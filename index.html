@@ -380,99 +380,74 @@
   }
   .sound-form input::placeholder { color: var(--text2); }
   .form-full { grid-column: 1/-1; display: flex; gap: 8px; }
-
+  
   /* ── CUSTOM KNOB SECTION ── */
-  .custom-knob-section {
-    grid-column: 1/-1;
+  .custom-knob-group {
     display: flex;
     flex-direction: column;
     gap: 10px;
     padding: 12px;
-    background: var(--surface2);
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 3px;
-    margin: 8px 0;
   }
-  .custom-knob-header {
+  
+  .custom-knob-item {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
+    gap: 12px;
   }
-  .custom-knob-nav {
-    display: flex;
-    gap: 6px;
-  }
-  .custom-knob-nav button {
-    padding: 4px 10px;
-    border-radius: 2px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--accent);
+  
+  .custom-knob-item label {
     font-family: var(--font-mono);
     font-size: 10px;
-    cursor: pointer;
-    transition: all .1s;
-  }
-  .custom-knob-nav button:hover {
-    border-color: var(--accent);
-    background: var(--accent);
-    color: var(--pad-text);
-  }
-  .custom-knob-label {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--accent2);
+    color: var(--text2);
     letter-spacing: 1px;
+    min-width: 60px;
+    text-align: right;
   }
-  .custom-knob-container {
+  
+  .custom-knob-item input[type="number"] {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 6px 8px;
+    border-radius: 2px;
+    width: 120px;
+  }
+  
+  .custom-knob-display {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface2);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 20px;
+    position: relative;
+    cursor: ns-resize;
+    user-select: none;
   }
-  .custom-knob-display {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
+  
+  .custom-knob-display .knob-dot {
+    width: 2px;
+    height: 12px;
+    background: var(--accent);
+    border-radius: 1px;
+    position: absolute;
+    top: 3px;
+    transform-origin: bottom center;
   }
+  
   .custom-knob-val {
     font-family: var(--font-mono);
-    font-size: 14px;
-    color: var(--accent);
-    font-weight: bold;
-  }
-  .custom-knob-unit {
-    font-family: var(--font-mono);
-    font-size: 9px;
-    color: var(--text2);
-  }
-  .custom-knob-input {
-    flex: 1;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    padding: 8px 10px;
-    border-radius: 2px;
-  }
-  .btn-test {
-    padding: 6px 12px;
-    border-radius: 2px;
-    border: 1px solid var(--accent2);
-    background: transparent;
-    color: var(--accent2);
-    font-family: var(--font-mono);
     font-size: 10px;
-    cursor: pointer;
-    letter-spacing: 1px;
-    transition: all .1s;
-  }
-  .btn-test:hover {
-    background: var(--accent2);
-    color: #001a10;
+    color: var(--accent);
+    min-width: 70px;
+    text-align: center;
   }
  
   /* ── MEMO SECTION ── */
@@ -562,7 +537,6 @@
     .knobs-row { gap: 12px; }
     .knob { width: 40px; height: 40px; }
     .sound-form { grid-template-columns: 1fr; }
-    .custom-knob-container { flex-direction: column; }
   }
 </style>
 </head>
@@ -848,11 +822,7 @@ const state = {
   release: 0.5,
   fx: { reverb: false, delay: false },
   showAdd: false,
-  customKnobParam: 0, // 0=freq, 1=dur, 2=filter
-  customFreq: 440,
-  customSweep: null,
-  customDur: 0.3,
-  customFilter: 5000,
+  customKnobDrag: null,
 };
  
 DEVICES.forEach(d => {
@@ -918,113 +888,6 @@ function updateBtnRow() {
   const rb = document.getElementById('btn-rec');
   if (rb) rb.className = 'btn rec' + (state.rec ? ' active' : '');
 }
-
-function getCustomKnobInfo() {
-  const params = [
-    { label: 'FREQUENZA', val: state.customFreq, min: 20, max: 8000, unit: 'Hz', key: 'freq' },
-    { label: 'DURATA', val: state.customDur, min: 0.05, max: 3, unit: 's', key: 'dur' },
-    { label: 'FILTRO', val: state.customFilter, min: 100, max: 20000, unit: 'Hz', key: 'filter' },
-  ];
-  return params[state.customKnobParam];
-}
-
-function formatCustomValue(val, key) {
-  if (key === 'filter' && val >= 1000) return (val/1000).toFixed(1) + 'k';
-  if (key === 'dur') return val.toFixed(2);
-  return Math.round(val);
-}
-
-function updateCustomKnobDisplay() {
-  const info = getCustomKnobInfo();
-  const val = info.val;
-  const normalized = (val - info.min) / (info.max - info.min);
-  const angle = -135 + normalized * 270;
-  
-  const dot = document.querySelector('.custom-knob-section .knob-dot');
-  const valEl = document.querySelector('.custom-knob-val');
-  const inputEl = document.getElementById('cs-knob-input');
-  
-  if (dot) dot.style.transform = `rotate(${angle}deg)`;
-  if (valEl) valEl.textContent = formatCustomValue(val, info.key);
-  if (inputEl) inputEl.value = val;
-}
-
-function nextCustomParam() {
-  state.customKnobParam = (state.customKnobParam + 1) % 3;
-  updateCustomKnobDisplay();
-}
-
-function prevCustomParam() {
-  state.customKnobParam = (state.customKnobParam + 2) % 3;
-  updateCustomKnobDisplay();
-}
-
-let customKnobDrag = null;
-
-function startCustomKnob(e) {
-  e.preventDefault();
-  const info = getCustomKnobInfo();
-  customKnobDrag = { 
-    startY: e.clientY || e.touches?.[0].clientY,
-    startVal: info.val,
-    info: info 
-  };
-  
-  const move = (evt) => {
-    if (!customKnobDrag) return;
-    const currentY = evt.clientY || evt.touches?.[0].clientY;
-    const dy = customKnobDrag.startY - currentY;
-    const info = customKnobDrag.info;
-    const range = info.max - info.min;
-    const newVal = Math.max(info.min, Math.min(info.max, customKnobDrag.startVal + (dy / 160) * range));
-    
-    if (info.key === 'freq') state.customFreq = newVal;
-    if (info.key === 'dur') state.customDur = newVal;
-    if (info.key === 'filter') state.customFilter = newVal;
-    
-    updateCustomKnobDisplay();
-  };
-  
-  const end = () => {
-    customKnobDrag = null;
-    document.removeEventListener('mousemove', move);
-    document.removeEventListener('touchmove', move);
-    document.removeEventListener('mouseup', end);
-    document.removeEventListener('touchend', end);
-  };
-  
-  document.addEventListener('mousemove', move);
-  document.addEventListener('touchmove', move, { passive: false });
-  document.addEventListener('mouseup', end);
-  document.addEventListener('touchend', end);
-}
-
-function updateCustomInputValue(e) {
-  const val = parseFloat(e.target.value);
-  const info = getCustomKnobInfo();
-  if (isNaN(val)) return;
-  
-  const clamped = Math.max(info.min, Math.min(info.max, val));
-  
-  if (info.key === 'freq') state.customFreq = clamped;
-  if (info.key === 'dur') state.customDur = clamped;
-  if (info.key === 'filter') state.customFilter = clamped;
-  
-  updateCustomKnobDisplay();
-}
-
-function testCustomSound() {
-  getCtx();
-  const wave = (document.getElementById('cs-wave').value || 'sine');
-  const s = { 
-    wave, 
-    freq: state.customFreq, 
-    sweep: state.customSweep || null,
-    dur: state.customDur, 
-    filter: state.customFilter 
-  };
-  makeCustom(s);
-}
  
 function renderTabs() {
   document.getElementById('tabs').innerHTML = DEVICES.map((d, i) =>
@@ -1062,10 +925,6 @@ function renderDevice() {
     { id:'fil',    label:'FILTER', angle:filterAngle, val: Math.round(state.filterFreq/1000*10)/10 + 'k' },
     { id:'rel',    label:'RELEASE',angle:relAngle,    val: state.release.toFixed(1) + 's' },
   ];
-
-  const customInfo = getCustomKnobInfo();
-  const customNormalized = (customInfo.val - customInfo.min) / (customInfo.max - customInfo.min);
-  const customAngle = -135 + customNormalized * 270;
  
   const addPanel = state.showAdd ? `
     <div class="add-sound-panel">
@@ -1078,30 +937,56 @@ function renderDevice() {
           <option value="square">Square</option>
           <option value="triangle">Triangle</option>
         </select>
-        <input id="cs-sweep" type="number" placeholder="Sweep finale Hz (opt)" min="20" max="8000">
-
-        <div class="custom-knob-section">
-          <div class="custom-knob-header">
-            <div class="custom-knob-label">${customInfo.label}</div>
-            <div class="custom-knob-nav">
-              <button onclick="prevCustomParam()">< PREV</button>
-              <button onclick="nextCustomParam()">NEXT ></button>
-            </div>
-          </div>
-          <div class="custom-knob-container">
-            <div class="custom-knob-display">
-              <div class="knob" onmousedown="startCustomKnob(event)" ontouchstart="startCustomKnob(event)">
-                <div class="knob-dot" style="transform:rotate(${customAngle}deg)"></div>
+        
+        <!-- FREQUENCY KNOB -->
+        <div style="grid-column: 1/-1;">
+          <label style="font-family:var(--font-mono);font-size:10px;color:var(--text2);letter-spacing:1px;margin-bottom:.5rem;display:block">FREQUENZA (Hz)</label>
+          <div class="custom-knob-group">
+            <div class="custom-knob-item">
+              <label>FREQ</label>
+              <div class="custom-knob-display" id="cs-freq-knob" onmousedown="startCustomKnob(event,'cs-freq')" ontouchstart="startCustomKnobT(event,'cs-freq')">
+                <div class="knob-dot" id="cs-freq-dot"></div>
               </div>
-              <div class="custom-knob-val">${formatCustomValue(customInfo.val, customInfo.key)}</div>
-              <div class="custom-knob-unit">${customInfo.unit}</div>
+              <input type="number" id="cs-freq" placeholder="es. 440" min="20" max="8000" value="440" oninput="updateCustomKnob('cs-freq')">
+              <div class="custom-knob-val" id="cs-freq-val">440 Hz</div>
             </div>
-            <input type="number" id="cs-knob-input" class="custom-knob-input" min="${customInfo.min}" max="${customInfo.max}" step="0.1" value="${customInfo.val}" oninput="updateCustomInputValue(event)">
-            <button class="btn-test" onclick="testCustomSound()">▶ PROVA</button>
           </div>
         </div>
-
+        
+        <input id="cs-sweep" type="number" placeholder="Sweep finale Hz (opt)" min="20" max="8000">
+        
+        <!-- DURATION KNOB -->
+        <div style="grid-column: 1/-1;">
+          <label style="font-family:var(--font-mono);font-size:10px;color:var(--text2);letter-spacing:1px;margin-bottom:.5rem;display:block">DURATA (sec)</label>
+          <div class="custom-knob-group">
+            <div class="custom-knob-item">
+              <label>DUR</label>
+              <div class="custom-knob-display" id="cs-dur-knob" onmousedown="startCustomKnob(event,'cs-dur')" ontouchstart="startCustomKnobT(event,'cs-dur')">
+                <div class="knob-dot" id="cs-dur-dot"></div>
+              </div>
+              <input type="number" id="cs-dur" placeholder="es. 0.3" min="0.05" max="3" step="0.05" value="0.3" oninput="updateCustomKnob('cs-dur')">
+              <div class="custom-knob-val" id="cs-dur-val">0.3 s</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- FILTER KNOB -->
+        <div style="grid-column: 1/-1;">
+          <label style="font-family:var(--font-mono);font-size:10px;color:var(--text2);letter-spacing:1px;margin-bottom:.5rem;display:block">FILTRO (Hz)</label>
+          <div class="custom-knob-group">
+            <div class="custom-knob-item">
+              <label>FIL</label>
+              <div class="custom-knob-display" id="cs-filter-knob" onmousedown="startCustomKnob(event,'cs-filter')" ontouchstart="startCustomKnobT(event,'cs-filter')">
+                <div class="knob-dot" id="cs-filter-dot"></div>
+              </div>
+              <input type="number" id="cs-filter" placeholder="es. 5000" min="100" max="20000" value="5000" oninput="updateCustomKnob('cs-filter')">
+              <div class="custom-knob-val" id="cs-filter-val">5.0 k</div>
+            </div>
+          </div>
+        </div>
+        
         <div class="form-full">
+          <button class="btn" style="flex:1;background:var(--accent2);color:#001a10;border-color:var(--accent2)" onclick="playCustomPreview()">▶ PROVA</button>
           <button class="btn" style="flex:1" onclick="addCustomSound()">+ AGGIUNGI PAD</button>
           <button class="btn danger" onclick="state.showAdd=false;renderDevice()">ANNULLA</button>
         </div>
@@ -1248,12 +1133,95 @@ function toggleFx(fx) {
   if (delayFb)   delayFb.gain.value   = state.fx.delay  ? 0.35 : 0;
   renderDevice();
 }
+
+// ═══════════════════════════════════════════════
+//  CUSTOM KNOBS (per i parametri del suono custom)
+// ═══════════════════════════════════════════════
+function getCustomKnobRange(fieldId) {
+  if (fieldId === 'cs-freq') return { min: 20, max: 8000, unit: 'Hz' };
+  if (fieldId === 'cs-dur') return { min: 0.05, max: 3, unit: 's' };
+  if (fieldId === 'cs-filter') return { min: 100, max: 20000, unit: 'Hz' };
+  return { min: 0, max: 100, unit: '' };
+}
+
+function updateCustomKnob(fieldId) {
+  const input = document.getElementById(fieldId);
+  const val = parseFloat(input.value) || 0;
+  const range = getCustomKnobRange(fieldId);
+  const normalized = (val - range.min) / (range.max - range.min);
+  const angle = -135 + Math.max(0, Math.min(1, normalized)) * 270;
+  
+  const dot = document.getElementById(fieldId + '-dot');
+  if (dot) dot.style.transform = `rotate(${angle}deg)`;
+  
+  const valEl = document.getElementById(fieldId + '-val');
+  if (valEl) {
+    if (fieldId === 'cs-filter') {
+      valEl.textContent = (Math.round(val / 100) / 10) + ' k';
+    } else if (fieldId === 'cs-dur') {
+      valEl.textContent = val.toFixed(2) + ' s';
+    } else {
+      valEl.textContent = Math.round(val) + ' Hz';
+    }
+  }
+}
+
+function startCustomKnob(e, fieldId) {
+  state.customKnobDrag = { fieldId, startY: e.clientY, startVal: parseFloat(document.getElementById(fieldId).value) || 0 };
+  const move = e => {
+    if (!state.customKnobDrag) return;
+    const range = getCustomKnobRange(fieldId);
+    const dy = state.customKnobDrag.startY - e.clientY;
+    const range_val = range.max - range.min;
+    const delta = (dy / 160) * range_val;
+    const newVal = Math.max(range.min, Math.min(range.max, state.customKnobDrag.startVal + delta));
+    document.getElementById(fieldId).value = fieldId === 'cs-dur' ? newVal.toFixed(2) : Math.round(newVal);
+    updateCustomKnob(fieldId);
+  };
+  document.addEventListener('mousemove', move);
+  document.addEventListener('mouseup', () => {
+    state.customKnobDrag = null;
+    document.removeEventListener('mousemove', move);
+  }, { once: true });
+}
+
+function startCustomKnobT(e, fieldId) {
+  e.preventDefault();
+  const t0 = e.touches[0];
+  state.customKnobDrag = { fieldId, startY: t0.clientY, startVal: parseFloat(document.getElementById(fieldId).value) || 0 };
+  const move = e => {
+    if (!state.customKnobDrag) return;
+    const range = getCustomKnobRange(fieldId);
+    const dy = state.customKnobDrag.startY - e.touches[0].clientY;
+    const range_val = range.max - range.min;
+    const delta = (dy / 160) * range_val;
+    const newVal = Math.max(range.min, Math.min(range.max, state.customKnobDrag.startVal + delta));
+    document.getElementById(fieldId).value = fieldId === 'cs-dur' ? newVal.toFixed(2) : Math.round(newVal);
+    updateCustomKnob(fieldId);
+  };
+  document.addEventListener('touchmove', move, { passive: false });
+  document.addEventListener('touchend', () => {
+    state.customKnobDrag = null;
+    document.removeEventListener('touchmove', move);
+  }, { once: true });
+}
+
+function playCustomPreview() {
+  const wave = document.getElementById('cs-wave').value;
+  const freq = parseFloat(document.getElementById('cs-freq').value) || 440;
+  const dur = parseFloat(document.getElementById('cs-dur').value) || 0.3;
+  const filter = parseFloat(document.getElementById('cs-filter').value) || 5000;
+  makeCustom({ wave, freq, filter, dur });
+}
  
 function addCustomSound() {
   const name = (document.getElementById('cs-name').value || 'SND').toUpperCase().slice(0,6);
   const wave = document.getElementById('cs-wave').value;
+  const freq = parseFloat(document.getElementById('cs-freq').value) || 440;
   const sweep = parseFloat(document.getElementById('cs-sweep').value) || null;
-  const s = { wave, freq: state.customFreq, sweep, dur: state.customDur, filter: state.customFilter };
+  const dur = parseFloat(document.getElementById('cs-dur').value) || 0.3;
+  const filter = parseFloat(document.getElementById('cs-filter').value) || 5000;
+  const s = { wave, freq, sweep, dur, filter };
   const customDev = DEVICES.find(d => d.id === 'custom');
   customDev.pads.push({ n: name, fn: () => makeCustom(s) });
   if (!state.sequences['custom']) state.sequences['custom'] = [];
@@ -1311,6 +1279,7 @@ async function toggleAudioRec() {
     return;
   }
   try {
+    // Registra sia il microfono sia il contesto audio via AudioContext destination stream
     const dest = getCtx().createMediaStreamDestination();
     masterGain.connect(dest);
     const stream = dest.stream;
