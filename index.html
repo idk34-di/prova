@@ -39,9 +39,17 @@
 
         .top-section {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
             padding: 0 10px;
+        }
+
+        .step-display {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
         }
 
         .brand-name {
@@ -106,7 +114,7 @@
         }
 
         .btn-small:active {
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0px 0 rgba(255, 255, 255, 0.2);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
             transform: scale(0.95);
         }
 
@@ -283,6 +291,11 @@
             transform: translateY(2px);
         }
 
+        .btn-large.playing {
+            background: linear-gradient(145deg, #00ff00, #00cc00);
+            color: #000;
+        }
+
         .btn-orange {
             background: linear-gradient(145deg, #ff6600, #ff5500);
             flex: 0.5;
@@ -326,12 +339,13 @@
     <div class="container">
         <div class="device">
             <div class="top-section">
+                <div class="step-display">Step: <span id="current-step">1</span>/6</div>
                 <div class="brand-name"></div>
             </div>
 
             <div class="display-section">
                 <div class="display">
-                    <div class="display-value">193</div>
+                    <div class="display-value" id="bpm-display">120</div>
                     <div class="display-unit">BPM</div>
                 </div>
                 <div class="display-controls">
@@ -345,12 +359,12 @@
 
             <div class="control-grid">
                 <div class="grid-row">
-                    <button class="btn-medium"><span>Kick</span></button>
-                    <button class="btn-medium"><span>Clap</span></button>
-                    <button class="btn-medium"><span>Tom H</span></button>
-                    <button class="btn-medium"><span>Tom M</span></button>
-                    <button class="btn-medium"><span>Tom L</span></button>
-                    <button class="btn-medium"><span>Cymbal</span></button>
+                    <button class="btn-medium drum-btn" data-drum="kick"><span>Kick</span></button>
+                    <button class="btn-medium drum-btn" data-drum="clap"><span>Clap</span></button>
+                    <button class="btn-medium drum-btn" data-drum="tom-h"><span>Tom H</span></button>
+                    <button class="btn-medium drum-btn" data-drum="tom-m"><span>Tom M</span></button>
+                    <button class="btn-medium drum-btn" data-drum="tom-l"><span>Tom L</span></button>
+                    <button class="btn-medium drum-btn" data-drum="cymbal"><span>Cymbal</span></button>
                 </div>
 
                 <div class="grid-row">
@@ -363,12 +377,12 @@
                 </div>
 
                 <div class="grid-row">
-                    <button class="btn-medium"><span>Step 1</span></button>
-                    <button class="btn-medium"><span>Step 2</span></button>
-                    <button class="btn-medium"><span>Step 3</span></button>
-                    <button class="btn-medium"><span>Step 4</span></button>
-                    <button class="btn-medium"><span>Step 5</span></button>
-                    <button class="btn-medium"><span>Step 6</span></button>
+                    <button class="btn-medium step-btn" data-step="0"><span>Step 1</span></button>
+                    <button class="btn-medium step-btn" data-step="1"><span>Step 2</span></button>
+                    <button class="btn-medium step-btn" data-step="2"><span>Step 3</span></button>
+                    <button class="btn-medium step-btn" data-step="3"><span>Step 4</span></button>
+                    <button class="btn-medium step-btn" data-step="4"><span>Step 5</span></button>
+                    <button class="btn-medium step-btn" data-step="5"><span>Step 6</span></button>
                 </div>
 
                 <div class="grid-row">
@@ -383,25 +397,25 @@
 
             <div class="faders-section">
                 <div class="fader-group">
-                    <label>Speed</label>
+                    <label>Speed (BPM)</label>
                     <div class="fader">
-                        <input type="range" min="0" max="100" value="50" class="fader-input">
+                        <input type="range" min="30" max="300" value="120" class="fader-input" id="speed-fader">
                     </div>
                 </div>
                 <div class="fader-group">
                     <label>Volume</label>
                     <div class="fader">
-                        <input type="range" min="0" max="100" value="50" class="fader-input">
+                        <input type="range" min="0" max="100" value="50" class="fader-input" id="volume-fader">
                     </div>
                 </div>
             </div>
 
             <div class="bottom-controls">
-                <button class="btn-large"><span>Play</span></button>
-                <button class="btn-medium"><span>Stop</span></button>
-                <button class="btn-medium"><span>Rec</span></button>
-                <button class="btn-medium"><span>Reset</span></button>
-                <button class="btn-large"><span>Sync</span></button>
+                <button class="btn-large" id="play-btn"><span>Play</span></button>
+                <button class="btn-medium" id="stop-btn"><span>Stop</span></button>
+                <button class="btn-medium" id="clear-btn"><span>Clear</span></button>
+                <button class="btn-medium" id="prev-step-btn"><span>Prev</span></button>
+                <button class="btn-large" id="next-step-btn"><span>Next</span></button>
             </div>
 
             <div class="right-controls">
@@ -412,46 +426,175 @@
     </div>
 
     <script>
-        const buttons = document.querySelectorAll('.btn-medium, .btn-large');
+        // Audio Context
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Sequencer state
+        let sequence = Array(6).fill(null).map(() => ({})); // 6 steps
+        let currentStep = 0;
+        let isPlaying = false;
+        let bpm = 120;
+        let volume = 0.5;
+        let sequenceIndex = 0;
+        let playbackTimeout;
 
-        buttons.forEach(button => {
-            button.addEventListener('click', function() {
-                const row = this.closest('.grid-row') || this.closest('.bottom-controls') || this.closest('.right-controls');
-                if (row) {
-                    row.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+        // Drum sounds using Web Audio API
+        const drums = {
+            kick: { freq: 150, decay: 0.5, type: 'sine' },
+            clap: { freq: 800, decay: 0.1, type: 'square', noise: true },
+            'tom-h': { freq: 400, decay: 0.15, type: 'sine' },
+            'tom-m': { freq: 300, decay: 0.2, type: 'sine' },
+            'tom-l': { freq: 200, decay: 0.25, type: 'sine' },
+            cymbal: { freq: 300, decay: 0.4, type: 'triangle', noise: true }
+        };
+
+        // Play a drum sound
+        function playDrum(drumType) {
+            const drum = drums[drumType];
+            if (!drum) return;
+
+            const now = audioContext.currentTime;
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            const filter = audioContext.createBiquadFilter();
+
+            osc.type = drum.type;
+            osc.frequency.setValueAtTime(drum.freq, now);
+            gain.gain.setValueAtTime(volume, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + drum.decay);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioContext.destination);
+
+            osc.start(now);
+            osc.stop(now + drum.decay);
+
+            // Aggiungi rumore per clap e cymbal
+            if (drum.noise) {
+                const noiseBuffer = audioContext.createBufferSource();
+                const bufferSize = audioContext.sampleRate * drum.decay;
+                const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
                 }
-                
+                noiseBuffer.buffer = buffer;
+                const noiseGain = audioContext.createGain();
+                noiseGain.gain.setValueAtTime(volume * 0.3, now);
+                noiseGain.gain.exponentialRampToValueAtTime(0.01, now + drum.decay);
+                noiseBuffer.connect(noiseGain);
+                noiseGain.connect(audioContext.destination);
+                noiseBuffer.start(now);
+            }
+        }
+
+        // Update display
+        function updateDisplay() {
+            document.getElementById('current-step').textContent = currentStep + 1;
+            document.getElementById('bpm-display').textContent = bpm;
+        }
+
+        // Handle drum button clicks
+        document.querySelectorAll('.drum-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const drum = this.dataset.drum;
+                playDrum(drum);
+                // Aggiungi al step corrente
+                sequence[currentStep][drum] = true;
                 this.classList.add('active');
-                
-                setTimeout(() => {
-                    this.classList.remove('active');
-                }, 300);
+                setTimeout(() => this.classList.remove('active'), 300);
             });
         });
 
-        const faderInputs = document.querySelectorAll('.fader-input');
-        const displayValue = document.querySelector('.display-value');
-
-        faderInputs.forEach(fader => {
-            fader.addEventListener('input', function() {
-                const value = Math.round(this.value * 1.93);
-                displayValue.textContent = String(value).padStart(3, '0');
+        // Handle step buttons
+        document.querySelectorAll('.step-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                currentStep = parseInt(this.dataset.step);
+                updateDisplay();
+                // Highlight pulsante step corrente
+                document.querySelectorAll('.step-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
             });
         });
 
-        buttons.forEach(button => {
-            button.addEventListener('mousedown', function() {
-                this.style.transform = 'translateY(2px)';
-            });
+        // Speed fader
+        document.getElementById('speed-fader').addEventListener('input', function() {
+            bpm = parseInt(this.value);
+            updateDisplay();
+        });
 
-            button.addEventListener('mouseup', function() {
-                this.style.transform = 'translateY(0)';
-            });
+        // Volume fader
+        document.getElementById('volume-fader').addEventListener('input', function() {
+            volume = parseInt(this.value) / 100;
+        });
 
-            button.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
+        // Play button
+        document.getElementById('play-btn').addEventListener('click', function() {
+            if (isPlaying) {
+                isPlaying = false;
+                clearTimeout(playbackTimeout);
+                this.classList.remove('playing');
+            } else {
+                isPlaying = true;
+                this.classList.add('playing');
+                sequenceIndex = 0;
+                playSequence();
+            }
+        });
+
+        // Stop button
+        document.getElementById('stop-btn').addEventListener('click', function() {
+            isPlaying = false;
+            clearTimeout(playbackTimeout);
+            document.getElementById('play-btn').classList.remove('playing');
+            sequenceIndex = 0;
+        });
+
+        // Clear button
+        document.getElementById('clear-btn').addEventListener('click', function() {
+            sequence[currentStep] = {};
+        });
+
+        // Next step button
+        document.getElementById('next-step-btn').addEventListener('click', function() {
+            currentStep = (currentStep + 1) % 6;
+            updateDisplay();
+            // Highlight step corrente
+            document.querySelectorAll('.step-btn').forEach((b, i) => {
+                b.classList.toggle('active', i === currentStep);
             });
         });
+
+        // Previous step button
+        document.getElementById('prev-step-btn').addEventListener('click', function() {
+            currentStep = (currentStep - 1 + 6) % 6;
+            updateDisplay();
+            // Highlight step corrente
+            document.querySelectorAll('.step-btn').forEach((b, i) => {
+                b.classList.toggle('active', i === currentStep);
+            });
+        });
+
+        // Play sequence
+        function playSequence() {
+            if (!isPlaying) return;
+
+            const step = sequence[sequenceIndex];
+            Object.keys(step).forEach(drum => {
+                if (step[drum]) {
+                    playDrum(drum);
+                }
+            });
+
+            const stepDuration = (60 / bpm) * 1000; // Durata di uno step in ms
+            sequenceIndex = (sequenceIndex + 1) % 6;
+
+            playbackTimeout = setTimeout(playSequence, stepDuration);
+        }
+
+        // Initialize
+        updateDisplay();
     </script>
 </body>
 </html>
