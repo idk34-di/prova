@@ -2,333 +2,98 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sintetizzatore Audio</title>
+    <title>Sintetizzatore Web Audio</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .container {
-            background: #1a1a1a;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 600px;
-            width: 100%;
-            color: #fff;
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 2.5em;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .section {
-            margin-bottom: 30px;
-        }
-        .section h2 {
-            font-size: 1.3em;
-            margin-bottom: 15px;
-            color: #667eea;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
-        }
-        .control-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #e0e0e0;
-        }
-        input[type="range"] {
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: #333;
-            outline: none;
-            -webkit-appearance: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #667eea;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
-        }
-        input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #667eea;
-            cursor: pointer;
-            border: none;
-            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
-        }
-        select {
-            width: 100%;
-            padding: 10px;
-            background: #333;
-            color: #fff;
-            border: 1px solid #667eea;
-            border-radius: 5px;
-            font-size: 1em;
-            cursor: pointer;
-        }
-        .button-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        button {
-            padding: 15px;
-            font-size: 1.1em;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-        .btn-play {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .btn-play:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-        .btn-stop {
-            background: #e74c3c;
-            color: white;
-        }
-        .btn-stop:hover {
-            background: #c0392b;
-            transform: translateY(-2px);
-        }
-        .keyboard {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-            margin-top: 20px;
-        }
-        .key {
-            padding: 10px;
-            background: #333;
-            border: 2px solid #667eea;
-            color: #667eea;
-            font-weight: bold;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.1s;
-            text-align: center;
-        }
-        .key:hover {
-            background: #667eea;
-            color: #1a1a1a;
-        }
-        .key.active {
-            background: #667eea;
-            color: #1a1a1a;
-            transform: scale(0.95);
-        }
-        .display {
-            background: #222;
-            border: 2px solid #667eea;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-            font-family: 'Courier New', monospace;
-            text-align: center;
-        }
-        .display p {
-            margin: 5px 0;
-            color: #667eea;
-        }
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #1a1a1a; color: white; padding: 50px; }
+        .controls { background: #333; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        label { display: block; margin-bottom: 10px; }
+        input, select { width: 100%; margin-top: 5px; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; }
+        button:active { background: #0056b3; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎛️ SINTETIZZATORE</h1>
-        
-        <div class="display">
-            <p>Frequenza: <span id="freqDisplay">440</span> Hz</p>
-            <p>Tipo: <span id="typeDisplay">sine</span></p>
-        </div>
 
-        <div class="section">
-            <h2>⚙️ Impostazioni Base</h2>
-            <div class="control-group">
-                <label for="frequency">Frequenza (Hz)</label>
-                <input type="range" id="frequency" min="20" max="2000" value="440">
-            </div>
-            <div class="control-group">
-                <label for="volume">Volume</label>
-                <input type="range" id="volume" min="0" max="100" value="30">
-            </div>
-        </div>
+    <h2>Mini Synth JS</h2>
+    
+    <div class="controls">
+        <label>
+            Tipo di Onda:
+            <select id="oscType">
+                <option value="sine">Sinusoidale (Dolce)</option>
+                <option value="square">Quadra (Retro/8-bit)</option>
+                <option value="sawtooth">Dente di sega (Ruvido)</option>
+                <option value="triangle">Triangolare (Morbido)</option>
+            </select>
+        </label>
 
-        <div class="section">
-            <h2>🌊 Forma d'Onda</h2>
-            <div class="control-group">
-                <select id="waveType">
-                    <option value="sine">Sinusoidale</option>
-                    <option value="square">Quadra</option>
-                    <option value="sawtooth">Dente di Sega</option>
-                    <option value="triangle">Triangolare</option>
-                </select>
-            </div>
-        </div>
+        <label>
+            Frequenza: <span id="freqVal">440</span> Hz
+            <input type="range" id="freq" min="100" max="2000" value="440">
+        </label>
 
-        <div class="section">
-            <h2>⏱️ Inviluppo ADSR</h2>
-            <div class="control-group">
-                <label for="attack">Attack (ms)</label>
-                <input type="range" id="attack" min="0" max="500" value="10">
-            </div>
-            <div class="control-group">
-                <label for="decay">Decay (ms)</label>
-                <input type="range" id="decay" min="0" max="500" value="100">
-            </div>
-            <div class="control-group">
-                <label for="sustain">Sustain</label>
-                <input type="range" id="sustain" min="0" max="100" value="70">
-            </div>
-            <div class="control-group">
-                <label for="release">Release (ms)</label>
-                <input type="range" id="release" min="0" max="1000" value="200">
-            </div>
-        </div>
+        <label>
+            Volume:
+            <input type="range" id="volume" min="0" max="1" step="0.1" value="0.5">
+        </label>
 
-        <div class="section">
-            <h2>🎹 Tastiera</h2>
-            <div class="keyboard">
-                <button class="key" data-freq="261.63">DO</button>
-                <button class="key" data-freq="293.66">RE</button>
-                <button class="key" data-freq="329.63">MI</button>
-                <button class="key" data-freq="349.23">FA</button>
-                <button class="key" data-freq="392.00">SOL</button>
-                <button class="key" data-freq="440.00">LA</button>
-                <button class="key" data-freq="493.88">SI</button>
-            </div>
-        </div>
-
-        <div class="button-group">
-            <button class="btn-play" id="playBtn">▶️ RIPRODUCI</button>
-            <button class="btn-stop" id="stopBtn">⏹️ ARRESTA</button>
-        </div>
+        <button id="playBtn">AVVIA / FERMA</button>
     </div>
 
     <script>
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        let oscillator = null;
-        let gainNode = null;
+        let audioCtx;
+        let oscillator;
+        let gainNode;
         let isPlaying = false;
 
-        const controls = {
-            frequency: document.getElementById('frequency'),
-            volume: document.getElementById('volume'),
-            waveType: document.getElementById('waveType'),
-            attack: document.getElementById('attack'),
-            decay: document.getElementById('decay'),
-            sustain: document.getElementById('sustain'),
-            release: document.getElementById('release'),
-            playBtn: document.getElementById('playBtn'),
-            stopBtn: document.getElementById('stopBtn'),
-            freqDisplay: document.getElementById('freqDisplay'),
-            typeDisplay: document.getElementById('typeDisplay')
+        const playBtn = document.getElementById('playBtn');
+        const oscType = document.getElementById('oscType');
+        const freqSlider = document.getElementById('freq');
+        const freqVal = document.getElementById('freqVal');
+        const volSlider = document.getElementById('volume');
+
+        function initAudio() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            gainNode = audioCtx.createGain();
+            gainNode.connect(audioCtx.destination);
+        }
+
+        playBtn.addEventListener('click', () => {
+            if (!audioCtx) initAudio();
+
+            if (!isPlaying) {
+                // Crea l'oscillatore
+                oscillator = audioCtx.createOscillator();
+                oscillator.type = oscType.value;
+                oscillator.frequency.setValueAtTime(freqSlider.value, audioCtx.currentTime);
+                
+                // Collega: Oscillatore -> Volume -> Casse
+                oscillator.connect(gainNode);
+                gainNode.gain.setValueAtTime(volSlider.value, audioCtx.currentTime);
+                
+                oscillator.start();
+                playBtn.innerText = "FERMA";
+                isPlaying = true;
+            } else {
+                oscillator.stop();
+                playBtn.innerText = "AVVIA";
+                isPlaying = false;
+            }
+        });
+
+        // Aggiornamento parametri in tempo reale
+        freqSlider.oninput = () => {
+            freqVal.innerText = freqSlider.value;
+            if (isPlaying) oscillator.frequency.setTargetAtTime(freqSlider.value, audioCtx.currentTime, 0.05);
         };
 
-        function updateDisplay() {
-            controls.freqDisplay.textContent = controls.frequency.value;
-            controls.typeDisplay.textContent = controls.waveType.value;
-        }
+        oscType.onchange = () => {
+            if (isPlaying) oscillator.type = oscType.value;
+        };
 
-        function startSound(freq) {
-            if (isPlaying) stopSound();
-            
-            oscillator = audioContext.createOscillator();
-            gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.type = controls.waveType.value;
-            oscillator.frequency.value = freq;
-            
-            const now = audioContext.currentTime;
-            const attack = parseInt(controls.attack.value) / 1000;
-            const decay = parseInt(controls.decay.value) / 1000;
-            const sustain = parseInt(controls.sustain.value) / 100;
-            
-            gainNode.gain.setValueAtTime(0, now);
-            gainNode.gain.linearRampToValueAtTime(parseInt(controls.volume.value) / 100, now + attack);
-            gainNode.gain.linearRampToValueAtTime((parseInt(controls.volume.value) / 100) * sustain, now + attack + decay);
-            
-            oscillator.start(now);
-            isPlaying = true;
-        }
-
-        function stopSound() {
-            if (!oscillator) return;
-            
-            const now = audioContext.currentTime;
-            const release = parseInt(controls.release.value) / 1000;
-            
-            gainNode.gain.setValueAtTime(gainNode.gain.value, now);
-            gainNode.gain.linearRampToValueAtTime(0, now + release);
-            oscillator.stop(now + release);
-            
-            oscillator = null;
-            gainNode = null;
-            isPlaying = false;
-        }
-
-        controls.frequency.addEventListener('input', updateDisplay);
-        controls.waveType.addEventListener('change', updateDisplay);
-
-        controls.playBtn.addEventListener('click', () => {
-            startSound(parseInt(controls.frequency.value));
-        });
-
-        controls.stopBtn.addEventListener('click', stopSound);
-
-        document.querySelectorAll('.key').forEach(key => {
-            key.addEventListener('mousedown', () => {
-                key.classList.add('active');
-                startSound(parseFloat(key.dataset.freq));
-            });
-            
-            key.addEventListener('mouseup', () => {
-                key.classList.remove('active');
-                stopSound();
-            });
-            
-            key.addEventListener('mouseleave', () => {
-                key.classList.remove('active');
-                stopSound();
-            });
-        });
-
-        updateDisplay();
+        volSlider.oninput = () => {
+            if (isPlaying) gainNode.gain.setTargetAtTime(volSlider.value, audioCtx.currentTime, 0.05);
+        };
     </script>
 </body>
 </html>
