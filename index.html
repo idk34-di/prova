@@ -3,597 +3,331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Korg Volca Drum</title>
+    <title>Sintetizzatore Audio</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            font-family: 'Arial', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 100%;
-        }
-
-        .device {
-            background: linear-gradient(145deg, #b0b0b0 0%, #9a9a9a 100%);
-            width: 480px;
             padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            border: 2px solid #808080;
         }
-
-        .top-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 0 10px;
-        }
-
-        .step-display {
-            font-size: 14px;
-            font-weight: bold;
-            color: #333;
-            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
-        }
-
-        .brand-name {
-            width: 80px;
-            height: 30px;
-            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
-            border-radius: 4px;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
-        }
-
-        .display-section {
-            background: #6b6b6b;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
-            border: 1px solid #505050;
-        }
-
-        .display {
+        .container {
             background: #1a1a1a;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
-            border: 1px solid #0a0a0a;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            color: #fff;
         }
-
-        .display-value {
-            font-size: 32px;
-            font-weight: bold;
-            color: #ff6600;
-            font-family: 'Courier New', monospace;
-            letter-spacing: 2px;
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-
-        .display-unit {
-            font-size: 12px;
-            color: #888;
-            font-family: 'Courier New', monospace;
-            text-transform: uppercase;
+        .section {
+            margin-bottom: 30px;
         }
-
-        .display-controls {
-            display: flex;
-            justify-content: space-between;
-            gap: 8px;
+        .section h2 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
         }
-
-        .btn-small {
+        .control-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #e0e0e0;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #333;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
             width: 20px;
             height: 20px;
-            border-radius: 3px;
-            border: none;
-            background: linear-gradient(145deg, #888, #686868);
+            border-radius: 50%;
+            background: #667eea;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            transition: all 0.2s;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
         }
-
-        .btn-small:active {
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            background: #333;
+            color: #fff;
+            border: 1px solid #667eea;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            padding: 15px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .btn-play {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-play:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .btn-stop {
+            background: #e74c3c;
+            color: white;
+        }
+        .btn-stop:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+        .keyboard {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-top: 20px;
+        }
+        .key {
+            padding: 10px;
+            background: #333;
+            border: 2px solid #667eea;
+            color: #667eea;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.1s;
+            text-align: center;
+        }
+        .key:hover {
+            background: #667eea;
+            color: #1a1a1a;
+        }
+        .key.active {
+            background: #667eea;
+            color: #1a1a1a;
             transform: scale(0.95);
         }
-
-        .control-grid {
-            background: #7a7a7a;
-            padding: 12px;
+        .display {
+            background: #222;
+            border: 2px solid #667eea;
             border-radius: 8px;
-            margin-bottom: 15px;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
-            border: 1px solid #606060;
-        }
-
-        .grid-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-
-        .grid-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .btn-medium {
-            flex: 1;
-            height: 40px;
-            border: none;
-            border-radius: 5px;
-            background: linear-gradient(145deg, #888, #686868);
-            cursor: pointer;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            transition: all 0.2s;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: bold;
-            color: #333;
-            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
-        }
-
-        .btn-medium span {
-            display: block;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
             text-align: center;
         }
-
-        .btn-medium:hover {
-            background: linear-gradient(145deg, #999, #797979);
-        }
-
-        .btn-medium:active {
-            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.3);
-            transform: translateY(1px);
-        }
-
-        .btn-medium.active {
-            background: linear-gradient(145deg, #ff6600, #ff5500);
-            color: white;
-            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
-        }
-
-        .faders-section {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-            padding: 0 10px;
-        }
-
-        .fader-group {
-            flex: 1;
-        }
-
-        .fader-group label {
-            display: block;
-            font-size: 10px;
-            color: #333;
-            font-weight: bold;
-            margin-bottom: 5px;
-            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
-            text-align: center;
-        }
-
-        .fader {
-            background: #7a7a7a;
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
-            border: 1px solid #606060;
-        }
-
-        .fader-input {
-            width: 100%;
-            height: 30px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: transparent;
-            cursor: pointer;
-        }
-
-        .fader-input::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 30px;
-            border-radius: 3px;
-            background: linear-gradient(145deg, #333, #1a1a1a);
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            border: 1px solid #0a0a0a;
-        }
-
-        .fader-input::-moz-range-thumb {
-            width: 20px;
-            height: 30px;
-            border-radius: 3px;
-            background: linear-gradient(145deg, #333, #1a1a1a);
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            border: 1px solid #0a0a0a;
-        }
-
-        .fader-input::-webkit-slider-runnable-track {
-            background: linear-gradient(90deg, #555, #888);
-            height: 8px;
-            border-radius: 4px;
-            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
-        }
-
-        .fader-input::-moz-range-track {
-            background: linear-gradient(90deg, #555, #888);
-            height: 8px;
-            border-radius: 4px;
-            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
-            border: none;
-        }
-
-        .bottom-controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            padding: 0 10px;
-        }
-
-        .btn-large {
-            flex: 1;
-            height: 45px;
-            border: none;
-            border-radius: 6px;
-            background: linear-gradient(145deg, #888, #686868);
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-            color: #333;
-            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
-        }
-
-        .btn-large span {
-            display: block;
-            text-align: center;
-        }
-
-        .btn-large:hover {
-            background: linear-gradient(145deg, #999, #797979);
-        }
-
-        .btn-large:active {
-            box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.3);
-            transform: translateY(2px);
-        }
-
-        .btn-large.playing {
-            background: linear-gradient(145deg, #00ff00, #00cc00);
-            color: #000;
-        }
-
-        .btn-orange {
-            background: linear-gradient(145deg, #ff6600, #ff5500);
-            flex: 0.5;
-            color: white;
-            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
-        }
-
-        .btn-orange:hover {
-            background: linear-gradient(145deg, #ff7722, #ff6611);
-        }
-
-        .right-controls {
-            display: flex;
-            gap: 10px;
-            padding: 0 10px;
-        }
-
-        @media (max-width: 600px) {
-            .device {
-                width: 100%;
-                max-width: 480px;
-            }
-
-            .display-value {
-                font-size: 24px;
-            }
-
-            .btn-medium {
-                height: 35px;
-                font-size: 10px;
-            }
-
-            .btn-large {
-                height: 40px;
-                font-size: 11px;
-            }
+        .display p {
+            margin: 5px 0;
+            color: #667eea;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="device">
-            <div class="top-section">
-                <div class="step-display">Step: <span id="current-step">1</span>/6</div>
-                <div class="brand-name"></div>
+        <h1>🎛️ SINTETIZZATORE</h1>
+        
+        <div class="display">
+            <p>Frequenza: <span id="freqDisplay">440</span> Hz</p>
+            <p>Tipo: <span id="typeDisplay">sine</span></p>
+        </div>
+
+        <div class="section">
+            <h2>⚙️ Impostazioni Base</h2>
+            <div class="control-group">
+                <label for="frequency">Frequenza (Hz)</label>
+                <input type="range" id="frequency" min="20" max="2000" value="440">
             </div>
-
-            <div class="display-section">
-                <div class="display">
-                    <div class="display-value" id="bpm-display">120</div>
-                    <div class="display-unit">BPM</div>
-                </div>
-                <div class="display-controls">
-                    <button class="btn-small" title="Menu"></button>
-                    <button class="btn-small" title="Edit"></button>
-                    <button class="btn-small" title="Save"></button>
-                    <button class="btn-small" title="Load"></button>
-                    <button class="btn-small" title="Settings"></button>
-                </div>
+            <div class="control-group">
+                <label for="volume">Volume</label>
+                <input type="range" id="volume" min="0" max="100" value="30">
             </div>
+        </div>
 
-            <div class="control-grid">
-                <div class="grid-row">
-                    <button class="btn-medium drum-btn" data-drum="kick"><span>Kick</span></button>
-                    <button class="btn-medium drum-btn" data-drum="clap"><span>Clap</span></button>
-                    <button class="btn-medium drum-btn" data-drum="tom-h"><span>Tom H</span></button>
-                    <button class="btn-medium drum-btn" data-drum="tom-m"><span>Tom M</span></button>
-                    <button class="btn-medium drum-btn" data-drum="tom-l"><span>Tom L</span></button>
-                    <button class="btn-medium drum-btn" data-drum="cymbal"><span>Cymbal</span></button>
-                </div>
-
-                <div class="grid-row">
-                    <button class="btn-medium"><span>Decay</span></button>
-                    <button class="btn-medium"><span>Tone</span></button>
-                    <button class="btn-medium"><span>Level</span></button>
-                    <button class="btn-medium"><span>Mix</span></button>
-                    <button class="btn-medium"><span>Mod</span></button>
-                    <button class="btn-medium"><span>Rev</span></button>
-                </div>
-
-                <div class="grid-row">
-                    <button class="btn-medium step-btn" data-step="0"><span>Step 1</span></button>
-                    <button class="btn-medium step-btn" data-step="1"><span>Step 2</span></button>
-                    <button class="btn-medium step-btn" data-step="2"><span>Step 3</span></button>
-                    <button class="btn-medium step-btn" data-step="3"><span>Step 4</span></button>
-                    <button class="btn-medium step-btn" data-step="4"><span>Step 5</span></button>
-                    <button class="btn-medium step-btn" data-step="5"><span>Step 6</span></button>
-                </div>
-
-                <div class="grid-row">
-                    <button class="btn-medium"><span>Pat 1</span></button>
-                    <button class="btn-medium"><span>Pat 2</span></button>
-                    <button class="btn-medium"><span>Pat 3</span></button>
-                    <button class="btn-medium"><span>Pat 4</span></button>
-                    <button class="btn-medium"><span>Pat 5</span></button>
-                    <button class="btn-medium"><span>Pat 6</span></button>
-                </div>
+        <div class="section">
+            <h2>🌊 Forma d'Onda</h2>
+            <div class="control-group">
+                <select id="waveType">
+                    <option value="sine">Sinusoidale</option>
+                    <option value="square">Quadra</option>
+                    <option value="sawtooth">Dente di Sega</option>
+                    <option value="triangle">Triangolare</option>
+                </select>
             </div>
+        </div>
 
-            <div class="faders-section">
-                <div class="fader-group">
-                    <label>Speed (BPM)</label>
-                    <div class="fader">
-                        <input type="range" min="30" max="300" value="120" class="fader-input" id="speed-fader">
-                    </div>
-                </div>
-                <div class="fader-group">
-                    <label>Volume</label>
-                    <div class="fader">
-                        <input type="range" min="0" max="100" value="50" class="fader-input" id="volume-fader">
-                    </div>
-                </div>
+        <div class="section">
+            <h2>⏱️ Inviluppo ADSR</h2>
+            <div class="control-group">
+                <label for="attack">Attack (ms)</label>
+                <input type="range" id="attack" min="0" max="500" value="10">
             </div>
+            <div class="control-group">
+                <label for="decay">Decay (ms)</label>
+                <input type="range" id="decay" min="0" max="500" value="100">
+            </div>
+            <div class="control-group">
+                <label for="sustain">Sustain</label>
+                <input type="range" id="sustain" min="0" max="100" value="70">
+            </div>
+            <div class="control-group">
+                <label for="release">Release (ms)</label>
+                <input type="range" id="release" min="0" max="1000" value="200">
+            </div>
+        </div>
 
-            <div class="bottom-controls">
-                <button class="btn-large" id="play-btn"><span>Play</span></button>
-                <button class="btn-medium" id="stop-btn"><span>Stop</span></button>
-                <button class="btn-medium" id="clear-btn"><span>Clear</span></button>
-                <button class="btn-medium" id="prev-step-btn"><span>Prev</span></button>
-                <button class="btn-large" id="next-step-btn"><span>Next</span></button>
+        <div class="section">
+            <h2>🎹 Tastiera</h2>
+            <div class="keyboard">
+                <button class="key" data-freq="261.63">DO</button>
+                <button class="key" data-freq="293.66">RE</button>
+                <button class="key" data-freq="329.63">MI</button>
+                <button class="key" data-freq="349.23">FA</button>
+                <button class="key" data-freq="392.00">SOL</button>
+                <button class="key" data-freq="440.00">LA</button>
+                <button class="key" data-freq="493.88">SI</button>
             </div>
+        </div>
 
-            <div class="right-controls">
-                <button class="btn-large btn-orange"><span>Power</span></button>
-                <button class="btn-large"><span>Mode</span></button>
-            </div>
+        <div class="button-group">
+            <button class="btn-play" id="playBtn">▶️ RIPRODUCI</button>
+            <button class="btn-stop" id="stopBtn">⏹️ ARRESTA</button>
         </div>
     </div>
 
     <script>
-        // Audio Context
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        
-        // Sequencer state
-        let sequence = Array(6).fill(null).map(() => ({})); // 6 steps
-        let currentStep = 0;
+        let oscillator = null;
+        let gainNode = null;
         let isPlaying = false;
-        let bpm = 120;
-        let volume = 0.5;
-        let sequenceIndex = 0;
-        let playbackTimeout;
 
-        // Drum sounds using Web Audio API
-        const drums = {
-            kick: { freq: 150, decay: 0.5, type: 'sine' },
-            clap: { freq: 800, decay: 0.1, type: 'square', noise: true },
-            'tom-h': { freq: 400, decay: 0.15, type: 'sine' },
-            'tom-m': { freq: 300, decay: 0.2, type: 'sine' },
-            'tom-l': { freq: 200, decay: 0.25, type: 'sine' },
-            cymbal: { freq: 300, decay: 0.4, type: 'triangle', noise: true }
+        const controls = {
+            frequency: document.getElementById('frequency'),
+            volume: document.getElementById('volume'),
+            waveType: document.getElementById('waveType'),
+            attack: document.getElementById('attack'),
+            decay: document.getElementById('decay'),
+            sustain: document.getElementById('sustain'),
+            release: document.getElementById('release'),
+            playBtn: document.getElementById('playBtn'),
+            stopBtn: document.getElementById('stopBtn'),
+            freqDisplay: document.getElementById('freqDisplay'),
+            typeDisplay: document.getElementById('typeDisplay')
         };
 
-        // Play a drum sound
-        function playDrum(drumType) {
-            const drum = drums[drumType];
-            if (!drum) return;
-
-            const now = audioContext.currentTime;
-            const osc = audioContext.createOscillator();
-            const gain = audioContext.createGain();
-            const filter = audioContext.createBiquadFilter();
-
-            osc.type = drum.type;
-            osc.frequency.setValueAtTime(drum.freq, now);
-            gain.gain.setValueAtTime(volume, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + drum.decay);
-
-            osc.connect(filter);
-            filter.connect(gain);
-            gain.connect(audioContext.destination);
-
-            osc.start(now);
-            osc.stop(now + drum.decay);
-
-            // Aggiungi rumore per clap e cymbal
-            if (drum.noise) {
-                const noiseBuffer = audioContext.createBufferSource();
-                const bufferSize = audioContext.sampleRate * drum.decay;
-                const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
-                const data = buffer.getChannelData(0);
-                for (let i = 0; i < bufferSize; i++) {
-                    data[i] = Math.random() * 2 - 1;
-                }
-                noiseBuffer.buffer = buffer;
-                const noiseGain = audioContext.createGain();
-                noiseGain.gain.setValueAtTime(volume * 0.3, now);
-                noiseGain.gain.exponentialRampToValueAtTime(0.01, now + drum.decay);
-                noiseBuffer.connect(noiseGain);
-                noiseGain.connect(audioContext.destination);
-                noiseBuffer.start(now);
-            }
-        }
-
-        // Update display
         function updateDisplay() {
-            document.getElementById('current-step').textContent = currentStep + 1;
-            document.getElementById('bpm-display').textContent = bpm;
+            controls.freqDisplay.textContent = controls.frequency.value;
+            controls.typeDisplay.textContent = controls.waveType.value;
         }
 
-        // Handle drum button clicks
-        document.querySelectorAll('.drum-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const drum = this.dataset.drum;
-                playDrum(drum);
-                // Aggiungi al step corrente
-                sequence[currentStep][drum] = true;
-                this.classList.add('active');
-                setTimeout(() => this.classList.remove('active'), 300);
-            });
-        });
+        function startSound(freq) {
+            if (isPlaying) stopSound();
+            
+            oscillator = audioContext.createOscillator();
+            gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.type = controls.waveType.value;
+            oscillator.frequency.value = freq;
+            
+            const now = audioContext.currentTime;
+            const attack = parseInt(controls.attack.value) / 1000;
+            const decay = parseInt(controls.decay.value) / 1000;
+            const sustain = parseInt(controls.sustain.value) / 100;
+            
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(parseInt(controls.volume.value) / 100, now + attack);
+            gainNode.gain.linearRampToValueAtTime((parseInt(controls.volume.value) / 100) * sustain, now + attack + decay);
+            
+            oscillator.start(now);
+            isPlaying = true;
+        }
 
-        // Handle step buttons
-        document.querySelectorAll('.step-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                currentStep = parseInt(this.dataset.step);
-                updateDisplay();
-                // Highlight pulsante step corrente
-                document.querySelectorAll('.step-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
-
-        // Speed fader
-        document.getElementById('speed-fader').addEventListener('input', function() {
-            bpm = parseInt(this.value);
-            updateDisplay();
-        });
-
-        // Volume fader
-        document.getElementById('volume-fader').addEventListener('input', function() {
-            volume = parseInt(this.value) / 100;
-        });
-
-        // Play button
-        document.getElementById('play-btn').addEventListener('click', function() {
-            if (isPlaying) {
-                isPlaying = false;
-                clearTimeout(playbackTimeout);
-                this.classList.remove('playing');
-            } else {
-                isPlaying = true;
-                this.classList.add('playing');
-                sequenceIndex = 0;
-                playSequence();
-            }
-        });
-
-        // Stop button
-        document.getElementById('stop-btn').addEventListener('click', function() {
+        function stopSound() {
+            if (!oscillator) return;
+            
+            const now = audioContext.currentTime;
+            const release = parseInt(controls.release.value) / 1000;
+            
+            gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+            gainNode.gain.linearRampToValueAtTime(0, now + release);
+            oscillator.stop(now + release);
+            
+            oscillator = null;
+            gainNode = null;
             isPlaying = false;
-            clearTimeout(playbackTimeout);
-            document.getElementById('play-btn').classList.remove('playing');
-            sequenceIndex = 0;
-        });
-
-        // Clear button
-        document.getElementById('clear-btn').addEventListener('click', function() {
-            sequence[currentStep] = {};
-        });
-
-        // Next step button
-        document.getElementById('next-step-btn').addEventListener('click', function() {
-            currentStep = (currentStep + 1) % 6;
-            updateDisplay();
-            // Highlight step corrente
-            document.querySelectorAll('.step-btn').forEach((b, i) => {
-                b.classList.toggle('active', i === currentStep);
-            });
-        });
-
-        // Previous step button
-        document.getElementById('prev-step-btn').addEventListener('click', function() {
-            currentStep = (currentStep - 1 + 6) % 6;
-            updateDisplay();
-            // Highlight step corrente
-            document.querySelectorAll('.step-btn').forEach((b, i) => {
-                b.classList.toggle('active', i === currentStep);
-            });
-        });
-
-        // Play sequence
-        function playSequence() {
-            if (!isPlaying) return;
-
-            const step = sequence[sequenceIndex];
-            Object.keys(step).forEach(drum => {
-                if (step[drum]) {
-                    playDrum(drum);
-                }
-            });
-
-            const stepDuration = (60 / bpm) * 1000; // Durata di uno step in ms
-            sequenceIndex = (sequenceIndex + 1) % 6;
-
-            playbackTimeout = setTimeout(playSequence, stepDuration);
         }
 
-        // Initialize
+        controls.frequency.addEventListener('input', updateDisplay);
+        controls.waveType.addEventListener('change', updateDisplay);
+
+        controls.playBtn.addEventListener('click', () => {
+            startSound(parseInt(controls.frequency.value));
+        });
+
+        controls.stopBtn.addEventListener('click', stopSound);
+
+        document.querySelectorAll('.key').forEach(key => {
+            key.addEventListener('mousedown', () => {
+                key.classList.add('active');
+                startSound(parseFloat(key.dataset.freq));
+            });
+            
+            key.addEventListener('mouseup', () => {
+                key.classList.remove('active');
+                stopSound();
+            });
+            
+            key.addEventListener('mouseleave', () => {
+                key.classList.remove('active');
+                stopSound();
+            });
+        });
+
         updateDisplay();
     </script>
 </body>
