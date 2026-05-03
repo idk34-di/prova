@@ -1,322 +1,457 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Korg Volca Drum</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-body {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-    font-family: 'Arial', sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 20px;
-}
+        body {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-.container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-}
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
 
-.device {
-    background: linear-gradient(145deg, #b0b0b0 0%, #9a9a9a 100%);
-    width: 480px;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    border: 2px solid #808080;
-}
+        .device {
+            background: linear-gradient(145deg, #b0b0b0 0%, #9a9a9a 100%);
+            width: 480px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            border: 2px solid #808080;
+        }
 
-/* Top section */
-.top-section {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-    padding: 0 10px;
-}
+        .top-section {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
 
-.brand-name {
-    width: 80px;
-    height: 30px;
-    background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
-    border-radius: 4px;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
-}
+        .brand-name {
+            width: 80px;
+            height: 30px;
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            border-radius: 4px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
 
-/* Display section */
-.display-section {
-    background: #6b6b6b;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
-    border: 1px solid #505050;
-}
+        .display-section {
+            background: #6b6b6b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
+            border: 1px solid #505050;
+        }
 
-.display {
-    background: #1a1a1a;
-    padding: 12px;
-    border-radius: 6px;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
-    border: 1px solid #0a0a0a;
-}
+        .display {
+            background: #1a1a1a;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+            border: 1px solid #0a0a0a;
+        }
 
-.display-value {
-    font-size: 32px;
-    font-weight: bold;
-    color: #ff6600;
-    font-family: 'Courier New', monospace;
-    letter-spacing: 2px;
-}
+        .display-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #ff6600;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
 
-.display-unit {
-    font-size: 12px;
-    color: #888;
-    font-family: 'Courier New', monospace;
-    text-transform: uppercase;
-}
+        .display-unit {
+            font-size: 12px;
+            color: #888;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+        }
 
-.display-controls {
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-}
+        .display-controls {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+        }
 
-.btn-small {
-    width: 20px;
-    height: 20px;
-    border-radius: 3px;
-    border: none;
-    background: linear-gradient(145deg, #888, #686868);
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    transition: all 0.2s;
-}
+        .btn-small {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            border: none;
+            background: linear-gradient(145deg, #888, #686868);
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transition: all 0.2s;
+        }
 
-.btn-small:active {
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0px 0 rgba(255, 255, 255, 0.2);
-    transform: scale(0.95);
-}
+        .btn-small:active {
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0px 0 rgba(255, 255, 255, 0.2);
+            transform: scale(0.95);
+        }
 
-/* Control grid */
-.control-grid {
-    background: #7a7a7a;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
-    border: 1px solid #606060;
-}
+        .control-grid {
+            background: #7a7a7a;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+            border: 1px solid #606060;
+        }
 
-.grid-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-}
+        .grid-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
 
-.grid-row:last-child {
-    margin-bottom: 0;
-}
+        .grid-row:last-child {
+            margin-bottom: 0;
+        }
 
-.btn-medium {
-    flex: 1;
-    height: 40px;
-    border: none;
-    border-radius: 5px;
-    background: linear-gradient(145deg, #888, #686868);
-    cursor: pointer;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: bold;
-    color: #333;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
-}
+        .btn-medium {
+            flex: 1;
+            height: 40px;
+            border: none;
+            border-radius: 5px;
+            background: linear-gradient(145deg, #888, #686868);
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            color: #333;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
 
-.btn-medium span {
-    display: block;
-    text-align: center;
-}
+        .btn-medium span {
+            display: block;
+            text-align: center;
+        }
 
-.btn-medium:hover {
-    background: linear-gradient(145deg, #999, #797979);
-}
+        .btn-medium:hover {
+            background: linear-gradient(145deg, #999, #797979);
+        }
 
-.btn-medium:active {
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.3);
-    transform: translateY(1px);
-}
+        .btn-medium:active {
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.3);
+            transform: translateY(1px);
+        }
 
-.btn-medium.active {
-    background: linear-gradient(145deg, #ff6600, #ff5500);
-    color: white;
-    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
-}
+        .btn-medium.active {
+            background: linear-gradient(145deg, #ff6600, #ff5500);
+            color: white;
+            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+        }
 
-/* Faders section */
-.faders-section {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 15px;
-    padding: 0 10px;
-}
+        .faders-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 0 10px;
+        }
 
-.fader-group {
-    flex: 1;
-}
+        .fader-group {
+            flex: 1;
+        }
 
-.fader-group label {
-    display: block;
-    font-size: 10px;
-    color: #333;
-    font-weight: bold;
-    margin-bottom: 5px;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
-    text-align: center;
-}
+        .fader-group label {
+            display: block;
+            font-size: 10px;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+            text-align: center;
+        }
 
-.fader {
-    background: #7a7a7a;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
-    border: 1px solid #606060;
-}
+        .fader {
+            background: #7a7a7a;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+            border: 1px solid #606060;
+        }
 
-.fader-input {
-    width: 100%;
-    height: 30px;
-    -webkit-appearance: none;
-    appearance: none;
-    background: transparent;
-    cursor: pointer;
-}
+        .fader-input {
+            width: 100%;
+            height: 30px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
 
-.fader-input::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 30px;
-    border-radius: 3px;
-    background: linear-gradient(145deg, #333, #1a1a1a);
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    border: 1px solid #0a0a0a;
-}
+        .fader-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 30px;
+            border-radius: 3px;
+            background: linear-gradient(145deg, #333, #1a1a1a);
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid #0a0a0a;
+        }
 
-.fader-input::-moz-range-thumb {
-    width: 20px;
-    height: 30px;
-    border-radius: 3px;
-    background: linear-gradient(145deg, #333, #1a1a1a);
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    border: 1px solid #0a0a0a;
-}
+        .fader-input::-moz-range-thumb {
+            width: 20px;
+            height: 30px;
+            border-radius: 3px;
+            background: linear-gradient(145deg, #333, #1a1a1a);
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid #0a0a0a;
+        }
 
-.fader-input::-webkit-slider-runnable-track {
-    background: linear-gradient(90deg, #555, #888);
-    height: 8px;
-    border-radius: 4px;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
-}
+        .fader-input::-webkit-slider-runnable-track {
+            background: linear-gradient(90deg, #555, #888);
+            height: 8px;
+            border-radius: 4px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
 
-.fader-input::-moz-range-track {
-    background: linear-gradient(90deg, #555, #888);
-    height: 8px;
-    border-radius: 4px;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
-    border: none;
-}
+        .fader-input::-moz-range-track {
+            background: linear-gradient(90deg, #555, #888);
+            height: 8px;
+            border-radius: 4px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+            border: none;
+        }
 
-/* Bottom controls */
-.bottom-controls {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-    padding: 0 10px;
-}
+        .bottom-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 0 10px;
+        }
 
-.btn-large {
-    flex: 1;
-    height: 45px;
-    border: none;
-    border-radius: 6px;
-    background: linear-gradient(145deg, #888, #686868);
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-    color: #333;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
-}
+        .btn-large {
+            flex: 1;
+            height: 45px;
+            border: none;
+            border-radius: 6px;
+            background: linear-gradient(145deg, #888, #686868);
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #333;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
 
-.btn-large span {
-    display: block;
-    text-align: center;
-}
+        .btn-large span {
+            display: block;
+            text-align: center;
+        }
 
-.btn-large:hover {
-    background: linear-gradient(145deg, #999, #797979);
-}
+        .btn-large:hover {
+            background: linear-gradient(145deg, #999, #797979);
+        }
 
-.btn-large:active {
-    box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.3);
-    transform: translateY(2px);
-}
+        .btn-large:active {
+            box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.3);
+            transform: translateY(2px);
+        }
 
-.btn-orange {
-    background: linear-gradient(145deg, #ff6600, #ff5500);
-    flex: 0.5;
-    color: white;
-    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
-}
+        .btn-orange {
+            background: linear-gradient(145deg, #ff6600, #ff5500);
+            flex: 0.5;
+            color: white;
+            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+        }
 
-.btn-orange:hover {
-    background: linear-gradient(145deg, #ff7722, #ff6611);
-}
+        .btn-orange:hover {
+            background: linear-gradient(145deg, #ff7722, #ff6611);
+        }
 
-/* Right controls */
-.right-controls {
-    display: flex;
-    gap: 10px;
-    padding: 0 10px;
-}
+        .right-controls {
+            display: flex;
+            gap: 10px;
+            padding: 0 10px;
+        }
 
-/* Responsive */
-@media (max-width: 600px) {
-    .device {
-        width: 100%;
-        max-width: 480px;
-    }
+        @media (max-width: 600px) {
+            .device {
+                width: 100%;
+                max-width: 480px;
+            }
 
-    .display-value {
-        font-size: 24px;
-    }
+            .display-value {
+                font-size: 24px;
+            }
 
-    .btn-medium {
-        height: 35px;
-        font-size: 10px;
-    }
+            .btn-medium {
+                height: 35px;
+                font-size: 10px;
+            }
 
-    .btn-large {
-        height: 40px;
-        font-size: 11px;
-    }
-}
+            .btn-large {
+                height: 40px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="device">
+            <div class="top-section">
+                <div class="brand-name"></div>
+            </div>
+
+            <div class="display-section">
+                <div class="display">
+                    <div class="display-value">193</div>
+                    <div class="display-unit">BPM</div>
+                </div>
+                <div class="display-controls">
+                    <button class="btn-small" title="Menu"></button>
+                    <button class="btn-small" title="Edit"></button>
+                    <button class="btn-small" title="Save"></button>
+                    <button class="btn-small" title="Load"></button>
+                    <button class="btn-small" title="Settings"></button>
+                </div>
+            </div>
+
+            <div class="control-grid">
+                <div class="grid-row">
+                    <button class="btn-medium"><span>Kick</span></button>
+                    <button class="btn-medium"><span>Clap</span></button>
+                    <button class="btn-medium"><span>Tom H</span></button>
+                    <button class="btn-medium"><span>Tom M</span></button>
+                    <button class="btn-medium"><span>Tom L</span></button>
+                    <button class="btn-medium"><span>Cymbal</span></button>
+                </div>
+
+                <div class="grid-row">
+                    <button class="btn-medium"><span>Decay</span></button>
+                    <button class="btn-medium"><span>Tone</span></button>
+                    <button class="btn-medium"><span>Level</span></button>
+                    <button class="btn-medium"><span>Mix</span></button>
+                    <button class="btn-medium"><span>Mod</span></button>
+                    <button class="btn-medium"><span>Rev</span></button>
+                </div>
+
+                <div class="grid-row">
+                    <button class="btn-medium"><span>Step 1</span></button>
+                    <button class="btn-medium"><span>Step 2</span></button>
+                    <button class="btn-medium"><span>Step 3</span></button>
+                    <button class="btn-medium"><span>Step 4</span></button>
+                    <button class="btn-medium"><span>Step 5</span></button>
+                    <button class="btn-medium"><span>Step 6</span></button>
+                </div>
+
+                <div class="grid-row">
+                    <button class="btn-medium"><span>Pat 1</span></button>
+                    <button class="btn-medium"><span>Pat 2</span></button>
+                    <button class="btn-medium"><span>Pat 3</span></button>
+                    <button class="btn-medium"><span>Pat 4</span></button>
+                    <button class="btn-medium"><span>Pat 5</span></button>
+                    <button class="btn-medium"><span>Pat 6</span></button>
+                </div>
+            </div>
+
+            <div class="faders-section">
+                <div class="fader-group">
+                    <label>Speed</label>
+                    <div class="fader">
+                        <input type="range" min="0" max="100" value="50" class="fader-input">
+                    </div>
+                </div>
+                <div class="fader-group">
+                    <label>Volume</label>
+                    <div class="fader">
+                        <input type="range" min="0" max="100" value="50" class="fader-input">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-controls">
+                <button class="btn-large"><span>Play</span></button>
+                <button class="btn-medium"><span>Stop</span></button>
+                <button class="btn-medium"><span>Rec</span></button>
+                <button class="btn-medium"><span>Reset</span></button>
+                <button class="btn-large"><span>Sync</span></button>
+            </div>
+
+            <div class="right-controls">
+                <button class="btn-large btn-orange"><span>Power</span></button>
+                <button class="btn-large"><span>Mode</span></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const buttons = document.querySelectorAll('.btn-medium, .btn-large');
+
+        buttons.forEach(button => {
+            button.addEventListener('click', function() {
+                const row = this.closest('.grid-row') || this.closest('.bottom-controls') || this.closest('.right-controls');
+                if (row) {
+                    row.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                }
+                
+                this.classList.add('active');
+                
+                setTimeout(() => {
+                    this.classList.remove('active');
+                }, 300);
+            });
+        });
+
+        const faderInputs = document.querySelectorAll('.fader-input');
+        const displayValue = document.querySelector('.display-value');
+
+        faderInputs.forEach(fader => {
+            fader.addEventListener('input', function() {
+                const value = Math.round(this.value * 1.93);
+                displayValue.textContent = String(value).padStart(3, '0');
+            });
+        });
+
+        buttons.forEach(button => {
+            button.addEventListener('mousedown', function() {
+                this.style.transform = 'translateY(2px)';
+            });
+
+            button.addEventListener('mouseup', function() {
+                this.style.transform = 'translateY(0)';
+            });
+
+            button.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>
