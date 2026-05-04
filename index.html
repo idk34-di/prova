@@ -2,98 +2,148 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Sintetizzatore Web Audio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Spaceflight Simulator</title>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #1a1a1a; color: white; padding: 50px; }
-        .controls { background: #333; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        label { display: block; margin-bottom: 10px; }
-        input, select { width: 100%; margin-top: 5px; }
-        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; }
-        button:active { background: #0056b3; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; color: white; }
+        canvas { display: block; }
+        #ui {
+            position: absolute; top: 10px; left: 10px;
+            background: rgba(0, 0, 0, 0.7); padding: 15px; border-radius: 8px;
+            pointer-events: none; border: 1px solid #444;
+        }
+        .stat { margin-bottom: 5px; font-family: monospace; }
+        .controls { position: absolute; bottom: 10px; left: 10px; font-size: 12px; color: #888; }
     </style>
 </head>
 <body>
 
-    <h2>Mini Synth JS</h2>
+<div id="ui">
+    <div class="stat">Altitudine: <span id="alt">0</span> m</div>
+    <div class="stat">Velocità: <span id="vel">0</span> m/s</div>
+    <div class="stat">Carburante: <span id="fuel">100</span>%</div>
+</div>
+
+<div class="controls">
+    Frecce Sinistra/Destra: Ruota | Freccia Su: Motore
+</div>
+
+<canvas id="gameCanvas"></canvas>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// --- Configurazione ---
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const G = 0.1; // Costante di gravità
+const planet = { x: canvas.width / 2, y: canvas.height / 2, r: 2000, gravity: 5000 };
+const ship = {
+    x: canvas.width / 2,
+    y: canvas.height / 2 - 2050, // Posizionato sulla superficie
+    vx: 0,
+    vy: 0,
+    angle: -Math.PI / 2,
+    thrust: 0.15,
+    fuel: 100,
+    width: 10,
+    height: 25
+};
+
+const keys = {};
+window.addEventListener('keydown', e => keys[e.code] = true);
+window.addEventListener('keyup', e => keys[e.code] = false);
+
+function update() {
+    // 1. Calcolo Gravità (Direzione verso il centro del pianeta)
+    let dx = planet.x - ship.x;
+    let dy = planet.y - ship.y;
+    let distSq = dx*dx + dy*dy;
+    let dist = Math.sqrt(distSq);
+    let force = planet.gravity / distSq;
+
+    ship.vx += (dx / dist) * force;
+    ship.vy += (dy / dist) * force;
+
+    // 2. Input Utente
+    if (keys['ArrowLeft']) ship.angle -= 0.05;
+    if (keys['ArrowRight']) ship.angle += 0.05;
+    if (keys['ArrowUp'] && ship.fuel > 0) {
+        ship.vx += Math.cos(ship.angle) * ship.thrust;
+        ship.vy += Math.sin(ship.angle) * ship.thrust;
+        ship.fuel -= 0.1;
+    }
+
+    // 3. Integrazione Movimento
+    ship.x += ship.vx;
+    ship.y += ship.vy;
+
+    // 4. Collisione con il pianeta (Atterraggio/Schianto)
+    if (dist < planet.r + ship.height/2) {
+        let overlap = (planet.r + ship.height/2) - dist;
+        ship.x -= (dx / dist) * overlap;
+        ship.y -= (dy / dist) * overlap;
+        
+        // Fermati se tocchi terra (semplificato)
+        ship.vx *= 0.9; 
+        ship.vy *= 0.9;
+    }
+
+    // Aggiorna UI
+    document.getElementById('alt').innerText = Math.floor(dist - planet.r);
+    document.getElementById('vel').innerText = Math.floor(Math.sqrt(ship.vx**2 + ship.vy**2) * 10);
+    document.getElementById('fuel').innerText = Math.max(0, Math.floor(ship.fuel));
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Trasla la visuale per seguire la navicella (Camera Follow)
+    ctx.save();
+    ctx.translate(canvas.width/2 - ship.x, canvas.height/2 - ship.y);
+
+    // Disegna Pianeta
+    ctx.beginPath();
+    ctx.arc(planet.x, planet.y, planet.r, 0, Math.PI * 2);
+    ctx.fillStyle = '#222';
+    ctx.fill();
+    ctx.strokeStyle = '#444';
+    ctx.stroke();
+
+    // Disegna Navicella
+    ctx.save();
+    ctx.translate(ship.x, ship.y);
+    ctx.rotate(ship.angle + Math.PI/2);
     
-    <div class="controls">
-        <label>
-            Tipo di Onda:
-            <select id="oscType">
-                <option value="sine">Sinusoidale (Dolce)</option>
-                <option value="square">Quadra (Retro/8-bit)</option>
-                <option value="sawtooth">Dente di sega (Ruvido)</option>
-                <option value="triangle">Triangolare (Morbido)</option>
-            </select>
-        </label>
+    // Corpo Razzo
+    ctx.fillStyle = 'white';
+    ctx.fillRect(-ship.width/2, -ship.height/2, ship.width, ship.height);
+    
+    // Punta
+    ctx.beginPath();
+    ctx.moveTo(-ship.width/2, -ship.height/2);
+    ctx.lineTo(ship.width/2, -ship.height/2);
+    ctx.lineTo(0, -ship.height/2 - 10);
+    ctx.fill();
 
-        <label>
-            Frequenza: <span id="freqVal">440</span> Hz
-            <input type="range" id="freq" min="100" max="2000" value="440">
-        </label>
+    // Fiamme Motore
+    if (keys['ArrowUp'] && ship.fuel > 0) {
+        ctx.fillStyle = 'orange';
+        ctx.fillRect(-ship.width/4, ship.height/2, ship.width/2, 10 + Math.random() * 10);
+    }
+    ctx.restore();
 
-        <label>
-            Volume:
-            <input type="range" id="volume" min="0" max="1" step="0.1" value="0.5">
-        </label>
+    ctx.restore();
 
-        <button id="playBtn">AVVIA / FERMA</button>
-    </div>
+    requestAnimationFrame(() => {
+        update();
+        draw();
+    });
+}
 
-    <script>
-        let audioCtx;
-        let oscillator;
-        let gainNode;
-        let isPlaying = false;
-
-        const playBtn = document.getElementById('playBtn');
-        const oscType = document.getElementById('oscType');
-        const freqSlider = document.getElementById('freq');
-        const freqVal = document.getElementById('freqVal');
-        const volSlider = document.getElementById('volume');
-
-        function initAudio() {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            gainNode = audioCtx.createGain();
-            gainNode.connect(audioCtx.destination);
-        }
-
-        playBtn.addEventListener('click', () => {
-            if (!audioCtx) initAudio();
-
-            if (!isPlaying) {
-                // Crea l'oscillatore
-                oscillator = audioCtx.createOscillator();
-                oscillator.type = oscType.value;
-                oscillator.frequency.setValueAtTime(freqSlider.value, audioCtx.currentTime);
-                
-                // Collega: Oscillatore -> Volume -> Casse
-                oscillator.connect(gainNode);
-                gainNode.gain.setValueAtTime(volSlider.value, audioCtx.currentTime);
-                
-                oscillator.start();
-                playBtn.innerText = "FERMA";
-                isPlaying = true;
-            } else {
-                oscillator.stop();
-                playBtn.innerText = "AVVIA";
-                isPlaying = false;
-            }
-        });
-
-        // Aggiornamento parametri in tempo reale
-        freqSlider.oninput = () => {
-            freqVal.innerText = freqSlider.value;
-            if (isPlaying) oscillator.frequency.setTargetAtTime(freqSlider.value, audioCtx.currentTime, 0.05);
-        };
-
-        oscType.onchange = () => {
-            if (isPlaying) oscillator.type = oscType.value;
-        };
-
-        volSlider.oninput = () => {
-            if (isPlaying) gainNode.gain.setTargetAtTime(volSlider.value, audioCtx.currentTime, 0.05);
-        };
-    </script>
+draw();
+</script>
 </body>
 </html>
