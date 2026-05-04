@@ -3,29 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini Spaceflight Simulator</title>
+    <title>SFS Clone - Build & Fly</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; color: white; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; }
         canvas { display: block; }
         #ui {
             position: absolute; top: 10px; left: 10px;
-            background: rgba(0, 0, 0, 0.7); padding: 15px; border-radius: 8px;
-            pointer-events: none; border: 1px solid #444;
+            background: rgba(0, 0, 0, 0.8); padding: 15px; border-radius: 8px;
+            border: 1px solid #444; display: none;
         }
-        .stat { margin-bottom: 5px; font-family: monospace; }
-        .controls { position: absolute; bottom: 10px; left: 10px; font-size: 12px; color: #888; }
+        #build-menu {
+            position: absolute; right: 10px; top: 10px; bottom: 10px;
+            width: 150px; background: rgba(30, 30, 30, 0.9);
+            padding: 10px; border-left: 2px solid #555; text-align: center;
+        }
+        .part-btn {
+            background: #444; border: 1px solid #666; color: white;
+            padding: 10px; margin: 5px 0; cursor: pointer; width: 100%;
+        }
+        .part-btn:hover { background: #666; }
+        #launch-btn {
+            background: #28a745; font-weight: bold; margin-top: 20px;
+        }
+        .stat { font-family: monospace; margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
+<!-- UI di Volo -->
 <div id="ui">
     <div class="stat">Altitudine: <span id="alt">0</span> m</div>
     <div class="stat">Velocità: <span id="vel">0</span> m/s</div>
     <div class="stat">Carburante: <span id="fuel">100</span>%</div>
+    <div style="font-size: 10px; color: #888; margin-top:10px;">Frecce per pilotare</div>
 </div>
 
-<div class="controls">
-    Frecce Sinistra/Destra: Ruota | Freccia Su: Motore
+<!-- UI di Costruzione -->
+<div id="build-menu">
+    <h3>Officina</h3>
+    <p style="font-size: 12px;">Clicca per aggiungere pezzi sopra il motore</p>
+    <button class="part-btn" onclick="addPart('fuel')">Serbatoio (+Carburante)</button>
+    <button class="part-btn" onclick="addPart('capsule')">Capsula (Comando)</button>
+    <hr>
+    <button id="launch-btn" class="part-btn" onclick="startLaunch()">LANCIA!</button>
 </div>
 
 <canvas id="gameCanvas"></canvas>
@@ -33,114 +53,170 @@
 <script>
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-
-// --- Configurazione ---
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const G = 0.1; // Costante di gravità
-const planet = { x: canvas.width / 2, y: canvas.height / 2, r: 2000, gravity: 5000 };
-const ship = {
-    x: canvas.width / 2,
-    y: canvas.height / 2 - 2050, // Posizionato sulla superficie
-    vx: 0,
-    vy: 0,
-    angle: -Math.PI / 2,
-    thrust: 0.15,
-    fuel: 100,
-    width: 10,
-    height: 25
-};
+// --- Stato del Gioco ---
+let mode = 'BUILD'; // 'BUILD' o 'FLIGHT'
+const planet = { x: canvas.width / 2, y: 10000 + canvas.height/2 + 200, r: 10000, gravity: 25000 };
+
+// Struttura del razzo
+let rocketParts = [{ type: 'engine', h: 20, w: 20 }]; // Parte base sempre presente
+let totalFuel = 0;
+let currentFuel = 0;
+let ship = { x: canvas.width/2, y: canvas.height - 100, vx: 0, vy: 0, angle: -Math.PI/2, thrust: 0.2 };
 
 const keys = {};
 window.addEventListener('keydown', e => keys[e.code] = true);
 window.addEventListener('keyup', e => keys[e.code] = false);
 
+// --- Funzioni di Costruzione ---
+function addPart(type) {
+    if (mode !== 'BUILD') return;
+    if (type === 'fuel') rocketParts.push({ type: 'fuel', h: 30, w: 20 });
+    if (type === 'capsule') rocketParts.push({ type: 'capsule', h: 20, w: 20 });
+}
+
+function startLaunch() {
+    // Calcola statistiche in base ai pezzi
+    let fuelTanks = rocketParts.filter(p => p.type === 'fuel').length;
+    totalFuel = 100 + (fuelTanks * 50);
+    currentFuel = totalFuel;
+    
+    // Posiziona il razzo sul pianeta
+    ship.y = planet.y - planet.r - 20;
+    ship.x = planet.x;
+    
+    mode = 'FLIGHT';
+    document.getElementById('build-menu').style.display = 'none';
+    document.getElementById('ui').style.display = 'block';
+}
+
+// --- Loop Principale ---
 function update() {
-    // 1. Calcolo Gravità (Direzione verso il centro del pianeta)
-    let dx = planet.x - ship.x;
-    let dy = planet.y - ship.y;
-    let distSq = dx*dx + dy*dy;
-    let dist = Math.sqrt(distSq);
-    let force = planet.gravity / distSq;
+    if (mode === 'FLIGHT') {
+        let dx = planet.x - ship.x;
+        let dy = planet.y - ship.y;
+        let distSq = dx*dx + dy*dy;
+        let dist = Math.sqrt(distSq);
+        let force = planet.gravity / distSq;
 
-    ship.vx += (dx / dist) * force;
-    ship.vy += (dy / dist) * force;
+        // Gravità
+        ship.vx += (dx / dist) * force;
+        ship.vy += (dy / dist) * force;
 
-    // 2. Input Utente
-    if (keys['ArrowLeft']) ship.angle -= 0.05;
-    if (keys['ArrowRight']) ship.angle += 0.05;
-    if (keys['ArrowUp'] && ship.fuel > 0) {
-        ship.vx += Math.cos(ship.angle) * ship.thrust;
-        ship.vy += Math.sin(ship.angle) * ship.thrust;
-        ship.fuel -= 0.1;
+        // Controlli
+        if (keys['ArrowLeft']) ship.angle -= 0.04;
+        if (keys['ArrowRight']) ship.angle += 0.04;
+        if (keys['ArrowUp'] && currentFuel > 0) {
+            ship.vx += Math.cos(ship.angle) * ship.thrust;
+            ship.vy += Math.sin(ship.angle) * ship.thrust;
+            currentFuel -= 0.2;
+        }
+
+        ship.x += ship.vx;
+        ship.y += ship.vy;
+
+        // Collisione suolo
+        if (dist < planet.r + 10) {
+            ship.vx *= 0.8; ship.vy *= 0.8;
+            let overlap = (planet.r + 10) - dist;
+            ship.x -= (dx/dist) * overlap;
+            ship.y -= (dy/dist) * overlap;
+        }
+
+        // UI
+        document.getElementById('alt').innerText = Math.floor(dist - planet.r);
+        document.getElementById('vel').innerText = Math.floor(Math.sqrt(ship.vx**2 + ship.vy**2) * 10);
+        document.getElementById('fuel').innerText = Math.max(0, Math.floor((currentFuel/totalFuel)*100));
     }
-
-    // 3. Integrazione Movimento
-    ship.x += ship.vx;
-    ship.y += ship.vy;
-
-    // 4. Collisione con il pianeta (Atterraggio/Schianto)
-    if (dist < planet.r + ship.height/2) {
-        let overlap = (planet.r + ship.height/2) - dist;
-        ship.x -= (dx / dist) * overlap;
-        ship.y -= (dy / dist) * overlap;
-        
-        // Fermati se tocchi terra (semplificato)
-        ship.vx *= 0.9; 
-        ship.vy *= 0.9;
-    }
-
-    // Aggiorna UI
-    document.getElementById('alt').innerText = Math.floor(dist - planet.r);
-    document.getElementById('vel').innerText = Math.floor(Math.sqrt(ship.vx**2 + ship.vy**2) * 10);
-    document.getElementById('fuel').innerText = Math.max(0, Math.floor(ship.fuel));
 }
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Trasla la visuale per seguire la navicella (Camera Follow)
+    if (mode === 'BUILD') {
+        drawBuildMode();
+    } else {
+        drawFlightMode();
+    }
+
+    requestAnimationFrame(() => { update(); draw(); });
+}
+
+function drawBuildMode() {
+    ctx.strokeStyle = '#333';
+    // Griglia officina
+    for(let i=0; i<canvas.width; i+=20) {
+        ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i, canvas.height); ctx.stroke();
+    }
+    
+    let currentY = canvas.height - 100;
+    rocketParts.forEach(part => {
+        drawPart(canvas.width/2, currentY, part, -Math.PI/2);
+        currentY -= part.h;
+    });
+}
+
+function drawFlightMode() {
     ctx.save();
     ctx.translate(canvas.width/2 - ship.x, canvas.height/2 - ship.y);
 
-    // Disegna Pianeta
+    // Pianeta
     ctx.beginPath();
-    ctx.arc(planet.x, planet.y, planet.r, 0, Math.PI * 2);
-    ctx.fillStyle = '#222';
+    ctx.arc(planet.x, planet.y, planet.r, 0, Math.PI*2);
+    ctx.fillStyle = '#1a1a1a';
     ctx.fill();
-    ctx.strokeStyle = '#444';
+    ctx.strokeStyle = '#333';
     ctx.stroke();
 
-    // Disegna Navicella
+    // Razzo
     ctx.save();
     ctx.translate(ship.x, ship.y);
     ctx.rotate(ship.angle + Math.PI/2);
     
-    // Corpo Razzo
-    ctx.fillStyle = 'white';
-    ctx.fillRect(-ship.width/2, -ship.height/2, ship.width, ship.height);
-    
-    // Punta
-    ctx.beginPath();
-    ctx.moveTo(-ship.width/2, -ship.height/2);
-    ctx.lineTo(ship.width/2, -ship.height/2);
-    ctx.lineTo(0, -ship.height/2 - 10);
-    ctx.fill();
+    let currentY = 0;
+    rocketParts.forEach(part => {
+        drawPart(0, currentY, part, 0);
+        currentY -= part.h;
+    });
 
-    // Fiamme Motore
-    if (keys['ArrowUp'] && ship.fuel > 0) {
+    // Effetto motore
+    if (keys['ArrowUp'] && currentFuel > 0) {
         ctx.fillStyle = 'orange';
-        ctx.fillRect(-ship.width/4, ship.height/2, ship.width/2, 10 + Math.random() * 10);
+        ctx.beginPath();
+        ctx.moveTo(-5, 5); ctx.lineTo(5, 5); ctx.lineTo(0, 20 + Math.random()*10);
+        ctx.fill();
     }
     ctx.restore();
-
     ctx.restore();
+}
 
-    requestAnimationFrame(() => {
-        update();
-        draw();
-    });
+function drawPart(x, y, part, angle) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'white';
+    
+    if (part.type === 'engine') {
+        ctx.fillStyle = '#555';
+        ctx.fillRect(-part.w/2, -part.h, part.w, part.h);
+        ctx.strokeRect(-part.w/2, -part.h, part.w, part.h);
+    } else if (part.type === 'fuel') {
+        ctx.fillStyle = '#eee';
+        ctx.fillRect(-part.w/2, -part.h, part.w, part.h);
+        ctx.strokeRect(-part.w/2, -part.h, part.w, part.h);
+        // Linee estetiche serbatoio
+        ctx.strokeStyle = '#ccc';
+        ctx.strokeRect(-part.w/2 + 2, -part.h + 2, part.w - 4, part.h - 4);
+    } else if (part.type === 'capsule') {
+        ctx.fillStyle = '#888';
+        ctx.beginPath();
+        ctx.moveTo(-part.w/2, 0); ctx.lineTo(part.w/2, 0);
+        ctx.lineTo(0, -part.h); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+    }
+    ctx.restore();
 }
 
 draw();
