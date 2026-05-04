@@ -2,50 +2,48 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SFS Clone - Build & Fly</title>
+    <title>SFS Clone - Pro Builder</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; }
+        body { margin: 0; overflow: hidden; background: #0b0b0b; font-family: sans-serif; color: white; user-select: none; }
         canvas { display: block; }
-        #ui {
-            position: absolute; top: 10px; left: 10px;
-            background: rgba(0, 0, 0, 0.8); padding: 15px; border-radius: 8px;
-            border: 1px solid #444; display: none;
+        #ui, #build-menu { position: absolute; background: rgba(20, 20, 20, 0.9); border: 1px solid #444; padding: 15px; border-radius: 5px; }
+        #ui { top: 10px; left: 10px; display: none; min-width: 150px; }
+        #build-menu { right: 10px; top: 10px; bottom: 10px; width: 180px; overflow-y: auto; }
+        .part-item { 
+            background: #333; border: 1px solid #555; padding: 10px; margin: 8px 0; 
+            cursor: grab; text-align: center; font-size: 13px; transition: 0.2s;
         }
-        #build-menu {
-            position: absolute; right: 10px; top: 10px; bottom: 10px;
-            width: 150px; background: rgba(30, 30, 30, 0.9);
-            padding: 10px; border-left: 2px solid #555; text-align: center;
+        .part-item:hover { background: #444; border-color: #007bff; }
+        .part-item:active { cursor: grabbing; }
+        button { 
+            width: 100%; padding: 10px; margin-top: 10px; cursor: pointer; 
+            border: none; border-radius: 3px; font-weight: bold; 
         }
-        .part-btn {
-            background: #444; border: 1px solid #666; color: white;
-            padding: 10px; margin: 5px 0; cursor: pointer; width: 100%;
-        }
-        .part-btn:hover { background: #666; }
-        #launch-btn {
-            background: #28a745; font-weight: bold; margin-top: 20px;
-        }
-        .stat { font-family: monospace; margin-bottom: 5px; }
+        #btn-launch { background: #28a745; color: white; }
+        #btn-sep { background: #ffc107; color: black; display: none; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: auto; padding: 15px 30px; }
+        .stat { font-family: monospace; font-size: 14px; margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
-<!-- UI di Volo -->
 <div id="ui">
     <div class="stat">Altitudine: <span id="alt">0</span> m</div>
     <div class="stat">Velocità: <span id="vel">0</span> m/s</div>
     <div class="stat">Carburante: <span id="fuel">100</span>%</div>
-    <div style="font-size: 10px; color: #888; margin-top:10px;">Frecce per pilotare</div>
 </div>
 
-<!-- UI di Costruzione -->
+<button id="btn-sep" onclick="separateStage()">SGANCIA SEPARATORE (SPAZIO)</button>
+
 <div id="build-menu">
-    <h3>Officina</h3>
-    <p style="font-size: 12px;">Clicca per aggiungere pezzi sopra il motore</p>
-    <button class="part-btn" onclick="addPart('fuel')">Serbatoio (+Carburante)</button>
-    <button class="part-btn" onclick="addPart('capsule')">Capsula (Comando)</button>
-    <hr>
-    <button id="launch-btn" class="part-btn" onclick="startLaunch()">LANCIA!</button>
+    <h3 style="margin-top:0">Componenti</h3>
+    <div class="part-item" onmousedown="pickPart('capsule')">Capsula</div>
+    <div class="part-item" onmousedown="pickPart('fuel')">Serbatoio</div>
+    <div class="part-item" onmousedown="pickPart('engine')">Motore</div>
+    <div class="part-item" onmousedown="pickPart('separator')">Separatore</div>
+    <div class="part-item" onmousedown="pickPart('leg')">Gambe Atterraggio</div>
+    <div class="part-item" onmousedown="pickPart('solar')">Pannelli Solari</div>
+    <div class="part-item" onmousedown="pickPart('parachute')">Paracadute</div>
+    <button id="btn-launch" onclick="startLaunch()">LANCIA</button>
 </div>
 
 <canvas id="gameCanvas"></canvas>
@@ -56,167 +54,216 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// --- Stato del Gioco ---
-let mode = 'BUILD'; // 'BUILD' o 'FLIGHT'
-const planet = { x: canvas.width / 2, y: 10000 + canvas.height/2 + 200, r: 10000, gravity: 25000 };
+let mode = 'BUILD';
+let partsInRocket = [];
+let draggingPart = null;
+let mouse = { x: 0, y: 0 };
 
-// Struttura del razzo
-let rocketParts = [{ type: 'engine', h: 20, w: 20 }]; // Parte base sempre presente
-let totalFuel = 0;
-let currentFuel = 0;
-let ship = { x: canvas.width/2, y: canvas.height - 100, vx: 0, vy: 0, angle: -Math.PI/2, thrust: 0.2 };
+const planet = { x: 0, y: 10000 + 300, r: 10000, gravity: 30000 };
+let ship = { x: 0, y: 0, vx: 0, vy: 0, angle: -Math.PI/2, fuel: 0, totalFuel: 1 };
 
-const keys = {};
-window.addEventListener('keydown', e => keys[e.code] = true);
-window.addEventListener('keyup', e => keys[e.code] = false);
+const partData = {
+    capsule:  { w: 30, h: 25, color: '#aaa', type: 'command' },
+    fuel:     { w: 30, h: 40, color: '#eee', type: 'fuel' },
+    engine:   { w: 24, h: 20, color: '#444', type: 'engine' },
+    separator:{ w: 32, h: 10, color: '#ffc107', type: 'separator' },
+    leg:      { w: 10, h: 30, color: '#666', type: 'leg' },
+    solar:    { w: 10, h: 40, color: '#0055ff', type: 'solar' },
+    parachute:{ w: 20, h: 10, color: '#d9534f', type: 'parachute' }
+};
 
-// --- Funzioni di Costruzione ---
-function addPart(type) {
+// --- Gestione Mouse / Drag & Drop ---
+window.onmousemove = (e) => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+    if (draggingPart) {
+        draggingPart.x = mouse.x;
+        draggingPart.y = mouse.y;
+    }
+};
+
+window.onmousedown = (e) => {
     if (mode !== 'BUILD') return;
-    if (type === 'fuel') rocketParts.push({ type: 'fuel', h: 30, w: 20 });
-    if (type === 'capsule') rocketParts.push({ type: 'capsule', h: 20, w: 20 });
+    // Se clicchi su un pezzo già piazzato, lo riprendi
+    partsInRocket.forEach((p, i) => {
+        if (mouse.x > p.x - p.w/2 && mouse.x < p.x + p.w/2 && mouse.y > p.y - p.h/2 && mouse.y < p.y + p.h/2) {
+            draggingPart = partsInRocket.splice(i, 1)[0];
+        }
+    });
+};
+
+window.onmouseup = () => {
+    if (draggingPart) {
+        // "Snap" alla griglia semplificato
+        draggingPart.x = Math.round(draggingPart.x / 10) * 10;
+        partsInRocket.push(draggingPart);
+        draggingPart = null;
+    }
+};
+
+function pickPart(id) {
+    const d = partData[id];
+    draggingPart = { ...d, x: mouse.x, y: mouse.y, id: id };
 }
 
+// --- Logica di Volo ---
 function startLaunch() {
-    // Calcola statistiche in base ai pezzi
-    let fuelTanks = rocketParts.filter(p => p.type === 'fuel').length;
-    totalFuel = 100 + (fuelTanks * 50);
-    currentFuel = totalFuel;
-    
-    // Posiziona il razzo sul pianeta
-    ship.y = planet.y - planet.r - 20;
-    ship.x = planet.x;
-    
+    if (partsInRocket.length === 0) return;
     mode = 'FLIGHT';
     document.getElementById('build-menu').style.display = 'none';
     document.getElementById('ui').style.display = 'block';
+    document.getElementById('btn-sep').style.display = 'block';
+    
+    // Calcolo carburante
+    ship.fuel = partsInRocket.filter(p => p.id === 'fuel').length * 100;
+    ship.totalFuel = ship.fuel || 1;
+    
+    // Posizione iniziale (offset rispetto alla capsula)
+    ship.x = planet.x;
+    ship.y = planet.y - planet.r - 50;
 }
 
-// --- Loop Principale ---
+function separateStage() {
+    // Trova il primo separatore dall'alto e rimuovi tutto ciò che sta sotto
+    let sepIndex = partsInRocket.findIndex(p => p.id === 'separator');
+    if (sepIndex !== -1) {
+        partsInRocket.splice(sepIndex); // Rimuove il separatore e i pezzi successivi
+    }
+}
+
+window.addEventListener('keydown', e => {
+    if(e.code === 'Space') separateStage();
+    keys[e.code] = true;
+});
+window.addEventListener('keyup', e => keys[e.code] = false);
+const keys = {};
+
 function update() {
     if (mode === 'FLIGHT') {
         let dx = planet.x - ship.x;
         let dy = planet.y - ship.y;
-        let distSq = dx*dx + dy*dy;
-        let dist = Math.sqrt(distSq);
-        let force = planet.gravity / distSq;
+        let d = Math.sqrt(dx*dx + dy*dy);
+        let g = planet.gravity / (d*d);
+        
+        ship.vx += (dx/d) * g;
+        ship.vy += (dy/d) * g;
 
-        // Gravità
-        ship.vx += (dx / dist) * force;
-        ship.vy += (dy / dist) * force;
-
-        // Controlli
-        if (keys['ArrowLeft']) ship.angle -= 0.04;
-        if (keys['ArrowRight']) ship.angle += 0.04;
-        if (keys['ArrowUp'] && currentFuel > 0) {
-            ship.vx += Math.cos(ship.angle) * ship.thrust;
-            ship.vy += Math.sin(ship.angle) * ship.thrust;
-            currentFuel -= 0.2;
+        if (keys['ArrowLeft']) ship.angle -= 0.03;
+        if (keys['ArrowRight']) ship.angle += 0.03;
+        
+        const hasEngine = partsInRocket.some(p => p.id === 'engine');
+        if (keys['ArrowUp'] && ship.fuel > 0 && hasEngine) {
+            ship.vx += Math.cos(ship.angle) * 0.2;
+            ship.vy += Math.sin(ship.angle) * 0.2;
+            ship.fuel -= 0.5;
         }
 
         ship.x += ship.vx;
         ship.y += ship.vy;
 
-        // Collisione suolo
-        if (dist < planet.r + 10) {
-            ship.vx *= 0.8; ship.vy *= 0.8;
-            let overlap = (planet.r + 10) - dist;
-            ship.x -= (dx/dist) * overlap;
-            ship.y -= (dy/dist) * overlap;
+        if (d < planet.r + 20) {
+            ship.vx *= 0.9; ship.vy *= 0.9;
+            ship.y -= (dy/d) * (planet.r + 20 - d);
         }
 
-        // UI
-        document.getElementById('alt').innerText = Math.floor(dist - planet.r);
-        document.getElementById('vel').innerText = Math.floor(Math.sqrt(ship.vx**2 + ship.vy**2) * 10);
-        document.getElementById('fuel').innerText = Math.max(0, Math.floor((currentFuel/totalFuel)*100));
+        document.getElementById('alt').innerText = Math.floor(d - planet.r);
+        document.getElementById('vel').innerText = Math.floor(Math.sqrt(ship.vx**2 + ship.vy**2)*10);
+        document.getElementById('fuel').innerText = Math.max(0, Math.floor((ship.fuel/ship.totalFuel)*100));
     }
+}
+
+function drawPart(p, isFlight) {
+    ctx.save();
+    if (!isFlight) ctx.translate(p.x, p.y);
+    else ctx.translate(0, p.y - partsInRocket[0].y); // Offset relativo alla testa del razzo
+
+    ctx.fillStyle = p.color;
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 1;
+
+    switch(p.id) {
+        case 'capsule':
+            ctx.beginPath();
+            ctx.moveTo(-p.w/2, p.h/2); ctx.lineTo(p.w/2, p.h/2);
+            ctx.lineTo(0, -p.h/2); ctx.fill(); ctx.stroke();
+            break;
+        case 'fuel':
+            ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+            ctx.strokeRect(-p.w/2, -p.h/2, p.w, p.h);
+            break;
+        case 'engine':
+            ctx.fillStyle = '#333';
+            ctx.beginPath();
+            ctx.moveTo(-p.w/2, -p.h/2); ctx.lineTo(p.w/2, -p.h/2);
+            ctx.lineTo(p.w/2+5, p.h/2); ctx.lineTo(-p.w/2-5, p.h/2);
+            ctx.fill(); ctx.stroke();
+            break;
+        case 'separator':
+            ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+            break;
+        case 'leg':
+            ctx.fillRect(-p.w/2, -p.h/2, 4, p.h);
+            ctx.fillRect(-p.w/2, p.h/2-2, 15, 2);
+            break;
+        case 'solar':
+            ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx.fillRect(-p.w/2, -p.h/2, 2, p.h);
+            break;
+        case 'parachute':
+            ctx.fillStyle = '#d9534f';
+            ctx.beginPath(); ctx.arc(0, 0, p.w/2, Math.PI, 0); ctx.fill();
+            break;
+    }
+    ctx.restore();
 }
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (mode === 'BUILD') {
-        drawBuildMode();
+        // Griglia
+        ctx.strokeStyle = '#222';
+        for(let x=0; x<canvas.width; x+=40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); }
+        
+        partsInRocket.forEach(p => drawPart(p, false));
+        if (draggingPart) {
+            ctx.globalAlpha = 0.6;
+            drawPart(draggingPart, false);
+            ctx.globalAlpha = 1.0;
+        }
     } else {
-        drawFlightMode();
+        ctx.save();
+        ctx.translate(canvas.width/2, canvas.height/2);
+        ctx.rotate(ship.angle + Math.PI/2);
+        
+        // Disegna razzo centrato sulla prima parte
+        partsInRocket.forEach(p => drawPart(p, true));
+        
+        // Fiamme se motore attivo
+        if (keys['ArrowUp'] && ship.fuel > 0 && partsInRocket.some(p => p.id === 'engine')) {
+            ctx.fillStyle = 'orange';
+            let lastPart = partsInRocket[partsInRocket.length-1];
+            ctx.beginPath();
+            ctx.moveTo(-10, (lastPart.y - partsInRocket[0].y) + 15);
+            ctx.lineTo(10, (lastPart.y - partsInRocket[0].y) + 15);
+            ctx.lineTo(0, (lastPart.y - partsInRocket[0].y) + 40 + Math.random()*10);
+            ctx.fill();
+        }
+        ctx.restore();
+        
+        // Pianeta (camera follow)
+        ctx.save();
+        let camX = canvas.width/2 - ship.x;
+        let camY = canvas.height/2 - ship.y;
+        ctx.translate(camX, camY);
+        ctx.beginPath(); ctx.arc(planet.x, planet.y, planet.r, 0, Math.PI*2);
+        ctx.fillStyle = '#151515'; ctx.fill();
+        ctx.strokeStyle = '#333'; ctx.stroke();
+        ctx.restore();
     }
 
     requestAnimationFrame(() => { update(); draw(); });
-}
-
-function drawBuildMode() {
-    ctx.strokeStyle = '#333';
-    // Griglia officina
-    for(let i=0; i<canvas.width; i+=20) {
-        ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i, canvas.height); ctx.stroke();
-    }
-    
-    let currentY = canvas.height - 100;
-    rocketParts.forEach(part => {
-        drawPart(canvas.width/2, currentY, part, -Math.PI/2);
-        currentY -= part.h;
-    });
-}
-
-function drawFlightMode() {
-    ctx.save();
-    ctx.translate(canvas.width/2 - ship.x, canvas.height/2 - ship.y);
-
-    // Pianeta
-    ctx.beginPath();
-    ctx.arc(planet.x, planet.y, planet.r, 0, Math.PI*2);
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fill();
-    ctx.strokeStyle = '#333';
-    ctx.stroke();
-
-    // Razzo
-    ctx.save();
-    ctx.translate(ship.x, ship.y);
-    ctx.rotate(ship.angle + Math.PI/2);
-    
-    let currentY = 0;
-    rocketParts.forEach(part => {
-        drawPart(0, currentY, part, 0);
-        currentY -= part.h;
-    });
-
-    // Effetto motore
-    if (keys['ArrowUp'] && currentFuel > 0) {
-        ctx.fillStyle = 'orange';
-        ctx.beginPath();
-        ctx.moveTo(-5, 5); ctx.lineTo(5, 5); ctx.lineTo(0, 20 + Math.random()*10);
-        ctx.fill();
-    }
-    ctx.restore();
-    ctx.restore();
-}
-
-function drawPart(x, y, part, angle) {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = 'white';
-    
-    if (part.type === 'engine') {
-        ctx.fillStyle = '#555';
-        ctx.fillRect(-part.w/2, -part.h, part.w, part.h);
-        ctx.strokeRect(-part.w/2, -part.h, part.w, part.h);
-    } else if (part.type === 'fuel') {
-        ctx.fillStyle = '#eee';
-        ctx.fillRect(-part.w/2, -part.h, part.w, part.h);
-        ctx.strokeRect(-part.w/2, -part.h, part.w, part.h);
-        // Linee estetiche serbatoio
-        ctx.strokeStyle = '#ccc';
-        ctx.strokeRect(-part.w/2 + 2, -part.h + 2, part.w - 4, part.h - 4);
-    } else if (part.type === 'capsule') {
-        ctx.fillStyle = '#888';
-        ctx.beginPath();
-        ctx.moveTo(-part.w/2, 0); ctx.lineTo(part.w/2, 0);
-        ctx.lineTo(0, -part.h); ctx.closePath();
-        ctx.fill(); ctx.stroke();
-    }
-    ctx.restore();
 }
 
 draw();
