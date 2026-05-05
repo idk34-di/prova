@@ -2,195 +2,230 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>SFS Clone - Fix Clic</title>
+    <title>SFS Mobile Web Clone</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #111; font-family: sans-serif; color: white; }
-        canvas { display: block; background: #0a0a0a; }
+        :root { --accent: #4a90e2; --ui-bg: #1e1e1e; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; color: white; }
+        canvas { display: block; cursor: crosshair; }
         
-        /* Menu laterale */
-        #vab {
-            position: absolute; right: 0; top: 0; bottom: 0;
-            width: 200px; background: #1a1a1a; border-left: 2px solid #333;
-            padding: 10px; z-index: 10;
+        /* UI Editor Stile SFS */
+        #vab-sidebar {
+            position: absolute; right: 0; top: 0; bottom: 0; width: 240px;
+            background: var(--ui-bg); border-left: 2px solid #333;
+            display: flex; flex-direction: column; z-index: 100;
         }
-        .btn {
-            background: #333; border: 1px solid #555; color: white;
-            padding: 15px 10px; margin: 8px 0; width: 100%; cursor: pointer;
-            text-align: center; border-radius: 4px; font-weight: bold;
-        }
-        .btn:hover { background: #444; border-color: #007bff; }
-        #launch { background: #28a745; margin-top: 20px; }
+        .category-title { padding: 15px; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #333; }
+        .parts-grid { flex: 1; overflow-y: auto; padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
-        #hud {
-            position: absolute; top: 20px; left: 20px; 
-            background: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px;
-            display: none; pointer-events: none;
+        .part-item {
+            background: #2a2a2a; border: 1px solid #444; border-radius: 4px;
+            padding: 10px; text-align: center; cursor: pointer; transition: 0.2s;
         }
+        .part-item:hover { border-color: var(--accent); background: #333; }
+        .part-item img { width: 40px; height: auto; display: block; margin: 0 auto 5px; }
+        .part-label { font-size: 11px; color: #ccc; }
+
+        #launch-bar {
+            position: absolute; bottom: 0; left: 0; right: 240px; height: 60px;
+            background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;
+        }
+        .btn-launch {
+            background: var(--accent); color: white; border: none; padding: 10px 40px;
+            font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase;
+        }
+        #hud { position: absolute; top: 20px; left: 20px; pointer-events: none; display: none; }
     </style>
 </head>
 <body>
 
-<div id="vab">
-    <h3 style="text-align:center">COSTRUZIONE</h3>
-    <div class="btn" onmousedown="spawn('capsule')">CAPSULA</div>
-    <div class="btn" onmousedown="spawn('fuel')">SERBATOIO</div>
-    <div class="btn" onmousedown="spawn('engine')">MOTORE</div>
-    <div class="btn" onmousedown="spawn('separator')">SEPARATORE</div>
-    <button id="launch" class="btn" onclick="go()">LANCIA</button>
+<div id="vab-sidebar">
+    <div class="category-title">Componenti</div>
+    <div class="parts-grid">
+        <div class="part-item" onmousedown="createPart('capsule')"><div class="part-label">Capsula</div></div>
+        <div class="part-item" onmousedown="createPart('fuel_lg')"><div class="part-label">Serbatoio XL</div></div>
+        <div class="part-item" onmousedown="createPart('fuel_sm')"><div class="part-label">Serbatoio S</div></div>
+        <div class="part-item" onmousedown="createPart('engine')"><div class="part-label">Motore</div></div>
+        <div class="part-item" onmousedown="createPart('separator')"><div class="part-label">Separatore</div></div>
+        <div class="part-item" onmousedown="createPart('leg')"><div class="part-label">Gamba</div></div>
+        <div class="part-item" onmousedown="createPart('parachute')"><div class="part-label">Paracadute</div></div>
+    </div>
+</div>
+
+<div id="launch-bar">
+    <button class="btn-launch" onclick="launchRocket()">Lancia Missione</button>
 </div>
 
 <div id="hud">
-    Velocità: <span id="v">0</span> m/s<br>
-    Altezza: <span id="a">0</span> m
+    <div style="font-size: 24px; font-weight: bold;"><span id="h-vel">0</span> m/s</div>
+    <div style="color: #888;">Altitudine: <span id="h-alt">0</span> m</div>
 </div>
 
-<canvas id="game"></canvas>
+<canvas id="screen"></canvas>
 
 <script>
-const canvas = document.getElementById('game');
+const canvas = document.getElementById('screen');
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let mode = 'BUILD';
-let parts = [];
-let dragging = null;
-let mouse = { x: 0, y: 0 };
+let rocketParts = [];
+let activePart = null;
+let cam = { x: canvas.width/2 - 120, y: canvas.height/2, zoom: 1 };
 
-// --- LOGICA CLICK E TRASCINAMENTO ---
-function getMousePos(e) {
-    const rect = canvas.getBoundingClientRect();
-    return {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-    };
+const PART_DATA = {
+    capsule:  { w: 40, h: 32, color: '#d1d1d1', type: 'cmd' },
+    fuel_lg:  { w: 40, h: 80, color: '#f0f0f0', type: 'fuel' },
+    fuel_sm:  { w: 40, h: 40, color: '#f0f0f0', type: 'fuel' },
+    engine:   { w: 32, h: 25, color: '#444',   type: 'engine' },
+    separator:{ w: 40, h: 12, color: '#ffcc00', type: 'sep' },
+    leg:      { w: 10, h: 45, color: '#888',   type: 'leg' },
+    parachute:{ w: 30, h: 15, color: '#ff4444', type: 'para' }
+};
+
+// --- Editor Logic ---
+function createPart(id) {
+    const data = PART_DATA[id];
+    activePart = { ...data, id, x: cam.x, y: cam.y };
+    rocketParts.push(activePart);
 }
 
-canvas.onmousedown = (e) => {
-    if(mode !== 'BUILD') return;
-    const pos = getMousePos(e);
+window.addEventListener('mousedown', (e) => {
+    if (e.clientX > window.innerWidth - 240) return;
+    const mx = e.clientX; const my = e.clientY;
     
-    // Controlla se hai cliccato un pezzo esistente
-    for(let i = parts.length - 1; i >= 0; i--) {
-        let p = parts[i];
-        if(pos.x > p.x - p.w/2 && pos.x < p.x + p.w/2 &&
-           pos.y > p.y - p.h/2 && pos.y < p.y + p.h/2) {
-            dragging = parts.splice(i, 1)[0];
-            return;
+    // Pick part from stage
+    rocketParts.forEach((p, i) => {
+        if (mx > p.x - p.w/2 && mx < p.x + p.w/2 && my > p.y - p.h/2 && my < p.y + p.h/2) {
+            activePart = rocketParts.splice(i, 1)[0];
         }
-    }
-};
+    });
+});
 
-window.onmousemove = (e) => {
-    const pos = getMousePos(e);
-    mouse.x = pos.x;
-    mouse.y = pos.y;
-    
-    if(dragging) {
-        dragging.x = pos.x;
-        dragging.y = pos.y;
-        
-        // Snap Magnetico verso altri pezzi
-        parts.forEach(p => {
-            if(Math.abs(dragging.x - p.x) < 20) {
-                if(Math.abs(dragging.y - (p.y + p.h/2 + dragging.h/2)) < 20) {
-                    dragging.x = p.x; dragging.y = p.y + p.h/2 + dragging.h/2;
-                }
-                if(Math.abs(dragging.y - (p.y - p.h/2 - dragging.h/2)) < 20) {
-                    dragging.x = p.x; dragging.y = p.y - p.h/2 - dragging.h/2;
-                }
+window.addEventListener('mousemove', (e) => {
+    if (!activePart) return;
+    activePart.x = e.clientX;
+    activePart.y = e.clientY;
+
+    // Smart Snapping
+    rocketParts.forEach(p => {
+        if (Math.abs(activePart.x - p.x) < 20) {
+            // Snap vertical
+            if (Math.abs(activePart.y - (p.y + p.h/2 + activePart.h/2)) < 20) {
+                activePart.x = p.x; activePart.y = p.y + p.h/2 + activePart.h/2;
             }
-        });
-    }
-};
+            if (Math.abs(activePart.y - (p.y - p.h/2 - activePart.h/2)) < 20) {
+                activePart.x = p.x; activePart.y = p.y - p.h/2 - activePart.h/2;
+            }
+        }
+    });
+});
 
-window.onmouseup = () => { dragging = null; };
+window.addEventListener('mouseup', () => activePart = null);
 
-function spawn(type) {
-    // Crea il pezzo al centro dello schermo pronto per essere spostato
-    const p = { 
-        type, 
-        x: canvas.width/2 - 100, 
-        y: canvas.height/2, 
-        w: 40, h: (type==='fuel'?60:30),
-        color: (type==='capsule'?'#aaa':type==='engine'?'#444':'#eee')
-    };
-    parts.push(p);
-    dragging = p; // Lo aggancia subito al mouse
-}
-
-// --- VOLO ---
-let ship = { x: 0, y: 0, vx: 0, vy: 0, angle: -Math.PI/2 };
-function go() {
-    if(parts.length === 0) return;
+// --- Flight Logic ---
+let physics = { x: 0, y: 0, vx: 0, vy: 0, rot: -Math.PI/2, fuel: 100 };
+function launchRocket() {
+    if (rocketParts.length === 0) return;
     mode = 'FLIGHT';
-    document.getElementById('vab').style.display = 'none';
+    document.getElementById('vab-sidebar').style.display = 'none';
+    document.getElementById('launch-bar').style.display = 'none';
     document.getElementById('hud').style.display = 'block';
-    ship.y = 0;
+    
+    // Center rocket
+    let topY = Math.min(...rocketParts.map(p => p.y));
+    rocketParts.forEach(p => p.y -= topY);
+    physics.y = 0;
 }
 
 const keys = {};
 window.onkeydown = e => keys[e.code] = true;
 window.onkeyup = e => keys[e.code] = false;
 
-function loop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    if(mode === 'BUILD') {
-        // Disegna griglia
-        ctx.strokeStyle = '#222';
-        for(let i=0; i<canvas.width; i+=40) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
-        
-        parts.forEach(drawPart);
-        if(dragging) drawPart(dragging);
-    } else {
-        // Logica Volo Semplice
-        if(keys['ArrowUp']) {
-            ship.vx += Math.cos(ship.angle) * 0.1;
-            ship.vy += Math.sin(ship.angle) * 0.1;
-        }
-        if(keys['ArrowLeft']) ship.angle -= 0.05;
-        if(keys['ArrowRight']) ship.angle += 0.05;
-        
-        ship.vy += 0.02; // Gravità
-        ship.x += ship.vx; ship.y += ship.vy;
-        if(ship.y > 0) { ship.y = 0; ship.vy = 0; ship.vx *= 0.9; }
-
-        ctx.save();
-        ctx.translate(canvas.width/2, canvas.height/2 + (canvas.height/3));
-        ctx.translate(-ship.x, -ship.y);
-        
-        // Suolo
-        ctx.fillStyle = '#333';
-        ctx.fillRect(ship.x - 500, 25, 1000, 100);
-        
-        // Razzo
-        ctx.save();
-        ctx.translate(ship.x, ship.y);
-        ctx.rotate(ship.angle + Math.PI/2);
-        let offset = 0;
-        parts.forEach(p => {
-            drawPart({ ...p, x: 0, y: offset });
-            offset += p.h;
-        });
-        ctx.restore();
-        ctx.restore();
-        
-        document.getElementById('v').innerText = Math.abs(ship.vx).toFixed(1);
-        document.getElementById('a').innerText = Math.abs(Math.floor(ship.y));
-    }
-    requestAnimationFrame(loop);
-}
-
-function drawPart(p) {
+function drawPart(p, isFlight) {
     ctx.save();
     ctx.translate(p.x, p.y);
+    
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1.5;
     ctx.fillStyle = p.color;
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 2;
-    ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
-    ctx.strokeRect(-p.w/2, -p.h/2, p.w, p.h);
+
+    if (p.id === 'capsule') {
+        ctx.beginPath();
+        ctx.moveTo(-p.w/2, p.h/2); ctx.lineTo(p.w/2, p.h/2);
+        ctx.lineTo(p.w/3, -p.h/2); ctx.lineTo(-p.w/3, -p.h/2);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+    } else if (p.id === 'engine') {
+        ctx.fillStyle = '#333';
+        ctx.beginPath();
+        ctx.moveTo(-p.w/2, -p.h/2); ctx.lineTo(p.w/2, -p.h/2);
+        ctx.lineTo(p.w/2 + 5, p.h/2); ctx.lineTo(-p.w/2 - 5, p.h/2);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+    } else {
+        ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+        ctx.strokeRect(-p.w/2, -p.h/2, p.w, p.h);
+    }
+    
+    // Dettaglio Texture SFS (Linea centrale e ombra)
+    ctx.fillStyle = 'rgba(0,0,0,0.05)';
+    ctx.fillRect(0, -p.h/2, p.w/2, p.h);
+    ctx.beginPath(); ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+    ctx.moveTo(0, -p.h/2); ctx.lineTo(0, p.h/2); ctx.stroke();
+
     ctx.restore();
+}
+
+function loop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (mode === 'BUILD') {
+        // Grid background
+        ctx.strokeStyle = '#151515';
+        for(let i=0; i<canvas.width; i+=40) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
+        for(let i=0; i<canvas.height; i+=40) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(canvas.width,i); ctx.stroke(); }
+        
+        rocketParts.forEach(p => drawPart(p, false));
+    } else {
+        // Flight
+        if(keys['ArrowUp']) {
+            physics.vx += Math.cos(physics.rot) * 0.15;
+            physics.vy += Math.sin(physics.rot) * 0.15;
+        }
+        if(keys['ArrowLeft']) physics.rot -= 0.03;
+        if(keys['ArrowRight']) physics.rot += 0.03;
+        
+        physics.vy += 0.05; // Gravity
+        physics.x += physics.vx; physics.y += physics.vy;
+        
+        if(physics.y > 0) { physics.y = 0; physics.vy = 0; physics.vx *= 0.95; }
+
+        ctx.save();
+        ctx.translate(canvas.width/2, canvas.height/2 + 200);
+        
+        // Ground
+        ctx.fillStyle = '#222';
+        ctx.fillRect(-canvas.width/2, -physics.y + 30, canvas.width, 500);
+
+        ctx.save();
+        ctx.translate(-physics.x, -physics.y);
+        ctx.rotate(physics.rot + Math.PI/2);
+        rocketParts.forEach(p => drawPart(p, true));
+        
+        // Exhaust
+        if(keys['ArrowUp']) {
+            ctx.fillStyle = '#4facfe';
+            let last = rocketParts.find(p => p.id === 'engine') || rocketParts[rocketParts.length-1];
+            ctx.beginPath();
+            ctx.moveTo(-10, last.y + 15); ctx.lineTo(10, last.y + 15);
+            ctx.lineTo(0, last.y + 50 + Math.random()*20); ctx.fill();
+        }
+        ctx.restore();
+        ctx.restore();
+
+        document.getElementById('h-vel').innerText = (Math.sqrt(physics.vx**2 + physics.vy**2)*10).toFixed(1);
+        document.getElementById('h-alt').innerText = Math.abs(Math.floor(physics.y));
+    }
+    requestAnimationFrame(loop);
 }
 
 loop();
