@@ -2,142 +2,157 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>SFS Clone - Fixed Flight</title>
+    <title>SFS Master Clone</title>
     <style>
-        :root { --accent: #4a90e2; --ui-bg: #1e1e1e; }
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; color: white; }
+        :root { --accent: #4a90e2; --bg: #0f0f0f; --ui: #1a1a1a; }
+        body { margin: 0; overflow: hidden; background: var(--bg); font-family: 'Segoe UI', sans-serif; color: white; user-select: none; }
         canvas { display: block; }
-        
-        #vab-sidebar {
-            position: absolute; right: 0; top: 0; bottom: 0; width: 220px;
-            background: var(--ui-bg); border-left: 2px solid #333; z-index: 100;
-            padding: 10px;
+
+        /* Sidebar SFS Style */
+        #sidebar {
+            position: absolute; right: 0; top: 0; bottom: 0; width: 200px;
+            background: var(--ui); border-left: 1px solid #333; z-index: 100;
+            display: flex; flex-direction: column;
         }
-        .part-item {
-            background: #2a2a2a; border: 1px solid #444; margin-bottom: 8px;
-            padding: 15px; text-align: center; cursor: pointer; border-radius: 4px;
+        .header { padding: 15px; font-size: 12px; color: #666; border-bottom: 1px solid #333; text-align: center; }
+        .parts-container { flex: 1; overflow-y: auto; padding: 10px; }
+        .part-btn {
+            background: #252525; border: 1px solid #444; border-radius: 4px;
+            padding: 12px 5px; margin-bottom: 10px; cursor: pointer; text-align: center;
+            font-size: 11px; transition: 0.2s;
         }
-        .part-item:hover { border-color: var(--accent); }
-        
-        #launch-bar {
-            position: absolute; bottom: 20px; left: 20px; z-index: 101;
+        .part-btn:hover { border-color: var(--accent); background: #303030; }
+
+        /* UI Volo */
+        #hud {
+            position: absolute; top: 20px; left: 20px; pointer-events: none; display: none;
+            background: rgba(0,0,0,0.5); padding: 15px; border-radius: 5px; border-left: 3px solid var(--accent);
         }
-        .btn-launch {
-            background: #28a745; color: white; border: none; padding: 15px 30px;
-            font-weight: bold; border-radius: 4px; cursor: pointer;
+        .stat { font-family: monospace; font-size: 18px; margin-bottom: 5px; }
+        .stat span { color: var(--accent); }
+
+        #controls {
+            position: absolute; bottom: 20px; left: 20px; display: flex; gap: 10px;
         }
-        #hud { 
-            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-            text-align: center; pointer-events: none; display: none;
+        .btn {
+            background: var(--accent); border: none; color: white; padding: 15px 30px;
+            border-radius: 5px; font-weight: bold; cursor: pointer; text-transform: uppercase;
         }
+        #stage-btn { background: #ff9800; display: none; }
     </style>
 </head>
 <body>
 
-<div id="vab-sidebar">
-    <h3 style="font-size: 14px; color: #888;">COMPONENTI</h3>
-    <div class="part-item" onmousedown="createPart('capsule')">Capsula</div>
-    <div class="part-item" onmousedown="createPart('fuel')">Serbatoio</div>
-    <div class="part-item" onmousedown="createPart('engine')">Motore</div>
-    <div class="part-item" onmousedown="createPart('separator')">Separatore</div>
-</div>
-
-<div id="launch-bar">
-    <button class="btn-launch" onclick="launchRocket()">LANCIA MISSIONE</button>
+<div id="sidebar">
+    <div class="header">BLUEPRINT PARTS</div>
+    <div class="parts-container">
+        <div class="part-btn" onmousedown="spawn('capsule')">CAPSULA</div>
+        <div class="part-btn" onmousedown="spawn('fuel_lg')">SERBATOIO XL</div>
+        <div class="part-btn" onmousedown="spawn('fuel_sm')">SERBATOIO S</div>
+        <div class="part-btn" onmousedown="spawn('engine')">MOTORE</div>
+        <div class="part-btn" onmousedown="spawn('separator')">SEPARATORE</div>
+        <div class="part-btn" onmousedown="spawn('leg')">GAMBA</div>
+        <div class="part-btn" onmousedown="spawn('solar')">PANNELLO SOLARE</div>
+        <div class="part-btn" onmousedown="spawn('parachute')">PARACADUTE</div>
+    </div>
 </div>
 
 <div id="hud">
-    <div style="font-size: 20px;"><span id="h-vel">0</span> m/s</div>
-    <div style="font-size: 14px; color: #aaa;">Altitudine: <span id="h-alt">0</span> m</div>
+    <div class="stat">VEL: <span id="v-val">0.0</span> m/s</div>
+    <div class="stat">ALT: <span id="a-val">0</span> m</div>
 </div>
 
-<canvas id="screen"></canvas>
+<div id="controls">
+    <button id="launch-btn" class="btn" onclick="launch()">Lancia</button>
+    <button id="stage-btn" class="btn" onclick="triggerStage()">Sgancia</button>
+</div>
+
+<canvas id="game"></canvas>
 
 <script>
-const canvas = document.getElementById('screen');
+const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let mode = 'BUILD';
-let rocketParts = [];
-let activePart = null;
+let parts = [];
+let dragging = null;
+let ship = { x: 0, y: 0, vx: 0, vy: 0, rot: -Math.PI/2 };
 
-const PART_DATA = {
-    capsule:  { w: 40, h: 32, color: '#d1d1d1' },
-    fuel:     { w: 40, h: 60, color: '#f0f0f0' },
-    engine:   { w: 32, h: 25, color: '#444' },
-    separator:{ w: 40, h: 10, color: '#ffcc00' }
+const DATA = {
+    capsule:  { w: 40, h: 30, color: '#aaa', type: 'top' },
+    fuel_lg:  { w: 40, h: 80, color: '#eee', type: 'body' },
+    fuel_sm:  { w: 40, h: 40, color: '#eee', type: 'body' },
+    engine:   { w: 30, h: 25, color: '#444', type: 'engine' },
+    separator:{ w: 40, h: 10, color: '#ffc107', type: 'sep' },
+    leg:      { w: 10, h: 40, color: '#888', type: 'leg' },
+    solar:    { w: 15, h: 50, color: '#1a3a6a', type: 'solar' },
+    parachute:{ w: 30, h: 15, color: '#d9534f', type: 'top' }
 };
 
 // --- EDITOR ---
-function createPart(id) {
-    const data = PART_DATA[id];
-    // Crea il pezzo al centro dell'area di costruzione (non sotto il menu)
-    activePart = { ...data, id, x: (canvas.width - 220) / 2, y: canvas.height / 2 };
-    rocketParts.push(activePart);
+function spawn(id) {
+    const p = { ...DATA[id], id, x: (canvas.width-200)/2, y: canvas.height/2 };
+    parts.push(p);
+    dragging = p;
 }
 
-window.addEventListener('mousedown', (e) => {
-    if (e.clientX > window.innerWidth - 220) return;
-    const mx = e.clientX; const my = e.clientY;
-    
-    for (let i = rocketParts.length - 1; i >= 0; i--) {
-        let p = rocketParts[i];
-        if (mx > p.x - p.w/2 && mx < p.x + p.w/2 && my > p.y - p.h/2 && my < p.y + p.h/2) {
-            activePart = rocketParts.splice(i, 1)[0];
-            break;
+canvas.onmousedown = (e) => {
+    if(mode !== 'BUILD' || e.clientX > canvas.width - 200) return;
+    for(let i=parts.length-1; i>=0; i--) {
+        let p = parts[i];
+        if(Math.abs(e.clientX - p.x) < p.w/2 && Math.abs(e.clientY - p.y) < p.h/2) {
+            dragging = parts.splice(i, 1)[0];
+            return;
         }
     }
-});
+};
 
-window.addEventListener('mousemove', (e) => {
-    if (!activePart) return;
-    activePart.x = e.clientX;
-    activePart.y = e.clientY;
-
-    // Snap magnetico
-    rocketParts.forEach(p => {
-        if (Math.abs(activePart.x - p.x) < 20) {
-            if (Math.abs(activePart.y - (p.y + p.h/2 + activePart.h/2)) < 15) {
-                activePart.x = p.x; activePart.y = p.y + p.h/2 + activePart.h/2;
+window.onmousemove = (e) => {
+    if(!dragging) return;
+    dragging.x = e.clientX;
+    dragging.y = e.clientY;
+    
+    // Snap Magnetico migliorato
+    parts.forEach(p => {
+        if(Math.abs(dragging.x - p.x) < 20) {
+            if(Math.abs(dragging.y - (p.y + p.h/2 + dragging.h/2)) < 15) {
+                dragging.x = p.x; dragging.y = p.y + p.h/2 + dragging.h/2;
             }
-            if (Math.abs(activePart.y - (p.y - p.h/2 - activePart.h/2)) < 15) {
-                activePart.x = p.x; activePart.y = p.y - p.h/2 - activePart.h/2;
+            if(Math.abs(dragging.y - (p.y - p.h/2 - dragging.h/2)) < 15) {
+                dragging.x = p.x; dragging.y = p.y - p.h/2 - dragging.h/2;
             }
         }
     });
-});
+};
 
-window.addEventListener('mouseup', () => activePart = null);
+window.onmouseup = () => dragging = null;
 
 // --- VOLO ---
-let ship = { x: 0, y: 0, vx: 0, vy: 0, rot: -Math.PI/2 };
-
-function launchRocket() {
-    if (rocketParts.length === 0) return;
-    
-    // Calcola il centro del razzo costruito per resettare le coordinate
-    let centerX = rocketParts[0].x;
-    let centerY = rocketParts[0].y;
-    
-    rocketParts.forEach(p => {
-        p.relX = p.x - centerX;
-        p.relY = p.y - centerY;
-    });
-
+function launch() {
+    if(parts.length === 0) return;
     mode = 'FLIGHT';
-    document.getElementById('vab-sidebar').style.display = 'none';
-    document.getElementById('launch-bar').style.display = 'none';
+    document.getElementById('sidebar').style.display = 'none';
+    document.getElementById('launch-btn').style.display = 'none';
     document.getElementById('hud').style.display = 'block';
+    document.getElementById('stage-btn').style.display = 'block';
     
-    ship.x = 0; ship.y = 0; ship.vx = 0; ship.vy = 0;
+    let root = parts[0];
+    parts.forEach(p => { p.rx = p.x - root.x; p.ry = p.y - root.y; });
+    ship.x = 0; ship.y = 0;
+}
+
+function triggerStage() {
+    let idx = parts.findIndex(p => p.id === 'separator');
+    if(idx !== -1) parts.splice(idx); // Rimuove tutto sotto il separatore
 }
 
 const keys = {};
 window.onkeydown = e => keys[e.code] = true;
 window.onkeyup = e => keys[e.code] = false;
 
+// --- RENDERING ---
 function drawPart(p, x, y) {
     ctx.save();
     ctx.translate(x, y);
@@ -145,11 +160,17 @@ function drawPart(p, x, y) {
     ctx.lineWidth = 1.5;
     ctx.fillStyle = p.color;
 
-    if (p.id === 'capsule') {
+    if(p.id === 'capsule') {
         ctx.beginPath();
         ctx.moveTo(-p.w/2, p.h/2); ctx.lineTo(p.w/2, p.h/2);
         ctx.lineTo(p.w/3, -p.h/2); ctx.lineTo(-p.w/3, -p.h/2);
-        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fill(); ctx.stroke();
+    } else if(p.id === 'engine') {
+        ctx.fillStyle = '#333';
+        ctx.beginPath();
+        ctx.moveTo(-p.w/4, -p.h/2); ctx.lineTo(p.w/4, -p.h/2);
+        ctx.lineTo(p.w/2, p.h/2); ctx.lineTo(-p.w/2, p.h/2);
+        ctx.fill(); ctx.stroke();
     } else {
         ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
         ctx.strokeRect(-p.w/2, -p.h/2, p.w, p.h);
@@ -164,56 +185,53 @@ function drawPart(p, x, y) {
 function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (mode === 'BUILD') {
-        // Griglia
-        ctx.strokeStyle = '#222';
+    if(mode === 'BUILD') {
+        // Griglia Blueprint
+        ctx.strokeStyle = '#1a1a1a';
         for(let i=0; i<canvas.width; i+=40) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
-        rocketParts.forEach(p => drawPart(p, p.x, p.y));
-        if (activePart) drawPart(activePart, activePart.x, activePart.y);
+        for(let i=0; i<canvas.height; i+=40) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(canvas.width,i); ctx.stroke(); }
+        
+        parts.forEach(p => drawPart(p, p.x, p.y));
+        if(dragging) drawPart(dragging, dragging.x, dragging.y);
     } else {
-        // Fisica
-        if(keys['ArrowUp']) {
+        // Fisica Volo
+        if(keys['ArrowUp'] && parts.some(p => p.id === 'engine')) {
             ship.vx += Math.cos(ship.rot) * 0.2;
             ship.vy += Math.sin(ship.rot) * 0.2;
         }
         if(keys['ArrowLeft']) ship.rot -= 0.04;
         if(keys['ArrowRight']) ship.rot += 0.04;
         
-        ship.vy += 0.05; // Gravità
+        ship.vy += 0.06; // Gravità
         ship.x += ship.vx; ship.y += ship.vy;
         
-        // Terreno
-        if(ship.y > 0) { ship.y = 0; ship.vy = 0; ship.vx *= 0.9; ship.rot = -Math.PI/2; }
+        if(ship.y > 0) { ship.y = 0; ship.vy = 0; ship.vx *= 0.9; }
 
         ctx.save();
-        // Camera Follow: Mette il razzo al centro dello schermo
-        ctx.translate(canvas.width/2, canvas.height/2);
+        ctx.translate(canvas.width/2, canvas.height/2); // Camera centrata
         
-        // Disegna il suolo
+        // Terreno
         ctx.fillStyle = '#222';
         ctx.fillRect(-canvas.width/2, -ship.y + 40, canvas.width, 1000);
 
-        // Disegna il razzo ruotato
         ctx.rotate(ship.rot + Math.PI/2);
-        rocketParts.forEach(p => {
-            drawPart(p, p.relX, p.relY);
-        });
+        parts.forEach(p => drawPart(p, p.rx, p.ry));
 
         // Fiamma
-        if(keys['ArrowUp']) {
+        if(keys['ArrowUp'] && parts.some(p => p.id === 'engine')) {
+            let engine = parts.find(p => p.id === 'engine');
             ctx.fillStyle = '#4facfe';
             ctx.beginPath();
-            ctx.moveTo(-10, 40); ctx.lineTo(10, 40);
-            ctx.lineTo(0, 80 + Math.random()*20); ctx.fill();
+            ctx.moveTo(-10, engine.ry + 15); ctx.lineTo(10, engine.ry + 15);
+            ctx.lineTo(0, engine.ry + 60 + Math.random()*20); ctx.fill();
         }
         ctx.restore();
 
-        document.getElementById('h-vel').innerText = (Math.sqrt(ship.vx**2 + ship.vy**2)*10).toFixed(1);
-        document.getElementById('h-alt').innerText = Math.abs(Math.floor(ship.y));
+        document.getElementById('v-val').innerText = (Math.sqrt(ship.vx**2 + ship.vy**2)*10).toFixed(1);
+        document.getElementById('a-val').innerText = Math.abs(Math.floor(ship.y));
     }
     requestAnimationFrame(loop);
 }
-
 loop();
 </script>
 </body>
