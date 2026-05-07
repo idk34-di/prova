@@ -1,434 +1,219 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini Spaceflight Simulator (Replica)</title>
-<style>
-    :root {
-        --bg-color: #121212;
-        --ui-bg: #212121;
-        --accent: #eee;
-        --lines: #444;
-    }
-    body { margin: 0; padding: 0; background-color: var(--bg-color); color: var(--accent); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; display: flex; height: 100vh; user-select: none;}
-    
-    /* --- EDITOR UI (SINISTRA) --- */
-    #editor-sidebar { width: 220px; background-color: var(--ui-bg); border-right: 1px solid var(--lines); display: flex; flex-direction: column; z-index: 10; }
-    #editor-header { padding: 15px; border-bottom: 1px solid var(--lines); text-align: center; font-weight: bold; font-size: 1.1em; }
-    .part-category { padding: 10px 15px; font-size: 0.85em; color: #888; text-transform: uppercase; letter-spacing: 1px; }
-    .part-item { padding: 15px; border-bottom: 1px solid #333; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; }
-    .part-item:hover { background-color: #333; }
-    .part-icon { width: 20px; height: 30px; border: 2px solid white; box-sizing: border-box; }
+    <meta charset="UTF-8">
+    <title>SFS Pro Clone - Full Physics</title>
+    <style>
+        :root { --ui-panel: rgba(30, 30, 30, 0.9); --accent: #3498db; }
+        body { margin: 0; background: #000; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; }
+        
+        /* Sidebar Editor */
+        #editor { width: 240px; background: #1a1a1a; border-right: 1px solid #333; z-index: 100; display: flex; flex-direction: column; }
+        .tab-title { padding: 20px; font-weight: bold; border-bottom: 1px solid #333; text-align: center; background: #222; }
+        .part-btn { padding: 15px; border-bottom: 1px solid #222; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; }
+        .part-btn:hover { background: #2c2c2c; border-left: 4px solid var(--accent); }
+        .icon-box { width: 30px; height: 30px; border: 2px solid #666; }
 
-    /* --- AREA DI GIOCO --- */
-    #game-container { flex-grow: 1; position: relative; }
-    canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
+        /* Area di Gioco */
+        #game-wrapper { flex-grow: 1; position: relative; background: linear-gradient(to bottom, #000 0%, #1a2a6c 100%); }
+        canvas { display: block; width: 100%; height: 100%; }
 
-    /* --- UI DI VOLO (DESTRA E BASSO) --- */
-    .flight-ui { position: absolute; pointer-events: none; display: none; flex-direction: column; gap: 5px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px;}
-    #telemetry-ui { top: 20px; right: 20px; text-align: right; }
-    #fuel-ui { bottom: 80px; left: 240px; width: 200px;}
-    .bar-container { width: 100%; height: 10px; background: #333; border: 1px solid var(--lines); }
-    #fuel-bar-fill { height: 100%; background: #0a0; width: 100%; transition: width 0.1s linear; }
-    
-    #controls-hint { bottom: 20px; right: 20px; position: absolute; font-size: 0.9em; color: #aaa; text-align: right;}
-
-    #btn-launch { position: absolute; bottom: 20px; left: 240px; padding: 10px 25px; background: #0078d7; border: none; color: white; cursor: pointer; font-weight: bold; border-radius: 3px; z-index: 20; }
-    #btn-launch:hover { background: #0086f0; }
-
-</style>
+        /* UI di Volo */
+        .hud { position: absolute; padding: 15px; background: var(--ui-panel); border-radius: 8px; pointer-events: none; border: 1px solid #444; }
+        #telemetry { top: 20px; right: 20px; min-width: 150px; }
+        #fuel-gauge { bottom: 20px; left: 20px; width: 250px; }
+        .bar-bg { background: #333; height: 12px; border-radius: 6px; overflow: hidden; margin-top: 5px; }
+        #fuel-fill { background: var(--accent); height: 100%; width: 100%; transition: width 0.1s; }
+        
+        #launch-btn { position: absolute; bottom: 30px; right: 30px; padding: 15px 40px; background: #27ae60; border: none; color: white; font-weight: bold; border-radius: 50px; cursor: pointer; font-size: 1.1em; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        #launch-btn:hover { background: #2ecc71; transform: scale(1.05); }
+    </style>
 </head>
 <body>
 
-    <!-- SIDEBAR EDITOR -->
-    <div id="editor-sidebar">
-        <div id="editor-header">EDITOR RAZZI</div>
-        <div class="part-category">Propulsione</div>
-        <div class="part-item" onclick="addPart('engine')">
-            <div class="part-icon" style="border-radius: 0 0 5px 5px; height: 15px; background: #444;"></div>
-            <span>Motore Piccolo</span>
-        </div>
-        <div class="part-item" onclick="addPart('tank')">
-            <div class="part-icon" style="height: 35px;"></div>
-            <span>Serbatoio M</span>
-        </div>
-        <div class="part-category">Comando</div>
-        <div class="part-item" onclick="addPart('capsule')">
-            <div class="part-icon" style="border-radius: 15px 15px 0 0; background: #666;"></div>
-            <span>Capsula</span>
-        </div>
+<div id="editor">
+    <div class="tab-title">COSTRUZIONE</div>
+    <div class="part-btn" onclick="spawnPart('capsule')"><div class="icon-box" style="border-radius: 50% 50% 0 0"></div> Capsula</div>
+    <div class="part-btn" onclick="spawnPart('tank')"><div class="icon-box"></div> Serbatoio Carburante</div>
+    <div class="part-btn" onclick="spawnPart('engine')"><div class="icon-box" style="border-top:none"></div> Motore Hawk</div>
+</div>
+
+<div id="game-wrapper">
+    <button id="launch-btn" onclick="startMission()">LANCIA MISSIONE</button>
+    
+    <div id="telemetry" class="hud" style="display:none">
+        <div style="color: #888; font-size: 0.8em;">ALTITUDINE</div>
+        <div id="alt-val" style="font-size: 1.4em; font-weight: bold;">0 m</div>
+        <div style="color: #888; font-size: 0.8em; margin-top: 10px;">VELOCITÀ VERTICALE</div>
+        <div id="vel-val" style="font-size: 1.4em; font-weight: bold;">0.0 m/s</div>
     </div>
 
-    <!-- MAIN CONTAINER -->
-    <div id="game-container">
-        <button id="btn-launch" onclick="tryLaunch()">ANCIA</button>
-        <canvas id="gameCanvas"></canvas>
-
-        <!-- FLIGHT UI (Nascosta all'inizio) -->
-        <div id="telemetry-ui" class="flight-ui">
-            <div>Altezza: <b id="ui-alt">0</b> m</div>
-            <div>Velocità V: <b id="ui-vy">0.0</b> m/s</div>
-        </div>
-        
-        <div id="fuel-ui" class="flight-ui">
-            <div>Carburante</div>
-            <div class="bar-container"><div id="fuel-bar-fill"></div></div>
-        </div>
-
-        <div id="controls-hint" class="flight-ui">
-            Usa FRECCE per curvare<br>
-            Usa freccia SU / SHIFT per il motore<br>
-            Usa freccia GIÙ / CTRL per spegnere
-        </div>
+    <div id="fuel-gauge" class="hud" style="display:none">
+        <div style="font-size: 0.9em;">CARBURANTE</div>
+        <div class="bar-bg"><div id="fuel-fill"></div></div>
     </div>
+
+    <canvas id="sfsCanvas"></canvas>
+</div>
 
 <script>
-/**
- * COSTANTI E CONFIGURAZIONE
- */
-const canvas = document.getElementById('gameCanvas');
+const canvas = document.getElementById('sfsCanvas');
 const ctx = canvas.getContext('2d');
-const ui = {
-    alt: document.getElementById('ui-alt'),
-    vy: document.getElementById('ui-vy'),
-    fuelBar: document.getElementById('fuel-bar-fill'),
-    flightUIs: document.querySelectorAll('.flight-ui'),
-    btnLaunch: document.getElementById('btn-launch')
-};
 
-// Configurazione Pezzi (Massa in tonnellate, Carburante, Spinta in kN)
-const PART_STATS = {
-    capsule: { mass: 2, fuel: 0, thrust: 0, width: 26, height: 30, color: '#999', draw: drawCapsule },
-    tank: { mass: 4, fuel: 360, thrust: 0, width: 26, height: 40, color: '#eee', draw: drawTank },
-    engine: { mass: 1, fuel: 0, thrust: 150, width: 22, height: 20, color: '#555', draw: drawEngine }
-};
+let gameState = 'build';
+let parts = [];
+let stars = [];
+let rocket = { x: 0, y: 0, vx: 0, vy: 0, angle: -Math.PI/2, fuel: 100, mass: 1, throttle: 0 };
+let camY = 0;
+let worldY = 0;
 
-const GRAVITY = 0.05; // Molto blanda per il demo
-const GROUND_Y = window.innerHeight - 50;
+// Inizializzazione Stelle
+for(let i=0; i<200; i++) {
+    stars.push({ x: Math.random() * 3000, y: Math.random() * 3000, s: Math.random() * 2 });
+}
 
-/**
- * STATO DEL GIOCO
- */
-let gameState = 'build'; // 'build' o 'flight'
-let myRocket = {
-    parts: [], // Elenco dei pezzi assemblati {type, x, y}
-    x: 0, y: 0,
-    vx: 0, vy: 0,
-    angle: -Math.PI / 2, // Punta verso l'alto
-    totalMass: 0,
-    currentFuel: 0,
-    maxFuel: 0,
-    totalThrust: 0,
-    throttle: 0, // 0 to 1
-};
+function resize() {
+    canvas.width = window.innerWidth - (gameState === 'build' ? 240 : 0);
+    canvas.height = window.innerHeight;
+    if(gameState === 'build') {
+        rocket.x = canvas.width / 2;
+        rocket.y = canvas.height - 150;
+    }
+}
+window.addEventListener('resize', resize);
+resize();
+
+function spawnPart(type) {
+    const config = {
+        capsule: { w: 40, h: 40, color: '#bdc3c7', mass: 2 },
+        tank: { w: 40, h: 60, color: '#ecf0f1', mass: 4 },
+        engine: { w: 34, h: 25, color: '#34495e', mass: 1, isEngine: true }
+    };
+    let p = config[type];
+    let yPos = parts.length > 0 ? parts[0].y - p.h : rocket.y - p.h;
+    parts.unshift({ ...p, type, x: rocket.x - p.w/2, y: yPos });
+}
+
+function startMission() {
+    if(parts.length < 2) return alert("Costruisci un razzo!");
+    gameState = 'flight';
+    document.getElementById('editor').style.display = 'none';
+    document.getElementById('launch-btn').style.display = 'none';
+    document.querySelectorAll('.hud').forEach(el => el.style.display = 'block');
+    resize();
+}
 
 let keys = {};
+window.onkeydown = e => keys[e.code] = true;
+window.onkeyup = e => keys[e.code] = false;
 
-// Inizializzazione
-function init() {
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-    window.addEventListener('keydown', e => keys[e.code] = true);
-    window.addEventListener('keyup', e => keys[e.code] = false);
-    
-    // Posizione iniziale razzo nell'hangar
-    myRocket.x = (window.innerWidth - 220) / 2;
-    myRocket.y = GROUND_Y - 20; // Un po' sollevato
+function drawBackground() {
+    // Atmosfera dinamica: diventa nera man mano che sali
+    let alt = Math.abs(worldY) / 10;
+    let skyB = Math.max(0, 100 - alt/50); 
+    let skyG = Math.max(0, 40 - alt/100);
+    ctx.fillStyle = `rgb(0, ${skyG}, ${skyB})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    gameLoop();
-}
-
-/**
- * LOGICA EDITOR (BUILD MODE)
- */
-function addPart(type) {
-    if (gameState !== 'build') return;
-
-    let stats = PART_STATS[type];
-    let newY = myRocket.y;
-
-    // Calcola la posizione Y per "impilare" il pezzo sopra gli altri
-    if (myRocket.parts.length > 0) {
-        // Mettilo sopra l'ultimo pezzo aggiunto (la y cala perché si sale)
-        newY = myRocket.parts[0].y - stats.height; 
-    } else {
-        newY = myRocket.y - stats.height;
-    }
-
-    myRocket.parts.unshift({ // Aggiungi in testa così l'indice 0 è il pezzo più in alto
-        type: type,
-        y_offset: 0, // Calcolato dinamicamente durante il disegno
-        ...stats
+    // Stelle (si muovono con la telecamera)
+    ctx.fillStyle = "white";
+    stars.forEach(s => {
+        let sy = (s.y - camY * 0.5) % canvas.height;
+        if(sy < 0) sy += canvas.height;
+        ctx.fillRect(s.x % canvas.width, sy, s.s, s.s);
     });
-
-    recalculateRocketStats();
-}
-
-function recalculateRocketStats() {
-    let mass = 0;
-    let fuel = 0;
-    let thrust = 0;
-    let currentY = 0;
-
-    for (let part of myRocket.parts) {
-        mass += part.mass;
-        fuel += part.fuel;
-        thrust += part.thrust;
-        part.y_offset = currentY; // Offset relativo dal "centro" del razzo
-        currentY += part.height;
-    }
-
-    myRocket.totalMass = mass;
-    myRocket.maxFuel = fuel;
-    myRocket.currentFuel = fuel;
-    myRocket.totalThrust = thrust;
-}
-
-function tryLaunch() {
-    if (myRocket.parts.length < 2) {
-        alert("Costruisci un razzo più completo prima di lanciare! (Serve almeno un serbatoio e un motore)");
-        return;
-    }
-    if (myRocket.totalThrust <= 0) {
-        alert("Il tuo razzo non ha motori!");
-        return;
-    }
-
-    gameState = 'flight';
-    ui.btnLaunch.style.display = 'none';
-    document.getElementById('editor-sidebar').style.display = 'none';
-    ui.flightUIs.forEach(el => el.style.display = 'flex');
-    
-    // Resetta posizione fisica
-    myRocket.vx = 0;
-    myRocket.vy = 0;
-    // La y fisica è la base del razzo
-}
-
-
-/**
- * CICLO PRINCIPALE E FISICA (FLIGHT MODE)
- */
-function gameLoop() {
-    update();
-    draw();
-    requestAnimationFrame(gameLoop);
 }
 
 function update() {
-    if (gameState !== 'flight') return;
+    if(gameState !== 'flight') return;
 
-    // 1. Controlli Pilota
-    if (keys['ArrowLeft']) myRocket.angle -= 0.02;
-    if (keys['ArrowRight']) myRocket.angle += 0.02;
+    // Controlli
+    if(keys['ArrowLeft']) rocket.angle -= 0.04;
+    if(keys['ArrowRight']) rocket.angle += 0.04;
     
-    // Throttle
-    if (keys['ArrowUp'] || keys['ShiftLeft']) myRocket.throttle = 1;
-    if (keys['ArrowDown'] || keys['ControlLeft']) myRocket.throttle = 0;
-
-    // 2. Logica Motore e Consumo
-    let netThrust = 0;
-    if (myRocket.throttle > 0 && myRocket.currentFuel > 0 && myRocket.totalThrust > 0) {
-        netThrust = myRocket.totalThrust * myRocket.throttle;
-        
-        // Consumo proporzionale alla spinta (molto semplificato)
-        myRocket.currentFuel -= 0.5 * myRocket.throttle; 
-        if (myRocket.currentFuel < 0) myRocket.currentFuel = 0;
-    } else {
-        netThrust = 0;
+    if(keys['ArrowUp'] && rocket.fuel > 0) {
+        let power = 0.25;
+        rocket.vx += Math.cos(rocket.angle) * power;
+        rocket.vy += Math.sin(rocket.angle) * power;
+        rocket.fuel -= 0.15;
     }
 
-    // 3. Fisica (Accelerazione = Forza / Massa)
-    let ax = (Math.cos(myRocket.angle) * netThrust) / myRocket.totalMass;
-    let ay = (Math.sin(myRocket.angle) * netThrust) / myRocket.totalMass;
+    // Fisica
+    rocket.vy += 0.08; // Gravità
+    rocket.x += rocket.vx;
+    rocket.y += rocket.vy;
+    worldY = rocket.y - (canvas.height - 150);
 
-    // Applica Gravità
-    ay += GRAVITY;
+    // Camera follow fluida
+    let targetCamY = rocket.y - canvas.height / 1.5;
+    camY += (targetCamY - camY) * 0.1;
 
-    // 4. Aggiorna Velocità e Posizione
-    myRocket.vx += ax;
-    myRocket.vy += ay;
-    myRocket.x += myRocket.vx;
-    myRocket.y += myRocket.vy;
-
-    // 5. Collisione Terreno
-    if (myRocket.y >= GROUND_Y) {
-        myRocket.y = GROUND_Y;
-        if (myRocket.vy > 1) { // Atterraggio duro
-             // Qui andrebbe un'esplosione, per ora resettiamo
-             console.log("Crash!");
-             myRocket.vx = 0;
-             myRocket.vy = 0;
-             myRocket.throttle = 0;
-        } else {
-            myRocket.vy = 0;
-            myRocket.vx *= 0.9; // Attrito al suolo
-        }
+    // Collisione terreno
+    if(rocket.y > canvas.height - 150) {
+        rocket.y = canvas.height - 150;
+        rocket.vy = 0;
+        rocket.vx *= 0.8;
     }
 
-    // 6. Aggiorna UI
-    updateFlightUI();
+    // UI
+    document.getElementById('alt-val').innerText = Math.floor(Math.abs(worldY)/5) + " m";
+    document.getElementById('vel-val').innerText = (-rocket.vy * 2).toFixed(1) + " m/s";
+    document.getElementById('fuel-fill').style.width = rocket.fuel + "%";
 }
 
-
-/**
- * FUNZIONI DI DISEGNO (CANVAS)
- */
 function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Disegna Sfondo (Stelle)
-    drawStars();
-
-    // Disegna Terreno
-    ctx.fillStyle = '#333';
-    ctx.fillRect(0, GROUND_Y, canvas.width, window.innerHeight - GROUND_Y);
-    ctx.strokeStyle = '#666';
-    ctx.beginPath(); ctx.moveTo(0, GROUND_Y); ctx.lineTo(canvas.width, GROUND_Y); ctx.stroke();
-
-    // Disegna Razzo
-    drawRocket(ctx);
-}
-
-function drawRocket(ctx) {
-    if (myRocket.parts.length === 0) {
-        // Segnaposto nell'editor se vuoto
-        ctx.fillStyle = '#333';
-        ctx.fillRect(myRocket.x - 15, myRocket.y - 60, 30, 60);
-        return;
-    }
+    drawBackground();
 
     ctx.save();
-    
-    // Trasla e Ruota l'intero sistema di coordinate del razzo
-    // La 'y' di myRocket è considerata la BASE del razzo (l'ultimo pezzo)
-    ctx.translate(myRocket.x, myRocket.y);
-    if (gameState === 'flight') {
-        ctx.rotate(myRocket.angle + Math.PI/2); // Ruota di 90 gradi perché l'angolo 0 è destra
-    }
+    ctx.translate(0, -camY);
 
-    // Disegna le fiamme se il motore è acceso
-    if (gameState === 'flight' && myRocket.throttle > 0 && myRocket.currentFuel > 0) {
-        drawFlames(ctx);
-    }
+    // Terreno (Erba/Terra)
+    ctx.fillStyle = '#27ae60';
+    ctx.fillRect(0, canvas.height - 150, canvas.width, 1000);
+    ctx.fillStyle = '#2ecc71';
+    ctx.fillRect(0, canvas.height - 150, canvas.width, 5);
 
-    // Disegna ogni pezzo basandosi sulle funzioni definite in PART_STATS
-    let currentY = 0; // Stack dal basso verso l'alto
-    
-    // Disegniamo in ordine inverso (dal motore in su) per la gestione della profondità
-    for (let i = myRocket.parts.length -1; i >= 0; i--) {
-        let part = myRocket.parts[i];
-        ctx.save();
-        ctx.translate(0, -currentY - part.height); // Sposta l'origine alla base del pezzo
-        part.draw(ctx, part);
-        ctx.restore();
-        currentY += part.height;
-    }
+    // Disegno Razzo
+    ctx.save();
+    ctx.translate(rocket.x, rocket.y);
+    ctx.rotate(rocket.angle + Math.PI/2);
+
+    let currentY = 0;
+    parts.forEach(p => {
+        ctx.fillStyle = p.color;
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "rgba(255,255,255,0.3)";
+        
+        // Disegno forme specifiche
+        if(p.type === 'capsule') {
+            ctx.beginPath();
+            ctx.moveTo(-p.w/2, 0); ctx.lineTo(p.w/2, 0);
+            ctx.lineTo(p.w/4, -p.h); ctx.lineTo(-p.w/4, -p.h);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+        } else {
+            ctx.fillRect(-p.w/2, -currentY - p.h, p.w, p.h);
+            ctx.strokeRect(-p.w/2, -currentY - p.h, p.w, p.h);
+        }
+
+        // Effetto Fiamme Motore
+        if(p.isEngine && keys['ArrowUp'] && rocket.fuel > 0) {
+            ctx.fillStyle = "rgba(255, 165, 0, " + (0.5 + Math.random()*0.5) + ")";
+            ctx.beginPath();
+            ctx.moveTo(-10, 0); ctx.lineTo(10, 0); 
+            ctx.lineTo(0, 40 + Math.random()*20);
+            ctx.fill();
+        }
+        currentY += p.h;
+    });
 
     ctx.restore();
+    ctx.restore();
+
+    update();
+    requestAnimationFrame(draw);
 }
 
-// --- Funzioni di disegno specifiche per pezzo ---
-
-function drawCapsule(ctx, stats) {
-    ctx.fillStyle = stats.color;
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    // Forma trapezoidale
-    ctx.moveTo(-stats.width/2, stats.height);
-    ctx.lineTo(stats.width/2, stats.height);
-    ctx.lineTo(stats.width/2 * 0.6, 0);
-    ctx.lineTo(-stats.width/2 * 0.6, 0);
-    ctx.closePath();
-    ctx.fill(); ctx.stroke();
-    
-    // Oblò
-    ctx.fillStyle = '#333';
-    ctx.beginPath(); ctx.arc(0, stats.height*0.5, 5, 0, Math.PI*2); ctx.fill();
-}
-
-function drawTank(ctx, stats) {
-    ctx.fillStyle = stats.color;
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 2;
-    ctx.fillRect(-stats.width/2, 0, stats.width, stats.height);
-    ctx.strokeRect(-stats.width/2, 0, stats.width, stats.height);
-    
-    // Linee serbatoio SFS style
-    ctx.strokeStyle = '#ccc'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(-stats.width/2 + 5, stats.height*0.3); ctx.lineTo(stats.width/2 - 5, stats.height*0.3); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(-stats.width/2 + 5, stats.height*0.6); ctx.lineTo(stats.width/2 - 5, stats.height*0.6); ctx.stroke();
-}
-
-function drawEngine(ctx, stats) {
-    ctx.fillStyle = stats.color;
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 2;
-    // Campana motore
-    ctx.beginPath();
-    ctx.moveTo(-stats.width/2, stats.height);
-    ctx.lineTo(stats.width/2, stats.height);
-    ctx.lineTo(stats.width/2 * 0.7, 0);
-    ctx.lineTo(-stats.width/2 * 0.7, 0);
-    ctx.closePath();
-    ctx.fill(); ctx.stroke();
-}
-
-function drawFlames(ctx) {
-    let flicker = Math.random() * 10;
-    ctx.fillStyle = 'orange';
-    ctx.beginPath();
-    ctx.moveTo(-8, 0);
-    ctx.lineTo(8, 0);
-    ctx.lineTo(0, 25 + flicker);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = 'yellow';
-    ctx.beginPath();
-    ctx.moveTo(-5, 0);
-    ctx.lineTo(5, 0);
-    ctx.lineTo(0, 15 + flicker);
-    ctx.closePath();
-    ctx.fill();
-}
-
-// --- Utility disegni ---
-
-let stars = [];
-function drawStars() {
-    if (stars.length === 0) {
-        for(let i=0; i<100; i++) stars.push({x: Math.random()*canvas.width, y:Math.random()*canvas.height, s: Math.random()*2});
-    }
-    ctx.fillStyle = 'white';
-    for(let s of stars) ctx.fillRect(s.x, s.y, s.s, s.s);
-}
-
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    // Segnale di ridisegnare il terreno
-}
-
-function updateFlightUI() {
-    let altitude = Math.max(0, (GROUND_Y - myRocket.y) / 10).toFixed(0);
-    let speed = (-myRocket.vy).toFixed(1); // vy negativa = sale
-    
-    ui.alt.innerText = altitude;
-    ui.vy.innerText = speed;
-
-    let fuelPerc = (myRocket.currentFuel / myRocket.maxFuel) * 100;
-    ui.fuelBar.style.width = fuelPerc + '%';
-    
-    if (fuelPerc < 20) ui.fuelBar.style.background = '#a00';
-    else if (fuelPerc < 50) ui.fuelBar.style.background = '#aa0';
-    else ui.fuelBar.style.background = '#0a0';
-}
-
-// Avvia tutto
-init();
-
+draw();
 </script>
 </body>
 </html>
