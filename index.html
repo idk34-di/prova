@@ -5,586 +5,765 @@
 <title>Spaceflight Simulator Ultra</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:#000;color:#fff;font-family:'Segoe UI',monospace;overflow:hidden;display:flex;height:100vh;user-select:none;}
-#ui-left{width:260px;background:#111;border-right:1px solid #2a2a2a;display:flex;flex-direction:column;z-index:100;flex-shrink:0;}
-.vab-header{padding:12px;background:#0d0d0d;text-align:center;border-bottom:1px solid #2a2a2a;font-size:12px;letter-spacing:2px;color:#aaa;}
-.vab-header span{color:#3af;font-weight:bold;font-size:14px;}
-.tab-bar{display:flex;border-bottom:1px solid #2a2a2a;}
-.tab{flex:1;padding:8px;text-align:center;font-size:10px;cursor:pointer;color:#666;border-bottom:2px solid transparent;}
-.tab.active{color:#3af;border-bottom:2px solid #3af;background:#131313;}
-.cat-label{padding:6px 12px;font-size:9px;color:#555;background:#0a0a0a;letter-spacing:2px;border-bottom:1px solid #1a1a1a;}
-.part-list{overflow-y:auto;flex:1;}
-.part-list::-webkit-scrollbar{width:4px;}
-.part-list::-webkit-scrollbar-track{background:#0a0a0a;}
-.part-list::-webkit-scrollbar-thumb{background:#333;}
-.part-card{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;border-bottom:1px solid #1a1a1a;transition:background .15s;}
-.part-card:hover{background:#1a1a1a;}
-.part-card.selected{background:#152030;border-left:3px solid #3af;}
-.part-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:#0a0a0a;border:1px solid #2a2a2a;font-size:10px;color:#aaa;flex-shrink:0;}
-.part-info{flex:1;}
-.part-name{font-size:11px;color:#ddd;font-weight:bold;}
-.part-stat{font-size:9px;color:#555;margin-top:1px;}
-#game-container{flex:1;position:relative;overflow:hidden;}
-canvas{display:block;}
-.hud-panel{position:absolute;background:rgba(0,5,15,0.88);border:1px solid #1a3a5a;border-radius:4px;padding:10px;pointer-events:none;font-family:monospace;}
-#telemetry{top:15px;right:15px;width:190px;display:none;}
-#hud-staging{bottom:15px;left:15px;width:140px;display:none;}
-#hud-map{bottom:15px;right:15px;width:120px;height:120px;display:none;}
-#hud-orient{top:15px;left:50%;transform:translateX(-50%);width:200px;display:none;}
-.hud-label{font-size:9px;color:#3af;letter-spacing:1.5px;margin-bottom:2px;}
-.hud-value{font-size:16px;font-weight:bold;color:#eee;margin-bottom:8px;}
-.hud-value.warn{color:#fa0;}
-.hud-value.danger{color:#f44;}
-.fuel-bar-bg{background:#0a1a2a;height:6px;border-radius:2px;margin-bottom:8px;}
-.fuel-bar{height:100%;background:#3af;border-radius:2px;transition:width .1s;}
-#btn-launch{position:absolute;bottom:20px;right:20px;padding:14px 36px;background:linear-gradient(180deg,#1a9a1a,#0d6b0d);color:#fff;border:1px solid #2d2;border-radius:4px;font-weight:bold;cursor:pointer;font-size:13px;letter-spacing:2px;box-shadow:0 0 15px rgba(0,200,0,0.2);}
-#btn-launch:hover{background:linear-gradient(180deg,#2ab52a,#1a8a1a);}
-#btn-clear{position:absolute;bottom:20px;left:270px;padding:8px 16px;background:#1a0a0a;color:#f66;border:1px solid #422;border-radius:4px;cursor:pointer;font-size:11px;}
-.mode-banner{position:absolute;top:0;left:0;right:0;height:30px;background:rgba(0,0,30,0.7);display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:2px;color:#3af;display:none;}
-#controls-hint{position:absolute;bottom:70px;right:20px;text-align:right;font-size:10px;color:#333;pointer-events:none;display:none;}
-#message-box{position:absolute;top:50px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);border:1px solid #3af;border-radius:4px;padding:10px 20px;font-size:12px;color:#3af;pointer-events:none;opacity:0;transition:opacity .3s;}
-.sep-line{border:none;border-top:1px solid #1a3a5a;margin:6px 0;}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Courier New',monospace;color:#fff;user-select:none;}
+#wrap{display:flex;height:100vh;}
+ 
+/* ── LEFT PANEL ── */
+#panel{width:250px;flex-shrink:0;background:#0f0f0f;border-right:1px solid #1e2a1e;display:flex;flex-direction:column;}
+#panel-header{background:#0a120a;padding:10px 12px;border-bottom:1px solid #1e2a1e;text-align:center;}
+#panel-header .title{color:#4cff4c;font-size:13px;letter-spacing:3px;font-weight:bold;}
+#panel-header .sub{color:#2a6a2a;font-size:9px;letter-spacing:2px;margin-top:2px;}
+.tabs{display:flex;border-bottom:1px solid #1e2a1e;}
+.tab{flex:1;padding:6px 2px;text-align:center;font-size:9px;color:#3a5a3a;cursor:pointer;letter-spacing:1px;border-bottom:2px solid transparent;}
+.tab:hover{color:#4cff4c;}
+.tab.on{color:#4cff4c;border-bottom:2px solid #4cff4c;background:#0d180d;}
+.cat{padding:5px 10px;font-size:8px;color:#2a4a2a;background:#080808;letter-spacing:2px;border-bottom:1px solid #111;}
+#parts{flex:1;overflow-y:auto;}
+#parts::-webkit-scrollbar{width:3px;}
+#parts::-webkit-scrollbar-thumb{background:#1e3a1e;}
+.pc{display:flex;align-items:center;gap:8px;padding:7px 10px;cursor:pointer;border-bottom:1px solid #111;transition:background .12s;}
+.pc:hover{background:#131a13;}
+.pc.sel{background:#0d1f0d;border-left:2px solid #4cff4c;}
+.pico{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:#080808;border:1px solid #1a2a1a;font-size:11px;flex-shrink:0;}
+.pname{font-size:10px;color:#ccc;font-weight:bold;}
+.pstat{font-size:8px;color:#3a5a3a;margin-top:1px;}
+#status-bar{padding:8px 10px;border-top:1px solid #1e2a1e;font-size:9px;color:#2a5a2a;line-height:1.6;}
+ 
+/* ── CANVAS AREA ── */
+#cbox{flex:1;position:relative;overflow:hidden;}
+canvas#cv{display:block;width:100%;height:100%;}
+ 
+/* ── HUD ── */
+.hud{position:absolute;background:rgba(0,8,0,0.88);border:1px solid #1e4a1e;border-radius:2px;padding:10px 12px;pointer-events:none;display:none;}
+#hud-tele{top:10px;right:10px;width:185px;}
+#hud-nav{bottom:10px;left:10px;width:130px;}
+#hud-map{bottom:10px;right:10px;width:115px;padding:6px;}
+#hud-head{top:10px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:6px 14px;}
+.hl{font-size:8px;color:#4cff4c;letter-spacing:1.5px;margin-bottom:1px;}
+.hv{font-size:15px;font-weight:bold;color:#e8ffe8;margin-bottom:7px;}
+.hv.w{color:#ffcc00;}
+.hv.d{color:#ff4444;}
+.fb{background:#051005;height:5px;border-radius:1px;margin-bottom:7px;}
+.fi{height:100%;border-radius:1px;transition:width .1s,background .3s;}
+hr.hs{border:none;border-top:1px solid #1e3a1e;margin:5px 0;}
+ 
+/* buttons */
+#btn-launch{position:absolute;bottom:16px;right:16px;padding:13px 34px;background:linear-gradient(180deg,#1aaa1a,#0d6b0d);color:#fff;border:1px solid #3d3;border-radius:2px;font-weight:bold;cursor:pointer;font-size:12px;letter-spacing:2px;font-family:'Courier New',monospace;box-shadow:0 0 18px rgba(0,180,0,0.15);}
+#btn-launch:hover{background:linear-gradient(180deg,#22cc22,#1a8a1a);}
+#btn-clr{position:absolute;bottom:16px;left:258px;padding:7px 14px;background:#100808;color:#f44;border:1px solid #311;border-radius:2px;cursor:pointer;font-size:10px;font-family:'Courier New',monospace;}
+#toast{position:absolute;top:46px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.9);border:1px solid #4cff4c;border-radius:2px;padding:7px 18px;font-size:11px;color:#4cff4c;pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap;}
+#flight-banner{position:absolute;top:0;left:0;right:0;height:28px;background:rgba(0,20,0,0.8);display:none;align-items:center;justify-content:center;font-size:9px;letter-spacing:2px;color:#4cff4c;}
 </style>
 </head>
 <body>
-<div id="ui-left">
-  <div class="vab-header"><span>SFS ULTRA</span><br>VEHICLE ASSEMBLY</div>
-  <div class="tab-bar">
-    <div class="tab active" onclick="setTab('all')">TUTTI</div>
+<div id="wrap">
+<div id="panel">
+  <div id="panel-header">
+    <div class="title">SFS ULTRA</div>
+    <div class="sub">VEHICLE ASSEMBLY BUILDING</div>
+  </div>
+  <div class="tabs">
+    <div class="tab on" onclick="setTab('all')">TUTTI</div>
     <div class="tab" onclick="setTab('structural')">STRUTTURA</div>
     <div class="tab" onclick="setTab('propulsion')">MOTORI</div>
     <div class="tab" onclick="setTab('systems')">SISTEMI</div>
   </div>
-  <div class="part-list" id="parts-menu"></div>
-  <div style="padding:10px;border-top:1px solid #1a1a1a;font-size:10px;color:#444;">
-    CLICCA SUL CANVAS → AGGIUNGI PARTE<br>
-    TRASCINA → SPOSTA PARTI
+  <div id="parts"></div>
+  <div id="status-bar">
+    PARTI: <span id="sb-parts">0</span> &nbsp;|&nbsp; MASSA: <span id="sb-mass">0.0</span> t<br>
+    FUEL: <span id="sb-fuel">0</span> u &nbsp;|&nbsp; TASTO DX: rimuovi
   </div>
 </div>
-
-<div id="game-container">
-  <canvas id="sfsCanvas"></canvas>
-  <div class="mode-banner" id="mode-banner">MODALITÀ VOLO — FRECCE: STERZO | SU: MOTORI | SPAZIO: STADIO</div>
-  <div id="message-box"></div>
-
-  <div id="telemetry" class="hud-panel">
-    <div class="hud-label">ALTITUDINE</div>
-    <div class="hud-value" id="ui-alt">0 m</div>
-    <div class="hud-label">VELOCITÀ</div>
-    <div class="hud-value" id="ui-vel">0.0 m/s</div>
-    <div class="hud-label">ACCELERAZIONE</div>
-    <div class="hud-value" id="ui-accel">0.0 m/s²</div>
-    <hr class="sep-line">
-    <div class="hud-label">CARBURANTE</div>
-    <div class="fuel-bar-bg"><div class="fuel-bar" id="ui-fuel-bar" style="width:100%"></div></div>
-    <div class="hud-value" id="ui-fuel-pct" style="font-size:13px;">100%</div>
-    <div class="hud-label">SPINTA</div>
-    <div class="hud-value" id="ui-thrust" style="font-size:13px;">0.0 kN</div>
+ 
+<div id="cbox">
+  <canvas id="cv"></canvas>
+ 
+  <div id="flight-banner">MODALITÀ VOLO — WASD/FRECCE: manovra | SPAZIO: stadio | R: VAB</div>
+  <div id="toast"></div>
+ 
+  <div id="hud-tele" class="hud">
+    <div class="hl">ALTITUDINE</div><div class="hv" id="h-alt">0 m</div>
+    <div class="hl">VELOCITÀ</div><div class="hv" id="h-vel">0.0 m/s</div>
+    <div class="hl">ACCEL.</div><div class="hv" id="h-acc">0.0 m/s²</div>
+    <hr class="hs">
+    <div class="hl">CARBURANTE</div>
+    <div class="fb"><div class="fi" id="h-fbar" style="width:100%;background:#4cff4c;"></div></div>
+    <div class="hv" id="h-fpct" style="font-size:12px;">100%</div>
+    <div class="hl">SPINTA TOTALE</div>
+    <div class="hv" id="h-thrust" style="font-size:12px;">0.0 kN</div>
   </div>
-
-  <div id="hud-orient" class="hud-panel">
-    <canvas id="attitudeCanvas" width="190" height="30"></canvas>
+ 
+  <div id="hud-head" class="hud">
+    <span id="h-heading" style="font-size:10px;color:#4cff4c;letter-spacing:2px;">HDG 090° &nbsp;|&nbsp; 0.0 m/s</span>
   </div>
-
-  <div id="hud-staging" class="hud-panel">
-    <div class="hud-label">STADIO ATTIVO</div>
-    <div class="hud-value" id="ui-stage">1</div>
-    <div style="font-size:9px;color:#3af;">SPAZIO = separa stadio</div>
+ 
+  <div id="hud-nav" class="hud">
+    <div class="hl">STADIO</div>
+    <div class="hv" id="h-stage">1</div>
+    <div style="font-size:8px;color:#4cff4c;">SPAZIO → separa stadio</div>
+    <hr class="hs">
+    <div class="hl">ATMOSFERA</div>
+    <div class="hv" id="h-atmo" style="font-size:11px;">100%</div>
   </div>
-
-  <div id="hud-map" class="hud-panel">
-    <canvas id="mapCanvas" width="110" height="110"></canvas>
+ 
+  <div id="hud-map" class="hud">
+    <canvas id="minimap" width="103" height="103"></canvas>
   </div>
-
-  <div id="controls-hint">
-    ↑ MOTORI &nbsp; ← → ROTAZIONE &nbsp; SPAZIO: STADIO
-  </div>
-
-  <button id="btn-launch" onclick="launchRocket()">▲ LANCIA</button>
-  <button id="btn-clear" onclick="clearShip()">✕ SVUOTA</button>
+ 
+  <button id="btn-launch" onclick="launch()">▲ LANCIA</button>
+  <button id="btn-clr" onclick="clearShip()">✕ SVUOTA</button>
 </div>
-
+</div>
+ 
 <script>
-const PART_DEFS = {
-  nose_cone:   {name:"Cono Anteriore",cat:"structural",  w:36,h:36,color:"#bdc3c7",mass:0.5,icon:"▲",stat:"Aero drag ↓"},
-  capsule:     {name:"Capsula Apollo",cat:"structural",  w:44,h:44,color:"#a0a8b0",mass:2,  icon:"⬡",stat:"Crew: 3"},
-  tank_s:      {name:"Serbatoio S",  cat:"structural",  w:36,h:50,color:"#e0e4e8",mass:2,  fuel:60, icon:"▮",stat:"Fuel: 60u"},
-  tank_m:      {name:"Serbatoio M",  cat:"structural",  w:40,h:80,color:"#dce0e4",mass:4,  fuel:120,icon:"▮",stat:"Fuel: 120u"},
-  tank_l:      {name:"Serbatoio L",  cat:"structural",  w:44,h:120,color:"#d8dce0",mass:7, fuel:200,icon:"▮",stat:"Fuel: 200u"},
-  decoupler:   {name:"Decoupler",    cat:"structural",  w:40,h:10, color:"#e67e22",mass:0.3,isSeparator:true,icon:"▬",stat:"Separa stadi"},
-  fairing:     {name:"Ogiva",        cat:"structural",  w:50,h:60, color:"#95a5a6",mass:1,  icon:"△",stat:"Aeroshell"},
-  engine_a:    {name:"Motore Aerospike",cat:"propulsion",w:36,h:22,color:"#2c3e50",mass:1.2,thrust:0.5,isp:380,icon:"▽",stat:"ISP: 380s"},
-  engine_b:    {name:"Motore Raptor", cat:"propulsion", w:40,h:26,color:"#34495e",mass:1.5,thrust:0.8,isp:360,icon:"▽",stat:"ISP: 360s"},
-  engine_vac:  {name:"Motore Vacuum",cat:"propulsion",  w:50,h:40,color:"#1a2b3c",mass:0.8,thrust:0.4,isp:450,icon:"▽",stat:"ISP: 450s"},
-  rcs:         {name:"RCS Thruster",  cat:"propulsion", w:18,h:18,color:"#4a4a5a",mass:0.1,isRCS:true,icon:"✦",stat:"Controllo fino"},
-  parachute:   {name:"Paracadute",   cat:"systems",    w:30,h:14,color:"#c0392b",mass:0.4,isChute:true,state:0,icon:"∩",stat:"Deploy: SPAZIO"},
-  solar_s:     {name:"Solare S",     cat:"systems",    w:12,h:40,color:"#2980b9",mass:0.2,isSolar:true,state:0,icon:"||",stat:"Energia"},
-  solar_l:     {name:"Solare L",     cat:"systems",    w:12,h:80,color:"#1a6a9a",mass:0.3,isSolar:true,state:0,icon:"|||",stat:"Energia++"},
-  shield:      {name:"Scudo Termico",cat:"systems",    w:48,h:10,color:"#4e342e",mass:1.5,isShield:true,icon:"◠",stat:"Reentry"},
-  probe_core:  {name:"Probe Core",   cat:"systems",    w:30,h:20,color:"#2d4a3e",mass:0.3,icon:"□",stat:"Uncrewed"},
+// ═══════════════════════════════════════════════════════
+//  PARTE DEFINITIONS
+// ═══════════════════════════════════════════════════════
+const DEFS = {
+  nose:     {n:"Cono Aerodinamico",cat:"structural", w:36,h:38, col:"#adb5bd",mass:.4, icon:"▲",stat:"Riduce drag"},
+  capsule:  {n:"Capsula Crew",     cat:"structural", w:44,h:46, col:"#8d99ae",mass:2,  icon:"⬡",stat:"Crew: 3"},
+  service:  {n:"Modulo Servizio",  cat:"structural", w:44,h:40, col:"#6c757d",mass:1.5,icon:"▣",stat:"Struttura"},
+  tank_s:   {n:"Serbatoio S",      cat:"structural", w:36,h:55, col:"#dee2e6",mass:2,  fuel:60, icon:"▮",stat:"60u fuel"},
+  tank_m:   {n:"Serbatoio M",      cat:"structural", w:40,h:85, col:"#ced4da",mass:4,  fuel:130,icon:"▮",stat:"130u fuel"},
+  tank_l:   {n:"Serbatoio L",      cat:"structural", w:44,h:130,col:"#c8d0d8",mass:7,  fuel:220,icon:"▮",stat:"220u fuel"},
+  decoupler:{n:"Decoupler",        cat:"structural", w:40,h:10, col:"#fd7e14",mass:.3, isSep:true,icon:"▬",stat:"Separa stadi"},
+  fairing:  {n:"Ogiva Payload",    cat:"structural", w:52,h:65, col:"#868e96",mass:1.2,icon:"△",stat:"Aeroshell"},
+  engine_v: {n:"Motore Valcania",  cat:"propulsion", w:38,h:24, col:"#212529",mass:1.2,thrust:.55,isp:370,icon:"▽",stat:"370s ISP | 0.55T"},
+  engine_r: {n:"Motore Rapier",    cat:"propulsion", w:42,h:28, col:"#343a40",mass:1.6,thrust:.85,isp:350,icon:"▽",stat:"350s ISP | 0.85T"},
+  engine_vac:{n:"Motore Vacuum",   cat:"propulsion", w:52,h:44, col:"#1c2b3a",mass:.9, thrust:.45,isp:460,icon:"▽",stat:"460s ISP | 0.45T"},
+  rcs:      {n:"RCS Cluster",      cat:"propulsion", w:18,h:18, col:"#495057",mass:.1, isRCS:true,icon:"✦",stat:"Micro-spinta"},
+  chute:    {n:"Paracadute",       cat:"systems",    w:30,h:14, col:"#c0392b",mass:.4, isChute:true,icon:"∩",stat:"Deploy: SPAZIO"},
+  solar_s:  {n:"Pannello Solare S",cat:"systems",    w:14,h:42, col:"#1971c2",mass:.2, isSolar:true,icon:"||",stat:"Energia"},
+  solar_l:  {n:"Pannello Solare L",cat:"systems",    w:14,h:85, col:"#1864ab",mass:.3, isSolar:true,icon:"|||",stat:"Energia++"},
+  shield:   {n:"Scudo Termico",    cat:"systems",    w:50,h:10, col:"#5c3a21",mass:1.6,isShield:true,icon:"◠",stat:"Reentry heat"},
+  probe:    {n:"Probe Core",       cat:"systems",    w:30,h:20, col:"#2d4a3e",mass:.3, icon:"□",stat:"Uncrewed"},
+  antenna:  {n:"Antenna",          cat:"systems",    w:8, h:40, col:"#adb5bd",mass:.1, icon:"|",stat:"Comms"},
 };
-
-const canvas = document.getElementById('sfsCanvas');
-const ctx = canvas.getContext('2d');
-const attCanvas = document.getElementById('attitudeCanvas');
-const attCtx = attCanvas.getContext('2d');
-const mapCanvas = document.getElementById('mapCanvas');
-const mapCtx = mapCanvas.getContext('2d');
-
+ 
+// ═══════════════════════════════════════════════════════
+//  PLANETS / WORLD
+// ═══════════════════════════════════════════════════════
+// World coords: y increases downward. Surface at y=0 (world).
+// Planet centers far away; only Earth surface is the launch pad.
+const EARTH_RADIUS = 600000; // px world units — very large
+const PLANET_SURFACE = 0;    // world y of surface
+ 
+const PLANETS = [
+  {name:"Terra",    r:EARTH_RADIUS,    col:"#1a6b3a",atmo:140000, atmoCol:"rgba(80,140,255,",   cx:0,cy:EARTH_RADIUS,  gravity:9.81},
+  {name:"Luna",     r:180000,          col:"#888",   atmo:0,       atmoCol:null,                  cx:800000,cy:EARTH_RADIUS-400000, gravity:1.62},
+  {name:"Marte",    r:330000,          col:"#c1440e",atmo:40000,   atmoCol:"rgba(210,120,50,",    cx:-1200000,cy:EARTH_RADIUS+200000,gravity:3.72},
+];
+const EARTH = PLANETS[0];
+ 
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const mm = document.getElementById('minimap');
+const mctx = mm.getContext('2d');
+ 
 let mode = 'build';
-let selectedType = 'capsule';
+let tab = 'all';
+let selType = 'capsule';
 let ship = [];
-let stageNum = 1;
-let dragging = null, dragOffX = 0, dragOffY = 0;
-let currentTab = 'all';
-
-let rkt = {x:0,y:0,vx:0,vy:0,angle:-Math.PI/2,fuel:100,maxFuel:100,zoom:1,zoomTarget:1,flameSize:0};
-let worldY = 0;
-let keys = {};
-let lastFrame = 0;
-let trajectory = [];
-let messageTimeout = null;
-
-function showMsg(txt, dur=2000){
-  const m = document.getElementById('message-box');
-  m.textContent = txt;
-  m.style.opacity = '1';
-  clearTimeout(messageTimeout);
-  messageTimeout = setTimeout(()=>m.style.opacity='0', dur);
-}
-
+let stageN = 1;
+let drag = null, dox=0, doy=0;
+let toastTmr = null;
+ 
+// Flight state — world coords
+let flt = {
+  wx:0, wy:0,          // world position (center of rocket)
+  vx:0, vy:0,          // velocity world px/s
+  angle:-Math.PI/2,    // radians, 0=right
+  zoom:1,
+  zoomT:1,
+  maxFuel:100,
+  flameT:0,
+};
+let lastT=0;
+let traj=[];
+let keys={};
+let atmoAlpha=1;
+ 
+// ═══════════════════════════════════════════════════════
+//  MENU
+// ═══════════════════════════════════════════════════════
 function setTab(t){
-  currentTab = t;
-  document.querySelectorAll('.tab').forEach((el,i)=>{
-    el.classList.toggle('active', ['all','structural','propulsion','systems'][i]===t);
-  });
+  tab=t;
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('on',['all','structural','propulsion','systems'][i]===t));
   buildMenu();
 }
-
 function buildMenu(){
-  const menu = document.getElementById('parts-menu');
-  menu.innerHTML = '';
-  const cats = {structural:'STRUTTURA',propulsion:'PROPULSIONE',systems:'SISTEMI'};
-  let lastCat = '';
-  Object.keys(PART_DEFS).forEach(key=>{
-    const p = PART_DEFS[key];
-    if(currentTab !== 'all' && p.cat !== currentTab) return;
-    if(p.cat !== lastCat){
-      const lbl = document.createElement('div');
-      lbl.className = 'cat-label';
-      lbl.textContent = cats[p.cat] || p.cat.toUpperCase();
-      menu.appendChild(lbl);
-      lastCat = p.cat;
+  const el=document.getElementById('parts');
+  el.innerHTML='';
+  const catMap={structural:'STRUTTURA',propulsion:'PROPULSIONE',systems:'SISTEMI'};
+  let lastCat='';
+  for(const [k,d] of Object.entries(DEFS)){
+    if(tab!=='all'&&d.cat!==tab) continue;
+    if(d.cat!==lastCat){
+      const lbl=document.createElement('div');lbl.className='cat';lbl.textContent=catMap[d.cat];
+      el.appendChild(lbl);lastCat=d.cat;
     }
-    const div = document.createElement('div');
-    div.className = `part-card ${key===selectedType?'selected':''}`;
-    div.onclick = ()=>{
-      selectedType = key;
-      document.querySelectorAll('.part-card').forEach(c=>c.classList.remove('selected'));
-      div.classList.add('selected');
-    };
-    const def = PART_DEFS[key];
-    div.innerHTML = `<div class="part-icon">${def.icon}</div><div class="part-info"><div class="part-name">${def.name}</div><div class="part-stat">${def.stat}</div></div>`;
-    menu.appendChild(div);
-  });
+    const div=document.createElement('div');
+    div.className='pc'+(k===selType?' sel':'');
+    div.onclick=()=>{selType=k;document.querySelectorAll('.pc').forEach(c=>c.classList.remove('sel'));div.classList.add('sel');};
+    div.innerHTML=`<div class="pico">${d.icon}</div><div><div class="pname">${d.n}</div><div class="pstat">${d.stat}</div></div>`;
+    el.appendChild(div);
+  }
 }
 buildMenu();
-
-canvas.addEventListener('mousedown', e=>{
+ 
+// ═══════════════════════════════════════════════════════
+//  SHIP HELPERS
+// ═══════════════════════════════════════════════════════
+function totalFuel(){ return ship.filter(p=>p.active&&p.fuel).reduce((s,p)=>s+p.fuel,0); }
+function totalMass(){ return ship.filter(p=>p.active).reduce((s,p)=>s+p.mass,0); }
+function updateStatus(){
+  document.getElementById('sb-parts').textContent=ship.length;
+  document.getElementById('sb-mass').textContent=totalMass().toFixed(1);
+  document.getElementById('sb-fuel').textContent=totalFuel().toFixed(0);
+}
+ 
+function toast(msg,dur=2200){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.style.opacity='1';
+  clearTimeout(toastTmr);
+  toastTmr=setTimeout(()=>el.style.opacity='0',dur);
+}
+ 
+// ═══════════════════════════════════════════════════════
+//  CANVAS EVENTS — BUILD MODE
+// ═══════════════════════════════════════════════════════
+function canvasXY(e){
+  const r=cv.getBoundingClientRect();
+  return [e.clientX-r.left, e.clientY-r.top];
+}
+function buildOrigin(){ return [cv.width/2, cv.height-160]; }
+ 
+cv.addEventListener('mousedown',e=>{
   if(mode!=='build') return;
-  const rect = canvas.getBoundingClientRect();
-  const cx = e.clientX - rect.left;
-  const cy = e.clientY - rect.top;
-  const ox = canvas.width/2;
-  const oy = canvas.height - 180;
-  const rx = cx - ox;
-  const ry = cy - oy;
+  const [mx,my]=canvasXY(e);
+  const [ox,oy]=buildOrigin();
+  const rx=mx-ox, ry=my-oy;
+  // hit test existing parts
   for(let i=ship.length-1;i>=0;i--){
-    const p = ship[i];
-    if(rx>=p.relX && rx<=p.relX+p.w && ry>=p.relY && ry<=p.relY+p.h){
-      dragging = i;
-      dragOffX = rx - p.relX;
-      dragOffY = ry - p.relY;
-      return;
+    const p=ship[i];
+    if(rx>=p.rx&&rx<=p.rx+p.w&&ry>=p.ry&&ry<=p.ry+p.h){
+      drag=i; dox=rx-p.rx; doy=ry-p.ry; return;
     }
   }
-  const def = PART_DEFS[selectedType];
-  ship.push({
-    ...JSON.parse(JSON.stringify(def)),
-    type: selectedType,
-    relX: rx - def.w/2,
-    relY: ry - def.h/2,
-    active: true,
-    state: 0,
-    stageGroup: stageNum
-  });
-  showMsg(`${def.name} aggiunta!`);
+  // place new part
+  const def=DEFS[selType];
+  ship.push({...JSON.parse(JSON.stringify(def)),type:selType,rx:rx-def.w/2,ry:ry-def.h/2,active:true,state:0,sg:stageN});
+  toast(`${def.n} aggiunta`);
+  updateStatus();
 });
-
-canvas.addEventListener('mousemove', e=>{
-  if(dragging===null||mode!=='build') return;
-  const rect = canvas.getBoundingClientRect();
-  const cx = e.clientX - rect.left;
-  const cy = e.clientY - rect.top;
-  const ox = canvas.width/2;
-  const oy = canvas.height - 180;
-  ship[dragging].relX = (cx - ox) - dragOffX;
-  ship[dragging].relY = (cy - oy) - dragOffY;
+cv.addEventListener('mousemove',e=>{
+  if(drag===null||mode!=='build') return;
+  const [mx,my]=canvasXY(e);
+  const [ox,oy]=buildOrigin();
+  ship[drag].rx=(mx-ox)-dox;
+  ship[drag].ry=(my-oy)-doy;
 });
-
-canvas.addEventListener('mouseup', ()=>dragging=null);
-canvas.addEventListener('contextmenu', e=>{
-  if(mode!=='build') return;
-  e.preventDefault();
-  const rect = canvas.getBoundingClientRect();
-  const cx = e.clientX - rect.left;
-  const cy = e.clientY - rect.top;
-  const ox = canvas.width/2;
-  const oy = canvas.height - 180;
-  const rx = cx - ox;
-  const ry = cy - oy;
+cv.addEventListener('mouseup',()=>drag=null);
+cv.addEventListener('contextmenu',e=>{
+  if(mode!=='build') return; e.preventDefault();
+  const [mx,my]=canvasXY(e);
+  const [ox,oy]=buildOrigin();
+  const rx=mx-ox, ry=my-oy;
   for(let i=ship.length-1;i>=0;i--){
-    const p = ship[i];
-    if(rx>=p.relX && rx<=p.relX+p.w && ry>=p.relY && ry<=p.relY+p.h){
-      ship.splice(i,1);
-      showMsg('Parte rimossa');
-      return;
-    }
+    const p=ship[i];
+    if(rx>=p.rx&&rx<=p.rx+p.w&&ry>=p.ry&&ry<=p.ry+p.h){ ship.splice(i,1); toast('Parte rimossa'); updateStatus(); return; }
   }
 });
-
-function clearShip(){ ship=[]; showMsg('Razzo svuotato'); }
-
-function calcTotalFuel(){
-  return ship.filter(p=>p.active&&p.fuel).reduce((s,p)=>s+p.fuel,0);
-}
-function calcTotalMass(){
-  return ship.filter(p=>p.active).reduce((s,p)=>s+p.mass,0);
-}
-
-function launchRocket(){
-  if(!ship.length){showMsg('Aggiungi parti prima!',2500);return;}
-  const hasEngine = ship.some(p=>p.thrust);
-  if(!hasEngine){showMsg('Aggiungi almeno un motore!',2500);return;}
+function clearShip(){ ship=[]; updateStatus(); toast('Razzo svuotato'); }
+ 
+// ═══════════════════════════════════════════════════════
+//  LAUNCH
+// ═══════════════════════════════════════════════════════
+function launch(){
+  if(!ship.length){toast('Aggiungi parti prima!');return;}
+  if(!ship.some(p=>p.thrust)){toast('Aggiungi almeno un motore!');return;}
   mode='flight';
-  rkt.maxFuel = calcTotalFuel() || 100;
-  rkt.fuel = rkt.maxFuel;
-  rkt.x = canvas.width/2;
-  rkt.y = canvas.height - 180;
-  rkt.vx=0;rkt.vy=0;rkt.angle=-Math.PI/2;rkt.zoom=1;
-  trajectory=[];
-  document.getElementById('ui-left').style.display='none';
+  flt.maxFuel=totalFuel()||100;
+  // world coords: rocket starts on Earth surface
+  flt.wx=0;
+  flt.wy=-(totalRocketHeight()/2); // center of rocket above ground
+  flt.vx=0; flt.vy=0;
+  flt.angle=-Math.PI/2;
+  flt.zoom=1; flt.zoomT=1; flt.flameT=0;
+  traj=[];
+  document.getElementById('panel').style.display='none';
   document.getElementById('btn-launch').style.display='none';
-  document.getElementById('btn-clear').style.display='none';
-  document.getElementById('telemetry').style.display='block';
-  document.getElementById('hud-staging').style.display='block';
-  document.getElementById('hud-map').style.display='block';
-  document.getElementById('hud-orient').style.display='block';
-  document.getElementById('controls-hint').style.display='block';
-  document.getElementById('mode-banner').style.display='flex';
-  canvas.width = window.innerWidth;
-  showMsg('LANCIA! — Frecce: sterzata | ↑: motori | SPAZIO: stadio | R: VAB',3000);
+  document.getElementById('btn-clr').style.display='none';
+  ['hud-tele','hud-nav','hud-map','hud-head'].forEach(id=>document.getElementById(id).style.display='block');
+  document.getElementById('flight-banner').style.display='flex';
+  cv.width=window.innerWidth; cv.height=window.innerHeight;
+  toast('LANCIA! — WASD/Frecce: manovra | SPAZIO: stadio | R: VAB',3500);
 }
-
-window.addEventListener('keydown', e=>{
+ 
+function totalRocketHeight(){
+  if(!ship.length) return 100;
+  const ys=ship.map(p=>p.ry); const ye=ship.map(p=>p.ry+p.h);
+  return Math.max(...ye)-Math.min(...ys);
+}
+ 
+// ═══════════════════════════════════════════════════════
+//  KEYS
+// ═══════════════════════════════════════════════════════
+window.addEventListener('keydown',e=>{
   keys[e.code]=true;
-  if(e.code==='Space'&&mode==='flight'){e.preventDefault();activateStage();}
-  if(e.code==='KeyR'&&mode==='flight') resetFlight();
+  if(e.code==='Space'&&mode==='flight'){e.preventDefault();stageSep();}
+  if(e.code==='KeyR'&&mode==='flight') returnVAB();
 });
-window.addEventListener('keyup', e=>keys[e.code]=false);
-
-function activateStage(){
-  let separated = false;
+window.addEventListener('keyup',e=>keys[e.code]=false);
+ 
+function stageSep(){
+  let sep=false;
   ship.forEach(p=>{
-    if(p.isSeparator&&p.active&&p.stageGroup===stageNum){ p.active=false; separated=true; }
-    if((p.isChute||p.isSolar)&&p.stageGroup===stageNum) p.state=1;
+    if(p.isSep&&p.active&&p.sg===stageN){p.active=false;sep=true;}
+    if((p.isChute||p.isSolar)&&p.sg===stageN) p.state=1;
   });
-  if(separated){ stageNum++; showMsg(`STADIO ${stageNum} SEPARATO`); }
-  else showMsg(`STADIO ${stageNum} — nessun separatore`);
-  document.getElementById('ui-stage').textContent=stageNum;
+  if(sep){stageN++;toast(`STADIO ${stageN} SEPARATO`);}
+  else toast('Nessun separatore in questo stadio');
+  document.getElementById('h-stage').textContent=stageN;
 }
-
-function resetFlight(){
-  mode='build'; ship=[]; stageNum=1;
-  document.getElementById('ui-left').style.display='flex';
+ 
+function returnVAB(){
+  mode='build'; ship=[]; stageN=1;
+  document.getElementById('panel').style.display='flex';
   document.getElementById('btn-launch').style.display='block';
-  document.getElementById('btn-clear').style.display='block';
-  ['telemetry','hud-staging','hud-map','hud-orient','controls-hint','mode-banner'].forEach(id=>{
-    const el=document.getElementById(id); el.style.display='none';
-  });
-  canvas.width=window.innerWidth-260;
-  showMsg('Ritorno VAB',2000);
+  document.getElementById('btn-clr').style.display='block';
+  ['hud-tele','hud-nav','hud-map','hud-head'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('flight-banner').style.display='none';
+  cv.width=window.innerWidth-250; cv.height=window.innerHeight;
+  toast('Ritorno VAB',2000);
 }
-
-const GRAVITY = 0.08;
-const ATMO_HEIGHT = 3000;
-const DRAG_COEF = 0.0005;
-
+ 
+// ═══════════════════════════════════════════════════════
+//  PHYSICS
+// ═══════════════════════════════════════════════════════
+const G_CONST = 9.81;
+const ATMO_MAX = 120000; // metres equivalent (scaled)
+const SCALE = 5; // world px per "metre" visual
+ 
+function altitudeM(){ return Math.max(0,-flt.wy/SCALE); }
+function atmosphereFraction(alt){ return Math.max(0,1-alt/ATMO_MAX); }
+ 
 function update(dt){
-  if(mode!=='build'){
-    canvas.width=window.innerWidth;
-    canvas.height=window.innerHeight;
-  }
   if(mode!=='flight') return;
-
-  const prevSpeed = Math.sqrt(rkt.vx**2+rkt.vy**2);
-
-  if(keys['ArrowLeft']||keys['KeyA'])  rkt.angle -= 0.045*dt*60;
-  if(keys['ArrowRight']||keys['KeyD']) rkt.angle += 0.045*dt*60;
-
-  let thrustTotal=0;
-  const fueled = ship.filter(p=>p.active&&p.fuel&&p.fuel>0);
-
-  if((keys['ArrowUp']||keys['KeyW'])&&fueled.length>0){
-    ship.forEach(p=>{
-      if(p.thrust&&p.active){ thrustTotal+=p.thrust; }
-    });
-    if(thrustTotal>0){
-      const burn = 0.08*dt*60;
-      let remaining = burn;
-      for(const p of fueled){
-        const take = Math.min(p.fuel, remaining);
-        p.fuel -= take; remaining -= take;
-        if(remaining<=0) break;
-      }
-      rkt.vx += Math.cos(rkt.angle)*thrustTotal*dt*60*0.4;
-      rkt.vy += Math.sin(rkt.angle)*thrustTotal*dt*60*0.4;
-      rkt.flameSize = 20+Math.random()*30*thrustTotal;
-    }
-  } else { rkt.flameSize *= 0.85; }
-
-  rkt.vy += GRAVITY*dt*60;
-  const spd = Math.sqrt(rkt.vx**2+rkt.vy**2);
-  const alt = Math.max(0,-worldY/5);
-  const atmoDensity = Math.max(0, 1-alt/ATMO_HEIGHT);
-  const drag = DRAG_COEF * spd * spd * atmoDensity * dt*60;
-  if(spd>0){ rkt.vx -= (rkt.vx/spd)*drag; rkt.vy -= (rkt.vy/spd)*drag; }
-
-  ship.forEach(p=>{ if(p.isChute&&p.state===1){ rkt.vx*=Math.pow(0.94,dt*60); rkt.vy*=Math.pow(0.94,dt*60); }});
-
-  rkt.x += rkt.vx*dt*60;
-  rkt.y += rkt.vy*dt*60;
-  worldY = rkt.y-(canvas.height-180);
-
-  trajectory.push({x:rkt.x,y:rkt.y});
-  if(trajectory.length>400) trajectory.shift();
-
-  const spdNow = Math.sqrt(rkt.vx**2+rkt.vy**2);
-  const accel = (spdNow-prevSpeed)/dt;
-  const altM = Math.floor(Math.max(0,-worldY/5));
-  const velMs = (spdNow*3).toFixed(1);
-  const activeFuel = fueled.reduce((s,p)=>s+p.fuel,0);
-
-  rkt.zoomTarget = Math.max(0.08, 1/(1+spdNow*0.04+altM/3000));
-  rkt.zoom += (rkt.zoomTarget-rkt.zoom)*0.04*dt*60;
-
-  const fuelPct = Math.max(0, activeFuel/rkt.maxFuel*100);
-  document.getElementById('ui-alt').textContent = altM>10000?`${(altM/1000).toFixed(1)} km`:`${altM} m`;
-  document.getElementById('ui-vel').textContent = `${velMs} m/s`;
-  document.getElementById('ui-accel').textContent = `${accel.toFixed(1)} m/s²`;
-  const aEl = document.getElementById('ui-accel');
-  aEl.className = accel>10?'hud-value warn':(accel>30?'hud-value danger':'hud-value');
-  document.getElementById('ui-fuel-bar').style.width = fuelPct+'%';
-  document.getElementById('ui-fuel-bar').style.background = fuelPct<20?'#f44':fuelPct<50?'#fa0':'#3af';
-  document.getElementById('ui-fuel-pct').textContent = fuelPct.toFixed(1)+'%';
-  document.getElementById('ui-thrust').textContent = (thrustTotal*100).toFixed(1)+' kN';
-
-  if(rkt.y > canvas.height-180){
-    rkt.y=canvas.height-180;
-    const impact = Math.abs(rkt.vy);
-    rkt.vy=0; rkt.vx*=0.7;
-    if(impact>3) showMsg(impact>8?'DISTRUTTO! — R per ripartire':'Atterraggio duro!',2000);
-    else showMsg('Atterraggio morbido!',2000);
-  }
-}
-
-function drawStars(){
-  ctx.fillStyle='#fff';
-  for(let i=0;i<200;i++){
-    const sx=(i*137.5)%canvas.width;
-    const sy=(i*97.3)%canvas.height;
-    const sz=i%3===0?1.5:0.8;
-    ctx.fillRect(sx,sy,sz,sz);
-  }
-}
-
-function drawGround(){
-  const groundY=canvas.height-180;
-  const alt=Math.max(0,-worldY/5);
-  const skyCol=alt>2000?'#000':alt>500?`rgb(0,${Math.floor(10+alt/500*5)},${Math.floor(20+alt/500*30)})`:'#0a1520';
-  ctx.fillStyle=skyCol;
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  if(alt<3000) drawStars();
-
-  ctx.save();
-  ctx.translate(canvas.width/2-rkt.x*rkt.zoom, groundY-rkt.y*rkt.zoom+worldY*rkt.zoom);
-  ctx.scale(rkt.zoom,rkt.zoom);
-  ctx.fillStyle='#1a1a1a';
-  ctx.fillRect(-50000,canvas.height-180,100000,2000);
-  for(let i=-5000;i<5000;i+=200){
-    ctx.strokeStyle='#252525';ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(i,canvas.height-180);ctx.lineTo(i,canvas.height+800);ctx.stroke();
-  }
-  ctx.fillStyle='#2a2a2a';
-  ctx.fillRect(-50000,canvas.height-180,100000,4);
-  for(let i=-5000;i<5000;i+=400){
-    ctx.fillStyle='#333';
-    ctx.fillRect(i-20,canvas.height-190,40,10);
-  }
-  ctx.restore();
-}
-
-function drawTrajectory(){
-  if(trajectory.length<2) return;
-  ctx.save();
-  ctx.translate(canvas.width/2-rkt.x*rkt.zoom, canvas.height/2-rkt.y*rkt.zoom);
-  ctx.scale(rkt.zoom,rkt.zoom);
-  ctx.beginPath();
-  ctx.strokeStyle='rgba(100,200,255,0.25)';
-  ctx.lineWidth=1/rkt.zoom;
-  ctx.moveTo(trajectory[0].x,trajectory[0].y);
-  for(const p of trajectory) ctx.lineTo(p.x,p.y);
-  ctx.stroke();
-  ctx.restore();
-}
-
-function drawShip(){
-  ctx.save();
-  if(mode==='flight'){
-    ctx.translate(canvas.width/2, canvas.height/2);
-    ctx.scale(rkt.zoom,rkt.zoom);
-    ctx.translate(-rkt.x,-rkt.y);
-    ctx.translate(rkt.x,rkt.y);
-    ctx.rotate(rkt.angle+Math.PI/2);
+ 
+  // rotation
+  if(keys['ArrowLeft']||keys['KeyA']) flt.angle-=0.06*dt*60;
+  if(keys['ArrowRight']||keys['KeyD']) flt.angle+=0.06*dt*60;
+ 
+  // thrust
+  let thrust=0;
+  const fueled=ship.filter(p=>p.active&&p.fuel&&p.fuel>0);
+  const hasEngines=ship.some(p=>p.thrust&&p.active);
+  const thrusting=(keys['ArrowUp']||keys['KeyW'])&&fueled.length>0&&hasEngines;
+ 
+  if(thrusting){
+    ship.forEach(p=>{if(p.thrust&&p.active)thrust+=p.thrust;});
+    const burn=0.06*dt*60;
+    let rem=burn;
+    for(const p of fueled){const t=Math.min(p.fuel,rem);p.fuel-=t;rem-=t;if(rem<=0)break;}
+    flt.vx+=Math.cos(flt.angle)*thrust*dt*60*3;
+    flt.vy+=Math.sin(flt.angle)*thrust*dt*60*3;
+    flt.flameT=Math.min(1,flt.flameT+dt*8);
   } else {
-    ctx.translate(canvas.width/2, canvas.height-180);
+    flt.flameT=Math.max(0,flt.flameT-dt*5);
   }
-
+ 
+  // gravity (simplified, toward earth center = downward)
+  const alt=altitudeM();
+  const gravScale=1/Math.max(1,(1+alt/100000)**2);
+  flt.vy+=G_CONST*gravScale*SCALE*dt;
+ 
+  // drag
+  const atmo=atmosphereFraction(alt);
+  const spd=Math.sqrt(flt.vx**2+flt.vy**2);
+  if(spd>0){
+    const drag=0.0008*spd*spd*atmo;
+    flt.vx-=(flt.vx/spd)*drag*dt*60;
+    flt.vy-=(flt.vy/spd)*drag*dt*60;
+  }
+ 
+  // chute
+  ship.forEach(p=>{if(p.isChute&&p.state===1){flt.vx*=Math.pow(0.90,dt*60);flt.vy*=Math.pow(0.90,dt*60);}});
+ 
+  // move
+  flt.wx+=flt.vx*dt;
+  flt.wy+=flt.vy*dt;
+ 
+  // ground collision (wy=0 is surface)
+  if(flt.wy>=0){
+    const impact=Math.abs(flt.vy);
+    flt.wy=0; flt.vy=0; flt.vx*=0.6;
+    if(impact>80) toast('💥 DISTRUTTO! — R per ripartire',2500);
+    else if(impact>20) toast('Atterraggio duro!',2000);
+    else toast('Atterraggio morbido! 🎉',2000);
+  }
+ 
+  // zoom
+  const spdNow=Math.sqrt(flt.vx**2+flt.vy**2);
+  flt.zoomT=Math.max(0.04,1-spdNow/400-alt/200000);
+  flt.zoom+=(flt.zoomT-flt.zoom)*0.03*dt*60;
+ 
+  // traj
+  traj.push({x:flt.wx,y:flt.wy});
+  if(traj.length>600) traj.shift();
+ 
+  // HUD update
+  const altM=Math.floor(alt);
+  document.getElementById('h-alt').textContent=altM>10000?`${(altM/1000).toFixed(2)} km`:`${altM} m`;
+  document.getElementById('h-vel').textContent=`${(spdNow/SCALE).toFixed(1)} m/s`;
+  const prevSpeed=spd; const accel=(spdNow-prevSpeed)/Math.max(dt,0.001);
+  document.getElementById('h-acc').textContent=`${(Math.abs(accel)/SCALE).toFixed(1)} m/s²`;
+ 
+  const totF=fueled.reduce((s,p)=>s+p.fuel,0);
+  const fPct=Math.max(0,totF/flt.maxFuel*100);
+  document.getElementById('h-fbar').style.width=fPct+'%';
+  document.getElementById('h-fbar').style.background=fPct<20?'#f44':fPct<50?'#fc0':'#4cff4c';
+  document.getElementById('h-fpct').textContent=fPct.toFixed(1)+'%';
+  document.getElementById('h-thrust').textContent=(thrust*100).toFixed(0)+' kN';
+ 
+  const atmoP=(atmo*100).toFixed(0);
+  document.getElementById('h-atmo').textContent=atmoP+'%';
+  atmoAlpha=atmo;
+ 
+  const deg=((flt.angle+Math.PI/2)*180/Math.PI%360+360)%360;
+  document.getElementById('h-heading').textContent=`HDG ${deg.toFixed(0).padStart(3,'0')}° | ${(spdNow/SCALE).toFixed(0)} m/s`;
+}
+ 
+// ═══════════════════════════════════════════════════════
+//  STARS (pre-generate)
+// ═══════════════════════════════════════════════════════
+const STARS=[];
+for(let i=0;i<320;i++) STARS.push({x:Math.random(),y:Math.random(),r:Math.random()<0.05?1.4:0.7,a:0.4+Math.random()*0.6});
+ 
+// ═══════════════════════════════════════════════════════
+//  DRAW
+// ═══════════════════════════════════════════════════════
+function drawScene(){
+  const W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+ 
+  // ── background / sky ──
+  const alt=altitudeM();
+  const skyT=mode==='build'?1:Math.max(0,1-alt/ATMO_MAX);
+  const spaceCol='#000';
+  const skyCol=`rgb(${Math.floor(10+skyT*10)},${Math.floor(30+skyT*60)},${Math.floor(60+skyT*100)})`;
+  const bg=ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,spaceCol);
+  bg.addColorStop(Math.min(1,skyT*0.7),skyT>0.1?skyCol:spaceCol);
+  if(skyT>0.3) bg.addColorStop(1,`rgb(${Math.floor(20+skyT*30)},${Math.floor(80+skyT*80)},${Math.floor(100+skyT*100)})`);
+  ctx.fillStyle=bg;
+  ctx.fillRect(0,0,W,H);
+ 
+  // ── stars (fade with sky) ──
+  const starAlpha=mode==='build'?1:Math.max(0,1-skyT*1.2);
+  if(starAlpha>0){
+    STARS.forEach(s=>{
+      ctx.fillStyle=`rgba(255,255,255,${s.a*starAlpha})`;
+      ctx.fillRect(s.x*W,s.y*H,s.r,s.r);
+    });
+  }
+ 
+  if(mode==='build'){
+    drawBuildScene();
+  } else {
+    drawFlightScene();
+  }
+}
+ 
+// ── BUILD ──
+function drawBuildScene(){
+  const W=cv.width,H=cv.height;
+  const [ox,oy]=buildOrigin();
+ 
+  // grid
+  ctx.strokeStyle='rgba(0,80,0,0.22)';
+  ctx.lineWidth=1;
+  const gs=40;
+  for(let x=ox%gs;x<W;x+=gs){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=oy%gs;y<H;y+=gs){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+ 
+  // ground platform
+  ctx.fillStyle='#0d1a0d';
+  ctx.fillRect(0,oy,W,H-oy);
+  ctx.fillStyle='#1a3a1a';
+  ctx.fillRect(0,oy,W,3);
+  // launch tower stripes
+  for(let xx=ox-100;xx<ox+100;xx+=40){
+    ctx.fillStyle='rgba(255,100,0,0.2)';
+    ctx.fillRect(xx,oy-300,4,300);
+  }
+  // center axis
+  ctx.setLineDash([5,5]);
+  ctx.strokeStyle='rgba(0,180,0,0.12)';
+  ctx.beginPath();ctx.moveTo(ox,0);ctx.lineTo(ox,oy);ctx.stroke();
+  ctx.setLineDash([]);
+ 
+  // ship
+  ctx.save();ctx.translate(ox,oy);
+  drawShipParts(false);
+  ctx.restore();
+ 
+  // bottom info
+  ctx.fillStyle='rgba(0,80,0,0.3)';
+  ctx.fillRect(0,H-24,W,24);
+  ctx.fillStyle='#3a7a3a';ctx.font='9px Courier New';
+  ctx.fillText(`PARTI: ${ship.length}  |  MASSA: ${totalMass().toFixed(1)}t  |  FUEL: ${totalFuel().toFixed(0)}u  |  CLICK: posiziona  |  TASTO DX: rimuovi  |  TRASCINA: sposta`,10,H-9);
+}
+ 
+// ── FLIGHT ──
+function drawFlightScene(){
+  const W=cv.width,H=cv.height;
+  // camera: rocket stays at screen center
+  const camX=W/2;
+  const camY=H/2;
+ 
+  ctx.save();
+  ctx.translate(camX,camY);
+  ctx.scale(flt.zoom,flt.zoom);
+  ctx.translate(-flt.wx,-flt.wy);
+ 
+  // ── Earth surface & terrain ──
+  drawTerrain();
+ 
+  // ── Distant planets ──
+  drawPlanets();
+ 
+  // ── Atmosphere glow ──
+  drawAtmosphere();
+ 
+  // ── Trajectory ──
+  if(traj.length>2){
+    ctx.beginPath();
+    ctx.strokeStyle='rgba(0,200,100,0.25)';
+    ctx.lineWidth=1.5/flt.zoom;
+    ctx.moveTo(traj[0].x,traj[0].y);
+    traj.forEach(p=>ctx.lineTo(p.x,p.y));
+    ctx.stroke();
+  }
+ 
+  // ── Rocket ──
+  ctx.save();
+  ctx.translate(flt.wx,flt.wy);
+  ctx.rotate(flt.angle+Math.PI/2);
+  drawShipParts(true);
+  ctx.restore();
+ 
+  ctx.restore();
+ 
+  // ── minimap ──
+  drawMinimap();
+}
+ 
+function drawTerrain(){
+  // Ground plane at wy=0
+  const groundY=0;
+  // vast flat terrain
+  ctx.fillStyle='#0d1a08';
+  ctx.fillRect(-2000000,groundY,4000000,600000);
+  // surface line
+  ctx.strokeStyle='#1a3a10';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(-2000000,groundY);ctx.lineTo(2000000,groundY);ctx.stroke();
+  // grass tufts every 200px world units
+  ctx.strokeStyle='#1a4010';ctx.lineWidth=1.5;
+  for(let x=-20000;x<20000;x+=200){
+    ctx.beginPath();ctx.moveTo(x,groundY);ctx.lineTo(x-10,groundY-30);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x,groundY);ctx.lineTo(x+10,groundY-30);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x,groundY);ctx.lineTo(x,groundY-40);ctx.stroke();
+  }
+  // Launch pad
+  ctx.fillStyle='#2a3a2a';
+  ctx.fillRect(-80,groundY-8,160,8);
+  ctx.fillStyle='#3a4a3a';
+  ctx.fillRect(-60,groundY-4,120,4);
+  // launch tower
+  ctx.strokeStyle='#3a5a3a';ctx.lineWidth=4;
+  ctx.beginPath();ctx.moveTo(-100,groundY);ctx.lineTo(-100,groundY-600);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(100,groundY);ctx.lineTo(100,groundY-600);ctx.stroke();
+  for(let y=0;y>-600;y-=80){
+    ctx.strokeStyle='#2a4a2a';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(-100,groundY+y);ctx.lineTo(100,groundY+y);ctx.stroke();
+  }
+}
+ 
+function drawPlanets(){
+  // Luna — visible in distance
+  const luna=PLANETS[1];
+  ctx.save();
+  ctx.globalAlpha=0.7;
+  const gr=ctx.createRadialGradient(luna.cx,luna.cy,0,luna.cx,luna.cy,luna.r);
+  gr.addColorStop(0,'#aaa');gr.addColorStop(0.7,'#888');gr.addColorStop(1,'#444');
+  ctx.fillStyle=gr;
+  ctx.beginPath();ctx.arc(luna.cx,luna.cy,luna.r,0,Math.PI*2);ctx.fill();
+  // craters
+  ctx.fillStyle='rgba(0,0,0,0.3)';
+  [[luna.cx-50000,luna.cy+30000,15000],[luna.cx+80000,luna.cy-20000,20000],[luna.cx-20000,luna.cy-60000,10000]].forEach(([cx,cy,r])=>{
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
+  });
+  ctx.globalAlpha=1;
+  ctx.restore();
+ 
+  // Marte
+  const marte=PLANETS[2];
+  ctx.save();
+  ctx.globalAlpha=0.65;
+  const gr2=ctx.createRadialGradient(marte.cx,marte.cy,0,marte.cx,marte.cy,marte.r);
+  gr2.addColorStop(0,'#d4552a');gr2.addColorStop(0.7,'#b03a15');gr2.addColorStop(1,'#7a2208');
+  ctx.fillStyle=gr2;
+  ctx.beginPath();ctx.arc(marte.cx,marte.cy,marte.r,0,Math.PI*2);ctx.fill();
+  // atmo mars
+  const ga=ctx.createRadialGradient(marte.cx,marte.cy,marte.r*0.95,marte.cx,marte.cy,marte.r*1.05);
+  ga.addColorStop(0,'rgba(210,100,50,0.3)');ga.addColorStop(1,'rgba(210,100,50,0)');
+  ctx.fillStyle=ga;
+  ctx.beginPath();ctx.arc(marte.cx,marte.cy,marte.r*1.05,0,Math.PI*2);ctx.fill();
+  ctx.globalAlpha=1;
+  ctx.restore();
+}
+ 
+function drawAtmosphere(){
+  const earth=PLANETS[0];
+  // atmosphere glow around Earth (viewed from above)
+  const atmoR=earth.r+ATMO_MAX*SCALE;
+  const ga=ctx.createRadialGradient(earth.cx,earth.cy,earth.r,earth.cx,earth.cy,atmoR);
+  ga.addColorStop(0,'rgba(80,140,255,0.22)');
+  ga.addColorStop(0.5,'rgba(80,140,255,0.07)');
+  ga.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=ga;
+  ctx.beginPath();ctx.arc(earth.cx,earth.cy,atmoR,0,Math.PI*2);ctx.fill();
+}
+ 
+// ═══════════════════════════════════════════════════════
+//  DRAW SHIP PARTS
+// ═══════════════════════════════════════════════════════
+function drawShipParts(inFlight){
   ship.forEach(p=>{
     if(!p.active) return;
-    ctx.fillStyle=p.color;
-    ctx.strokeStyle='rgba(255,255,255,0.15)';
+    // part body
+    ctx.fillStyle=p.col;
+    ctx.strokeStyle='rgba(255,255,255,0.1)';
     ctx.lineWidth=1;
-    ctx.fillRect(p.relX,p.relY,p.w,p.h);
-    ctx.strokeRect(p.relX,p.relY,p.w,p.h);
-
+    ctx.fillRect(p.rx,p.ry,p.w,p.h);
+    ctx.strokeRect(p.rx,p.ry,p.w,p.h);
+ 
+    // special renders
     if(p.isShield){
-      ctx.fillStyle='#8d5524';
-      ctx.fillRect(p.relX,p.relY,p.w,p.h/2);
+      const sg=ctx.createLinearGradient(p.rx,p.ry,p.rx,p.ry+p.h);
+      sg.addColorStop(0,'#8d5524');sg.addColorStop(1,'#3a1f00');
+      ctx.fillStyle=sg;ctx.fillRect(p.rx,p.ry,p.w,p.h/2);
     }
-
-    if(p.thrust&&(keys['ArrowUp']||keys['KeyW'])&&mode==='flight'&&rkt.flameSize>0){
-      const fw=p.w*0.5;
-      const fx=p.relX+(p.w-fw)/2;
-      ctx.fillStyle=`rgba(255,${100+Math.random()*100},0,0.9)`;
-      ctx.fillRect(fx,p.relY+p.h,fw,rkt.flameSize*(0.7+Math.random()*0.3));
-      ctx.fillStyle=`rgba(255,255,200,0.7)`;
-      ctx.fillRect(fx+fw*0.2,p.relY+p.h,fw*0.6,rkt.flameSize*0.4);
+    if(p.type==='nose'||p.type==='fairing'){
+      // pointed top
+      ctx.fillStyle=p.col;
+      ctx.beginPath();ctx.moveTo(p.rx,p.ry);ctx.lineTo(p.rx+p.w/2,p.ry-p.h*0.6);ctx.lineTo(p.rx+p.w,p.ry);ctx.closePath();ctx.fill();
     }
-
+ 
+    // flame
+    if(p.thrust&&inFlight&&flt.flameT>0){
+      const fw=p.w*0.55;
+      const fx=p.rx+(p.w-fw)/2;
+      const fh=(30+flt.flameT*60)*(0.7+Math.random()*0.6);
+      const fg=ctx.createLinearGradient(fx,p.ry+p.h,fx,p.ry+p.h+fh);
+      fg.addColorStop(0,'rgba(255,255,200,0.95)');
+      fg.addColorStop(0.3,'rgba(255,140,0,0.8)');
+      fg.addColorStop(0.7,'rgba(255,60,0,0.5)');
+      fg.addColorStop(1,'rgba(255,0,0,0)');
+      ctx.fillStyle=fg;
+      ctx.beginPath();
+      ctx.moveTo(fx,p.ry+p.h);
+      ctx.lineTo(fx+fw/2,p.ry+p.h+fh);
+      ctx.lineTo(fx+fw,p.ry+p.h);
+      ctx.closePath();ctx.fill();
+    }
+ 
+    // chute deployed
     if(p.isChute&&p.state===1){
-      ctx.fillStyle='rgba(200,60,60,0.85)';
-      ctx.beginPath();ctx.arc(p.relX+p.w/2,p.relY-55,45,Math.PI,0);ctx.fill();
-      ctx.strokeStyle='rgba(255,255,255,0.6)';ctx.lineWidth=0.8;
-      [-15,0,15].forEach(ox=>{
-        ctx.beginPath();ctx.moveTo(p.relX+p.w/2+ox,p.relY-55);ctx.lineTo(p.relX+p.w/2,p.relY);ctx.stroke();
+      ctx.fillStyle='rgba(200,50,50,0.88)';
+      ctx.beginPath();ctx.arc(p.rx+p.w/2,p.ry-52,48,Math.PI,0);ctx.fill();
+      ctx.strokeStyle='rgba(255,200,200,0.7)';ctx.lineWidth=0.8;
+      [-18,0,18].forEach(ox=>{
+        ctx.beginPath();ctx.moveTo(p.rx+p.w/2+ox,p.ry-52);ctx.lineTo(p.rx+p.w/2,p.ry);ctx.stroke();
       });
+      // additional chute lines
+      ctx.strokeStyle='rgba(200,150,150,0.4)';
+      ctx.beginPath();ctx.arc(p.rx+p.w/2,p.ry-52,48,Math.PI,0);ctx.stroke();
     }
+ 
+    // solar panels open
     if(p.isSolar&&p.state===1){
-      ctx.fillStyle='#1a5276';
-      ctx.fillRect(p.relX-50,p.relY+5,50,12);
-      ctx.fillRect(p.relX+p.w,p.relY+5,50,12);
-      ctx.strokeStyle='#2e86c1';ctx.lineWidth=0.5;
-      for(let i=0;i<5;i++){
-        ctx.beginPath();ctx.moveTo(p.relX-50+i*10,p.relY+5);ctx.lineTo(p.relX-50+i*10,p.relY+17);ctx.stroke();
-        ctx.beginPath();ctx.moveTo(p.relX+p.w+i*10,p.relY+5);ctx.lineTo(p.relX+p.w+i*10,p.relY+17);ctx.stroke();
+      ctx.fillStyle='#154360';
+      ctx.fillRect(p.rx-55,p.ry+8,55,14);
+      ctx.fillRect(p.rx+p.w,p.ry+8,55,14);
+      ctx.strokeStyle='#1a6aa0';ctx.lineWidth=0.8;
+      for(let i=0;i<6;i++){
+        const lx=p.rx-55+i*9;
+        ctx.beginPath();ctx.moveTo(lx,p.ry+8);ctx.lineTo(lx,p.ry+22);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(p.rx+p.w+i*9,p.ry+8);ctx.lineTo(p.rx+p.w+i*9,p.ry+22);ctx.stroke();
       }
     }
   });
-
-  if(mode==='build'){
-    ctx.strokeStyle='rgba(100,200,255,0.08)';
-    ctx.setLineDash([4,4]);
-    ctx.beginPath();ctx.moveTo(0,-1000);ctx.lineTo(0,0);ctx.stroke();
-    ctx.setLineDash([]);
-  }
-  ctx.restore();
 }
-
-function drawAttitudeIndicator(){
-  attCanvas.width=190; attCanvas.height=30;
-  attCtx.fillStyle='#050d15';
-  attCtx.fillRect(0,0,190,30);
-  const deg=((rkt.angle+Math.PI/2)*180/Math.PI%360+360)%360;
-  attCtx.fillStyle='#3af';attCtx.font='10px monospace';
-  attCtx.textAlign='center';attCtx.fillText(`${deg.toFixed(1)}°`,95,11);
-  attCtx.fillStyle='rgba(100,200,255,0.3)';
-  attCtx.fillRect(0,16,190,8);
-  const vxd=Math.cos(rkt.angle);
-  const vyd=Math.sin(rkt.angle);
-  attCtx.fillStyle='#ff0';
-  attCtx.beginPath();attCtx.arc(95+vxd*40,20+vyd*4,3,0,Math.PI*2);attCtx.fill();
-}
-
-function drawMap(){
-  mapCanvas.width=110;mapCanvas.height=110;
-  mapCtx.fillStyle='#050d15';
-  mapCtx.fillRect(0,0,110,110);
-  mapCtx.strokeStyle='#1a3a5a';mapCtx.lineWidth=0.5;
-  for(let i=0;i<=110;i+=22){
-    mapCtx.beginPath();mapCtx.moveTo(i,0);mapCtx.lineTo(i,110);mapCtx.stroke();
-    mapCtx.beginPath();mapCtx.moveTo(0,i);mapCtx.lineTo(110,i);mapCtx.stroke();
+ 
+// ═══════════════════════════════════════════════════════
+//  MINIMAP
+// ═══════════════════════════════════════════════════════
+function drawMinimap(){
+  const W2=103,H2=103;
+  mm.width=W2;mm.height=H2;
+  mctx.fillStyle='#010a01';
+  mctx.fillRect(0,0,W2,H2);
+  mctx.strokeStyle='#0d2a0d';mctx.lineWidth=0.5;
+  for(let i=0;i<W2;i+=20){
+    mctx.beginPath();mctx.moveTo(i,0);mctx.lineTo(i,H2);mctx.stroke();
+    mctx.beginPath();mctx.moveTo(0,i);mctx.lineTo(W2,i);mctx.stroke();
   }
-  mapCtx.fillStyle='#2a4a2a';
-  mapCtx.fillRect(0,90,110,20);
-  const scale=1/300;
-  mapCtx.strokeStyle='rgba(100,200,255,0.4)';mapCtx.lineWidth=1;
-  if(trajectory.length>2){
-    mapCtx.beginPath();
-    trajectory.forEach((p,i)=>{
-      const tx=55+(p.x-rkt.x)*scale;
-      const ty=70+(p.y-rkt.y)*scale;
-      i===0?mapCtx.moveTo(tx,ty):mapCtx.lineTo(tx,ty);
+  // earth surface
+  mctx.fillStyle='#0d2a08';
+  mctx.fillRect(0,H2-15,W2,15);
+  // scale: 1 mm px = 2000 world px
+  const scale=1/2000;
+  // traj
+  if(traj.length>2){
+    mctx.beginPath();mctx.strokeStyle='rgba(0,200,80,0.5)';mctx.lineWidth=1;
+    traj.forEach((p,i)=>{
+      const tx=W2/2+(p.x-flt.wx)*scale;
+      const ty=H2/2+(p.y-flt.wy)*scale;
+      i===0?mctx.moveTo(tx,ty):mctx.lineTo(tx,ty);
     });
-    mapCtx.stroke();
+    mctx.stroke();
   }
-  mapCtx.fillStyle='#ff0';
-  mapCtx.beginPath();mapCtx.arc(55,70,3,0,Math.PI*2);mapCtx.fill();
-  mapCtx.fillStyle='#3af';mapCtx.font='8px monospace';mapCtx.textAlign='left';
-  mapCtx.fillText('MAPPA',3,9);
+  // rocket dot
+  mctx.fillStyle='#4cff4c';
+  mctx.beginPath();mctx.arc(W2/2,H2/2,2.5,0,Math.PI*2);mctx.fill();
+  // label
+  mctx.fillStyle='#2a5a2a';mctx.font='7px Courier New';mctx.textAlign='left';
+  mctx.fillText('MAPPA',3,8);
 }
-
-function draw(ts){
-  const dt = Math.min((ts-lastFrame)/1000,0.05);
-  lastFrame=ts;
+ 
+// ═══════════════════════════════════════════════════════
+//  MAIN LOOP
+// ═══════════════════════════════════════════════════════
+function resize(){
+  if(mode==='build'){cv.width=window.innerWidth-250;cv.height=window.innerHeight;}
+  else{cv.width=window.innerWidth;cv.height=window.innerHeight;}
+}
+window.addEventListener('resize',resize);
+resize();
+ 
+function loop(ts){
+  const dt=Math.min((ts-lastT)/1000,0.05);
+  lastT=ts;
   update(dt);
-
-  if(mode==='build'){
-    canvas.width=window.innerWidth-260;
-    canvas.height=window.innerHeight;
-    ctx.fillStyle='#080808';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    for(let i=0;i<100;i++){
-      ctx.fillStyle='rgba(255,255,255,0.4)';
-      ctx.fillRect((i*137)%canvas.width,(i*97)%canvas.height,i%3?0.5:1,i%3?0.5:1);
-    }
-    ctx.fillStyle='#1a1a1a';
-    ctx.fillRect(0,canvas.height-180,canvas.width,180);
-    ctx.fillStyle='#2a2a2a';
-    ctx.fillRect(0,canvas.height-180,canvas.width,4);
-    drawShip();
-    ctx.fillStyle='#444';ctx.font='10px monospace';
-    ctx.fillText(`PARTI: ${ship.length}  |  MASSA: ${calcTotalMass().toFixed(1)} t  |  FUEL: ${calcTotalFuel().toFixed(0)} u  |  TASTO DX: rimuovi parte`,14,canvas.height-14);
-  } else {
-    drawGround();
-    drawTrajectory();
-    drawShip();
-    drawAttitudeIndicator();
-    drawMap();
-  }
-  requestAnimationFrame(draw);
+  drawScene();
+  requestAnimationFrame(loop);
 }
-requestAnimationFrame(draw);
+requestAnimationFrame(loop);
 </script>
 </body>
 </html>
