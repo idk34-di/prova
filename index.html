@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3.0</title>
+<title>:3</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600&display=swap');
-
+ 
   :root {
     --bg: #0a0e14; --surface: #111820; --surface2: #1a2330;
     --border: #1e3040; --accent: #5bc8e8; --accent2: #00ff88;
@@ -17,30 +17,30 @@
     --font-mono: 'Share Tech Mono', monospace;
     --font-ui: 'Rajdhani', sans-serif;
   }
-
+ 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
   body {
     background: var(--bg); color: var(--text);
     font-family: var(--font-ui); min-height: 100vh;
     overflow-x: hidden; transition: background .4s, color .4s;
   }
-
+ 
   header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
     background: var(--surface);
   }
-
+ 
   .header-right { display: flex; align-items: center; gap: 12px; }
-
+ 
   .rec-indicator {
     width: 8px; height: 8px; border-radius: 50%;
     background: var(--accent3); opacity: 0; transition: opacity .3s;
   }
   .rec-indicator.active { opacity: 1; animation: blink 1s infinite; }
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
-
+ 
   .theme-picker { display: flex; gap: 6px; align-items: center; }
   .theme-dot {
     width: 18px; height: 18px; border-radius: 50%; cursor: pointer;
@@ -52,12 +52,12 @@
     font-family: var(--font-mono); font-size: 9px; color: var(--text2);
     letter-spacing: 1px; margin-right: 4px; white-space: nowrap;
   }
-
+ 
   main {
     max-width: 860px; margin: 0 auto;
     padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 1rem;
   }
-
+ 
   .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
   .tab {
     padding: 5px 14px; border-radius: 2px; border: 1px solid var(--border);
@@ -66,12 +66,12 @@
   }
   .tab:hover { border-color: var(--accent); color: var(--accent); }
   .tab.active { background: var(--accent); color: var(--pad-text); border-color: var(--accent); }
-
+ 
   .device {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 4px; padding: 1.25rem;
   }
-
+ 
   .screen {
     background: var(--screen-bg); border: 1px solid #002233;
     border-radius: 3px; padding: 10px 14px; margin-bottom: 1.25rem;
@@ -84,7 +84,7 @@
   .screen-info { color: var(--screen-dim); font-size: 10px; letter-spacing: 1px; }
   .screen-info.on { color: var(--screen-text); }
   .screen-info.rec-on { color: var(--accent3); }
-
+ 
   .pads-grid {
     display: grid; grid-template-columns: repeat(4, 1fr);
     gap: 8px; margin-bottom: 1.25rem;
@@ -99,7 +99,7 @@
   .pad:active, .pad.flash { transform: scale(.9); filter: brightness(1.5); }
   .pad-note { font-family: var(--font-mono); font-size: 13px; font-weight: bold; }
   .pad-sub { font-family: var(--font-mono); font-size: 9px; opacity: .6; }
-
+ 
   .step-section { margin-bottom: 1rem; }
   .step-track-wrap { margin-bottom: 5px; }
   .step-track-label {
@@ -114,7 +114,7 @@
   .step.on { background: var(--step-on); border-color: var(--step-on); }
   .step.current { background: var(--step-cur); border-color: var(--step-cur); }
   .step.on.current { background: var(--step-cur); }
-
+ 
   .controls-panel { border-top: 1px solid var(--border); padding-top: 1rem; margin-top: .5rem; }
   .knobs-row { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; margin-bottom: 1rem; }
   .knob-group { display: flex; flex-direction: column; align-items: center; gap: 5px; }
@@ -130,7 +130,7 @@
   }
   .knob-val { font-family: var(--font-mono); font-size: 10px; color: var(--accent); }
   .knob-label { font-family: var(--font-mono); font-size: 9px; color: var(--text2); letter-spacing: 1px; }
-
+ 
   .fx-section { display: flex; flex-direction: column; gap: 5px; }
   .fx-label { font-family: var(--font-mono); font-size: 9px; color: var(--text2); letter-spacing: 1px; }
   .fx-chain { display: flex; gap: 5px; flex-wrap: wrap; }
@@ -140,7 +140,7 @@
     background: transparent; color: var(--accent); letter-spacing: 1px; transition: all .1s;
   }
   .fx-btn.active { background: var(--accent); color: var(--pad-text); }
-
+ 
   .btn-row { display: flex; gap: 6px; margin-bottom: 1rem; flex-wrap: wrap; }
   .btn {
     padding: 7px 16px; border-radius: 2px; border: 1px solid var(--border);
@@ -156,12 +156,12 @@
   .btn.save-btn:hover { background: var(--accent2); color: #001a10; }
   .btn.load-btn { border-color: var(--accent); color: var(--accent); }
   .btn.load-btn:hover { background: var(--accent); color: var(--pad-text); }
-
+ 
   .tempo-row { display: flex; align-items: center; gap: 10px; margin-bottom: .75rem; }
   .tempo-row label { font-family: var(--font-mono); font-size: 10px; color: var(--text2); letter-spacing: 1px; white-space: nowrap; }
   .tempo-row input[type=range] { flex: 1; accent-color: var(--accent); }
   .tempo-val { font-family: var(--font-mono); font-size: 12px; color: var(--text); min-width: 60px; text-align: right; }
-
+ 
   .steps-row { display: flex; align-items: center; gap: 10px; margin-bottom: .75rem; }
   .steps-row label { font-family: var(--font-mono); font-size: 10px; color: var(--text2); letter-spacing: 1px; white-space: nowrap; }
   .steps-row select {
@@ -169,7 +169,7 @@
     color: var(--accent); font-family: var(--font-mono); font-size: 11px;
     padding: 4px 8px; border-radius: 2px; cursor: pointer;
   }
-
+ 
   .songs-section {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 4px; padding: 1rem 1.25rem;
@@ -198,7 +198,7 @@
   .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
   .btn-sm.danger:hover { border-color: var(--accent3); color: var(--accent3); }
   .btn-sm.load:hover { border-color: var(--accent2); color: var(--accent2); }
-
+ 
   .toast {
     position: fixed; bottom: 24px; left: 50%;
     transform: translateX(-50%) translateY(60px);
@@ -209,7 +209,7 @@
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
   .toast.error { background: var(--accent3); color: #fff; }
-
+ 
   .add-sound-panel {
     border: 1px solid var(--border); border-radius: 4px;
     padding: 1rem; margin-top: 1rem; background: var(--surface2);
@@ -246,9 +246,9 @@
     font-size: 10px; cursor: pointer; letter-spacing: 1px; transition: all .1s;
   }
   .preview-btn:hover, .preview-btn.playing { background: var(--accent); color: var(--pad-text); }
-
+ 
   #file-input-song { display: none; }
-
+ 
   @media (max-width: 500px) {
     .pads-grid { gap: 5px; }
     .pad { height: 52px; }
@@ -259,12 +259,15 @@
     .theme-label { display: none; }
   }
 </style>
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content=":3">
 </head>
 <body>
-
+ 
 <div class="toast" id="toast"></div>
 <input type="file" id="file-input-song" accept=".json" onchange="importSongFile(event)">
-
+ 
 <header>
   <div class="theme-picker">
     <span class="theme-label">TEMA</span>
@@ -274,11 +277,11 @@
     <div class="rec-indicator" id="rec-dot"></div>
   </div>
 </header>
-
+ 
 <main>
   <div class="tabs" id="tabs"></div>
   <div id="device-container"></div>
-
+ 
   <div class="songs-section">
     <div class="songs-title">♪ CANZONI SALVATE</div>
     <div class="songs-row">
@@ -289,7 +292,7 @@
     <div class="songs-list" id="songs-list"></div>
   </div>
 </main>
-
+ 
 <script>
 // ═══════════════ TEMI ═══════════════
 const THEMES = [
@@ -300,7 +303,7 @@ const THEMES = [
   { name:'Matrix',      dot:'#00ff41', vars:{'--bg':'#000000','--surface':'#030f03','--surface2':'#071807','--border':'#0a280a','--accent':'#00ff41','--accent2':'#00cc33','--accent3':'#ff0000','--text':'#a0ffb0','--text2':'#1a5a1a','--screen-bg':'#000000','--screen-text':'#00ff41','--screen-dim':'#003300','--pad':'#00ff41','--pad-text':'#000000','--step-on':'#00ff41','--step-off':'#071807','--step-cur':'#00cc33'}},
   { name:'Pink Wave',   dot:'#ff6eb4', vars:{'--bg':'#140a12','--surface':'#201020','--surface2':'#2e1530','--border':'#4a1a45','--accent':'#ff6eb4','--accent2':'#ff9de2','--accent3':'#ff3860','--text':'#f0c8e8','--text2':'#7a3a70','--screen-bg':'#0d0510','--screen-text':'#ff6eb4','--screen-dim':'#4a0a35','--pad':'#ff6eb4','--pad-text':'#140a12','--step-on':'#ff6eb4','--step-off':'#2e1530','--step-cur':'#ff9de2'}},
 ];
-
+ 
 let activeTheme = 0;
 function applyTheme(idx) {
   activeTheme = idx;
@@ -318,12 +321,12 @@ const savedTheme = parseInt(localStorage.getItem('beatTheme') || '0');
 buildThemePicker();
 applyTheme(savedTheme);
 </script>
-
+ 
 <script>
 // ═══════════════ AUDIO ENGINE ═══════════════
 const AC = window.AudioContext || window.webkitAudioContext;
 let ctx=null, masterGain=null, filterNode=null, reverbMix=null, delayMix=null, delayFb=null;
-
+ 
 function getCtx() {
   if (!ctx) {
     ctx = new AC();
@@ -345,7 +348,7 @@ function getCtx() {
   return ctx;
 }
 function out(node){node.connect(masterGain);}
-
+ 
 function makeDrum(freq,dur,noiseAmt,attack){
   const c=getCtx(),t=c.currentTime,o=c.createOscillator(),g=c.createGain();
   o.frequency.setValueAtTime(freq,t); o.frequency.exponentialRampToValueAtTime(20,t+dur);
@@ -364,7 +367,7 @@ function makeZap(){const c=getCtx(),t=c.currentTime,o=c.createOscillator(),g=c.c
 function makePew(){const c=getCtx(),t=c.currentTime,o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(1500,t);o.frequency.exponentialRampToValueAtTime(200,t+0.3);g.gain.setValueAtTime(0.3,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.3);o.connect(g);out(g);o.start(t);o.stop(t+0.3);}
 function makeBip(f){const c=getCtx(),t=c.currentTime,o=c.createOscillator(),g=c.createGain();o.type='square';o.frequency.value=f;g.gain.setValueAtTime(0.2,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.1);o.connect(g);out(g);o.start(t);o.stop(t+0.1);}
 function makeCustom(s){const c=getCtx(),t=c.currentTime,o=c.createOscillator(),g=c.createGain(),f=c.createBiquadFilter();o.type=s.wave||'sine';o.frequency.value=s.freq||440;if(s.sweep)o.frequency.exponentialRampToValueAtTime(s.sweep,t+(s.dur||0.3));f.type='lowpass';f.frequency.value=s.filter||5000;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.4,t+0.01);g.gain.exponentialRampToValueAtTime(0.001,t+(s.dur||0.3));o.connect(f);f.connect(g);out(g);o.start(t);o.stop(t+(s.dur||0.3));}
-
+ 
 // ═══════════════ DEVICES ═══════════════
 const DEVICES = [
   {id:'drum',name:'DRUM',pads:[
@@ -427,7 +430,7 @@ const DEVICES = [
   ]},
   {id:'custom',name:'CUSTOM',pads:[]},
 ];
-
+ 
 // ═══════════════ STATE ═══════════════
 const state = {
   activeDevice:0, bpm:120, playing:false, rec:false, currentStep:0, numSteps:16,
@@ -436,12 +439,12 @@ const state = {
   customForm:{freq:440,sweep:null,dur:0.3,filter:5000,wave:'sine'}
 };
 DEVICES.forEach(d=>{state.sequences[d.id]=Array(8).fill(null).map(()=>Array(state.numSteps).fill(false));});
-
+ 
 // ═══════════════ SONGS ═══════════════
 let savedSongs=[];
 function loadSongsFromStorage(){try{const r=localStorage.getItem('beatSongs');if(r)savedSongs=JSON.parse(r);}catch(e){savedSongs=[];}}
 function saveSongsToStorage(){try{localStorage.setItem('beatSongs',JSON.stringify(savedSongs));}catch(e){showToast('Memoria piena!',true);}}
-
+ 
 function saveSong(){
   const inp=document.getElementById('song-name-input');
   const name=inp.value.trim()||('canzone-'+new Date().toISOString().slice(0,10));
@@ -452,7 +455,7 @@ function saveSong(){
     customPads,theme:activeTheme});
   saveSongsToStorage(); inp.value=''; renderSongs(); showToast('✓ '+name+' salvata!');
 }
-
+ 
 function loadSong(idx){
   const s=savedSongs[idx]; if(!s)return;
   if(state.playing)stopSeq();
@@ -469,22 +472,22 @@ function loadSong(idx){
   if(s.theme!==undefined)applyTheme(s.theme);
   renderTabs();renderDevice();showToast('♪ '+s.name+' caricata!');
 }
-
+ 
 function deleteSong(idx){const name=savedSongs[idx].name;savedSongs.splice(idx,1);saveSongsToStorage();renderSongs();showToast('Eliminata: '+name);}
-
+ 
 function exportSong(idx){
   const s=savedSongs[idx],json=JSON.stringify(s,null,2),blob=new Blob([json],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
   a.href=url;a.download=(s.name||'canzone').replace(/[^a-z0-9]/gi,'_')+'.json';document.body.appendChild(a);a.click();
   setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},500);showToast('↓ File scaricato!');
 }
-
+ 
 function importSongFile(event){
   const file=event.target.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=e=>{try{const s=JSON.parse(e.target.result);if(!s.version||!s.sequences)throw new Error('File non valido');savedSongs.push(s);saveSongsToStorage();renderSongs();showToast('↑ '+(s.name||'canzone')+' importata!');}catch(err){showToast('Errore: '+err.message,true);}};
   reader.readAsText(file);event.target.value='';
 }
-
+ 
 function renderSongs(){
   const list=document.getElementById('songs-list');
   if(!savedSongs.length){list.innerHTML='<div style="font-family:var(--font-mono);font-size:10px;color:var(--text2);padding:.5rem 0">Nessuna canzone. Premi ↓ SALVA per salvare la sessione corrente.</div>';return;}
@@ -493,10 +496,10 @@ function renderSongs(){
     return`<div class="song-item"><div class="song-item-name">♪ ${s.name}</div><div class="song-item-meta">${s.bpm}bpm · ${s.numSteps}st · ${date}</div><button class="btn-sm load" onclick="loadSong(${i})">▶ CARICA</button><button class="btn-sm" onclick="exportSong(${i})">↓ FILE</button><button class="btn-sm danger" onclick="deleteSong(${i})">✕</button></div>`;
   }).join('');
 }
-
+ 
 let toastTimer=null;
 function showToast(msg,isError=false){const el=document.getElementById('toast');el.textContent=msg;el.className='toast show'+(isError?' error':'');if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.className='toast';},2500);}
-
+ 
 // ═══════════════ SEQUENCER ═══════════════
 function getStepMs(){return(60/state.bpm/4)*1000;}
 function startSeq(){
@@ -505,7 +508,7 @@ function startSeq(){
   tick();state.intervalId=setInterval(tick,getStepMs());updateScreen();updateBtnRow();
 }
 function stopSeq(){state.playing=false;clearInterval(state.intervalId);state.intervalId=null;state.currentStep=0;updateSteps();updateScreen();updateBtnRow();}
-
+ 
 // ═══════════════ RENDER ═══════════════
 function updateScreen(){
   const b=document.querySelector('.screen-bpm');if(b)b.textContent=state.bpm+' BPM';
@@ -525,7 +528,7 @@ function updateBtnRow(){
   const rb=document.getElementById('btn-rec');if(rb)rb.className='btn rec'+(state.rec?' active':'');
 }
 function renderTabs(){document.getElementById('tabs').innerHTML=DEVICES.map((d,i)=>`<button class="tab${i===state.activeDevice?' active':''}" onclick="switchDevice(${i})">${d.name}</button>`).join('');}
-
+ 
 function renderDevice(){
   const dev=DEVICES[state.activeDevice],seq=state.sequences[dev.id];
   const padsHTML=dev.pads.map((p,i)=>`<button class="pad" id="pad-${i}" onclick="triggerPad(${i})" ontouchstart="triggerPad(${i})"><span class="pad-note">${p.n}</span>${p.sub?`<span class="pad-sub">${p.sub}</span>`:''}</button>`).join('');
@@ -538,10 +541,10 @@ function renderDevice(){
   const ckFl=Math.max(0,Math.min(1,(state.customForm.filter-100)/19900));
   const customKnobs=[{id:'freq',label:'FREQ',angle:-135+ckF*270,val:Math.round(state.customForm.freq)+' Hz'},{id:'sweep',label:'SWEEP',angle:-135+ckS*270,val:state.customForm.sweep?Math.round(state.customForm.sweep)+' Hz':'---'},{id:'dur',label:'DUR',angle:-135+ckD*270,val:state.customForm.dur.toFixed(2)+'s'},{id:'filter',label:'FILT',angle:-135+ckFl*270,val:Math.round(state.customForm.filter/100)/10+'k'}];
   const addPanel=state.showAdd?`<div class="add-sound-panel"><div class="add-sound-title">+ AGGIUNGI SUONO CUSTOM</div><div class="sound-form"><input id="cs-name" placeholder="Nome (es. LASER)" maxlength="6"><select id="cs-wave" onchange="state.customForm.wave=this.value"><option value="sine" ${state.customForm.wave==='sine'?'selected':''}>Sine</option><option value="sawtooth" ${state.customForm.wave==='sawtooth'?'selected':''}>Sawtooth</option><option value="square" ${state.customForm.wave==='square'?'selected':''}>Square</option><option value="triangle" ${state.customForm.wave==='triangle'?'selected':''}>Triangle</option></select><div class="custom-knobs-row">${customKnobs.map(k=>`<div class="custom-knob-group"><div class="custom-knob" data-custom-knob="${k.id}" onmousedown="startCustomKnob(event,'${k.id}')" ontouchstart="startCustomKnobT(event,'${k.id}')"><div class="custom-knob-dot" style="transform:rotate(${k.angle}deg)"></div></div><div class="custom-knob-val" id="ckval-${k.id}">${k.val}</div><div class="custom-knob-label">${k.label}</div></div>`).join('')}<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px"><button class="preview-btn" id="preview-btn" onclick="previewCustomSound()">▶ TEST</button></div></div><input id="cs-freq" type="number" placeholder="Freq Hz" value="${state.customForm.freq}" min="20" max="8000" onchange="state.customForm.freq=parseFloat(this.value)||440;renderDevice()"><input id="cs-sweep" type="number" placeholder="Sweep Hz (opt)" value="${state.customForm.sweep||''}" min="20" max="8000" onchange="state.customForm.sweep=this.value?parseFloat(this.value):null;renderDevice()"><div class="form-full"><button class="btn" style="flex:1" onclick="addCustomSound()">+ AGGIUNGI PAD</button><button class="btn danger" onclick="state.showAdd=false;renderDevice()">ANNULLA</button></div></div></div>`:'';
-
+ 
   document.getElementById('device-container').innerHTML=`<div class="device"><div class="screen"><div class="screen-top"><span class="screen-label">${dev.name}</span><span class="screen-bpm">${state.bpm} BPM</span></div><div class="screen-row"><span class="screen-info${state.playing?' on':''}" data-k="play">${state.playing?'PLAY':'STOP'}</span><span class="screen-info${state.rec?' rec-on':''}" data-k="rec">${state.rec?'REC':'---'}</span><span class="screen-info" data-k="step">ST ${String(state.currentStep+1).padStart(2,'0')}/${state.numSteps}</span><span class="screen-info" data-k="fx">FX:${state.fx.reverb?'R':'-'}${state.fx.delay?'D':'-'}</span></div></div><div class="pads-grid">${padsHTML}</div><div class="step-section">${stepsHTML}</div><div class="controls-panel"><div class="knobs-row">${knobs.map(k=>`<div class="knob-group"><div class="knob" data-knob="${k.id}" onmousedown="startKnob(event,'${k.id}')" ontouchstart="startKnobT(event,'${k.id}')"><div class="knob-dot" style="transform:rotate(${k.angle}deg)"></div></div><div class="knob-val" id="kval-${k.id}">${k.val}</div><div class="knob-label">${k.label}</div></div>`).join('')}<div class="fx-section"><div class="fx-label">FX</div><div class="fx-chain"><button class="fx-btn${state.fx.reverb?' active':''}" onclick="toggleFx('reverb')">REVERB</button><button class="fx-btn${state.fx.delay?' active':''}" onclick="toggleFx('delay')">DELAY</button></div></div></div><div class="btn-row"><button id="btn-play" class="btn${state.playing?' active':''}" onclick="togglePlay()">${state.playing?'■ STOP':'▶ PLAY'}</button><button id="btn-rec" class="btn rec${state.rec?' active':''}" onclick="toggleRec()">● REC</button><button class="btn" onclick="clearSeq()">✕ CLR</button><button class="btn" onclick="state.showAdd=!state.showAdd;renderDevice()">+ SUONO</button></div><div class="tempo-row"><label>TEMPO</label><input type="range" min="60" max="220" value="${state.bpm}" step="1" oninput="changeBpm(this.value)"><span class="tempo-val" id="tempo-val">${state.bpm} BPM</span></div><div class="steps-row"><label>PASSI</label><select onchange="changeSteps(this.value)">${[8,12,16,24,32,48,64].map(n=>`<option value="${n}"${n===state.numSteps?' selected':''}>${n} step</option>`).join('')}</select></div></div>${addPanel}</div>`;
 }
-
+ 
 // ═══════════════ ACTIONS ═══════════════
 function switchDevice(i){state.activeDevice=i;renderTabs();renderDevice();}
 function triggerPad(i){
@@ -579,7 +582,7 @@ function addCustomSound(){
   state.showAdd=false;state.activeDevice=DEVICES.findIndex(d=>d.id==='custom');
   renderTabs();renderDevice();
 }
-
+ 
 // ═══════════════ KNOBS ═══════════════
 let knobDrag=null;
 function startKnob(e,id){knobDrag={id,startY:e.clientY,startVal:getKV(id)};const move=e=>{if(!knobDrag)return;applyKD(knobDrag.id,knobDrag.startY-e.clientY,knobDrag.startVal);};document.addEventListener('mousemove',move);document.addEventListener('mouseup',()=>{knobDrag=null;document.removeEventListener('mousemove',move);},{once:true});}
@@ -592,7 +595,7 @@ function applyKD(id,dy,startVal){
   if(id==='rel'){state.release=v;const el=document.getElementById('kval-rel');if(el)el.textContent=v.toFixed(1)+'s';}
   const dot=document.querySelector(`[data-knob="${id}"] .knob-dot`);if(dot)dot.style.transform=`rotate(${-135+v*270}deg)`;
 }
-
+ 
 let customKnobDrag=null;
 function startCustomKnob(e,id){customKnobDrag={id,startY:e.clientY,startVal:getCustomKV(id)};const move=e=>{if(!customKnobDrag)return;applyCustomKD(customKnobDrag.id,customKnobDrag.startY-e.clientY,customKnobDrag.startVal);};document.addEventListener('mousemove',move);document.addEventListener('mouseup',()=>{customKnobDrag=null;document.removeEventListener('mousemove',move);},{once:true});}
 function startCustomKnobT(e,id){e.preventDefault();const t0=e.touches[0];customKnobDrag={id,startY:t0.clientY,startVal:getCustomKV(id)};const move=e=>{if(!customKnobDrag)return;applyCustomKD(customKnobDrag.id,customKnobDrag.startY-e.touches[0].clientY,customKnobDrag.startVal);};document.addEventListener('touchmove',move,{passive:false});document.addEventListener('touchend',()=>{customKnobDrag=null;document.removeEventListener('touchmove',move);},{once:true});}
@@ -605,7 +608,7 @@ function applyCustomKD(id,dy,startVal){
   if(id==='filter'){state.customForm.filter=Math.round(100+v*19900);const ve=document.getElementById('ckval-filter');if(ve)ve.textContent=Math.round(state.customForm.filter/100)/10+'k';}
   const dot=document.querySelector(`[data-custom-knob="${id}"] .custom-knob-dot`);if(dot)dot.style.transform=`rotate(${-135+v*270}deg)`;
 }
-
+ 
 // ═══════════════ INIT ═══════════════
 loadSongsFromStorage();
 renderTabs();
@@ -614,5 +617,3 @@ renderSongs();
 </script>
 </body>
 </html>
-© 2026 Ismaele. All rights reserved.
-Created: 04-05-2026 | Last Update: 30-05-2026
