@@ -1,3 +1,4 @@
+cat > /mnt/user-data/outputs/myapp.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -5,159 +6,198 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MySpace</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600&display=swap');
- 
-  :root {
-    --bg:#0a0e14;--surface:#111820;--surface2:#1a2330;
-    --border:#1e3040;--accent:#5bc8e8;--accent2:#00ff88;
-    --accent3:#ff6b6b;--text:#c8dce8;--text2:#4a7090;
-    --screen-bg:#000d14;--screen-text:#00d4ff;--screen-dim:#003355;
-    --pad:#5bc8e8;--pad-text:#001a28;
-    --font-mono:'Share Tech Mono',monospace;--font-ui:'Rajdhani',sans-serif;
-  }
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-  body{background:var(--bg);color:var(--text);font-family:var(--font-ui);height:100dvh;display:flex;flex-direction:column;overflow:hidden;transition:background .4s,color .4s;}
- 
-  header{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.25rem;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
-  .theme-picker{display:flex;align-items:center;gap:6px;}
-  .theme-label{font-family:var(--font-mono);font-size:9px;color:var(--text2);letter-spacing:1px;margin-right:4px;}
-  .theme-dot{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .15s,border-color .15s;flex-shrink:0;}
-  .theme-dot:hover{transform:scale(1.25);}
-  .theme-dot.active{border-color:var(--text);transform:scale(1.2);}
-  .app-title{font-family:var(--font-mono);font-size:11px;color:var(--accent);letter-spacing:2px;}
- 
-  .tabs{display:flex;gap:6px;flex-wrap:wrap;padding:.65rem 1.25rem .4rem;flex-shrink:0;}
-  .tab{padding:5px 14px;border-radius:2px;border:1px solid var(--border);font-family:var(--font-mono);font-size:11px;letter-spacing:2px;cursor:pointer;background:transparent;color:var(--text2);transition:all .15s;}
-  .tab:hover{border-color:var(--accent);color:var(--accent);}
-  .tab.active{background:var(--accent);color:var(--pad-text);border-color:var(--accent);}
- 
-  .main-wrap{flex:1;overflow:hidden;display:flex;flex-direction:column;}
-  .panel{display:none;flex:1;overflow-y:auto;overflow-x:hidden;}
-  .panel.active{display:block;}
- 
-  .device{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1.25rem;margin:0 1rem 1rem;}
-  .screen{background:var(--screen-bg);border:1px solid #002233;border-radius:3px;padding:10px 14px;margin-bottom:1.25rem;font-family:var(--font-mono);}
-  .screen-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
-  .screen-label{color:var(--screen-text);font-size:11px;letter-spacing:2px;}
-  .screen-right{color:var(--screen-text);font-size:20px;letter-spacing:1px;}
-  .screen-row{display:flex;gap:16px;}
-  .screen-info{color:var(--screen-dim);font-size:10px;letter-spacing:1px;}
- 
-  .btn{padding:7px 16px;border-radius:2px;border:1px solid var(--border);background:transparent;color:var(--text);font-family:var(--font-mono);font-size:11px;cursor:pointer;letter-spacing:1px;transition:all .1s;}
-  .btn:hover{border-color:var(--accent);color:var(--accent);}
-  .btn.active{background:var(--accent);color:var(--pad-text);border-color:var(--accent);}
-  .btn.danger{border-color:var(--accent3);color:var(--accent3);}
-  .btn.danger:hover{background:var(--accent3);color:#fff;}
-  .btn.green{border-color:var(--accent2);color:var(--accent2);}
-  .btn.green:hover{background:var(--accent2);color:#001a10;}
-  .btn-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.75rem;}
- 
-  /* ═══ DRAW ═══ */
-  .draw-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:.65rem 1rem;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
-  .tool-btn{padding:4px 10px;border-radius:2px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:var(--font-mono);font-size:10px;letter-spacing:1px;cursor:pointer;transition:all .15s;white-space:nowrap;}
-  .tool-btn:hover{border-color:var(--accent);color:var(--accent);}
-  .tool-btn.active{background:var(--accent);color:var(--pad-text);border-color:var(--accent);}
-  .tool-btn.red{border-color:var(--accent3);color:var(--accent3);}
-  .tool-btn.red:hover{background:var(--accent3);color:#fff;}
-  .tsep{width:1px;height:20px;background:var(--border);margin:0 2px;}
-  .crow{display:flex;gap:5px;align-items:center;}
-  .csw{width:17px;height:17px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .12s;flex-shrink:0;}
-  .csw:hover{transform:scale(1.25);}
-  .csw.active{border-color:var(--text);transform:scale(1.15);}
-  input[type=color].cpick{width:21px;height:21px;border-radius:2px;border:1px solid var(--border);cursor:pointer;padding:0;background:transparent;}
-  .szw{display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:9px;color:var(--text2);letter-spacing:1px;}
-  input[type=range].szr{width:70px;accent-color:var(--accent);}
- 
-  /* zoom controls */
-  .zoom-wrap{display:flex;align-items:center;gap:4px;font-family:var(--font-mono);font-size:9px;color:var(--text2);letter-spacing:1px;}
-  .zbtn{padding:3px 7px;border-radius:2px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:var(--font-mono);font-size:11px;cursor:pointer;transition:all .12s;line-height:1;}
-  .zbtn:hover{border-color:var(--accent);color:var(--accent);}
-  #zoomVal{min-width:36px;text-align:center;}
- 
-  .canvas-outer{flex:1;overflow:hidden;position:relative;cursor:grab;}
-  .canvas-outer.grabbing{cursor:grabbing;}
-  .canvas-viewport{position:absolute;top:0;left:0;transform-origin:0 0;}
-  #drawCanvas{display:block;cursor:crosshair;touch-action:none;}
- 
-  /* ═══ NOTES ═══ */
-  .notes-layout{display:flex;height:100%;}
-  .notes-sidebar{width:200px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--surface);}
-  .nsb-head{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:9px;color:var(--text2);letter-spacing:1px;}
-  .nsb-head span{flex:1;}
-  .sbtn{padding:3px 8px;border:1px solid var(--accent2);background:transparent;color:var(--accent2);font-family:var(--font-mono);font-size:10px;cursor:pointer;border-radius:2px;letter-spacing:1px;transition:all .1s;}
-  .sbtn:hover{background:var(--accent2);color:#001a10;}
-  .sbtn.del{border-color:var(--accent3);color:var(--accent3);}
-  .sbtn.del:hover{background:var(--accent3);color:#fff;}
-  .note-list{flex:1;overflow-y:auto;padding:5px;display:flex;flex-direction:column;gap:3px;}
-  .note-item{padding:6px 8px;border-radius:2px;cursor:pointer;border:1px solid transparent;transition:all .12s;}
-  .note-item:hover{background:var(--surface2);border-color:var(--border);}
-  .note-item.active{background:var(--surface2);border-color:var(--accent);}
-  .ni-title{font-family:var(--font-mono);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.5px;}
-  .ni-date{font-family:var(--font-mono);font-size:8px;color:var(--text2);margin-top:2px;}
-  .note-editor{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-  .note-title-in{padding:12px 16px 8px;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:var(--font-mono);font-size:14px;letter-spacing:1px;outline:none;}
-  .note-title-in::placeholder{color:var(--text2);}
-  .note-body-in{flex:1;padding:12px 16px;background:transparent;border:none;color:var(--text);font-family:var(--font-mono);font-size:11px;line-height:1.8;resize:none;outline:none;letter-spacing:.5px;}
-  .note-body-in::placeholder{color:var(--text2);}
-  .note-empty{flex:1;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:10px;color:var(--text2);letter-spacing:2px;}
- 
-  /* ═══ REMINDERS ═══ */
-  .rem-wrap{padding:1rem;display:flex;flex-direction:column;gap:12px;}
-  .rem-form{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1rem;display:flex;flex-direction:column;gap:9px;}
-  .form-label{font-family:var(--font-mono);font-size:9px;color:var(--accent);letter-spacing:2px;}
-  .frow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-  .fin{flex:1;min-width:120px;padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--text);font-family:var(--font-mono);font-size:11px;outline:none;letter-spacing:.5px;transition:border-color .15s;}
-  .fin:focus{border-color:var(--accent);}
-  .fin::placeholder{color:var(--text2);}
-  .fin-date{flex:0 0 auto;width:145px;min-width:unset;}
-  .fin-time{flex:0 0 auto;width:110px;min-width:unset;}
-  .rem-list{display:flex;flex-direction:column;gap:6px;}
-  .rem-card{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:10px 12px;display:flex;align-items:center;gap:10px;transition:border-color .15s;}
-  .rem-card:hover{border-color:var(--accent);}
-  .rem-card.done{opacity:.4;}
-  .rem-card.done .rem-title{text-decoration:line-through;}
-  .rem-chk{width:15px;height:15px;border:1px solid var(--accent);border-radius:2px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:10px;transition:background .12s;}
-  .rem-card.done .rem-chk{background:var(--accent);color:var(--pad-text);}
-  .rem-info{flex:1;min-width:0;}
-  .rem-title{font-family:var(--font-mono);font-size:11px;letter-spacing:.5px;}
-  .rem-time{font-family:var(--font-mono);font-size:9px;color:var(--text2);margin-top:2px;letter-spacing:1px;}
-  .rem-del{background:none;border:none;color:var(--text2);cursor:pointer;font-size:13px;padding:2px 4px;transition:color .15s;}
-  .rem-del:hover{color:var(--accent3);}
-  .notif-bar{background:var(--surface);border:1px solid var(--accent);border-radius:2px;padding:8px 12px;font-family:var(--font-mono);font-size:9px;color:var(--text2);display:flex;align-items:center;gap:8px;letter-spacing:1px;}
-  .notif-bar button{margin-left:auto;padding:4px 10px;background:var(--accent);border:none;color:var(--pad-text);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;cursor:pointer;border-radius:2px;}
-  .sw-reg-btn{padding:5px 12px;border:1px solid var(--accent2);background:transparent;color:var(--accent2);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;cursor:pointer;border-radius:2px;transition:all .1s;}
-  .sw-reg-btn:hover{background:var(--accent2);color:#001a10;}
- 
-  /* ═══ MUSIC ═══ */
-  .music-wrap{display:flex;flex-direction:column;height:100%;}
-  .music-info{padding:.6rem 1rem;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:9px;color:var(--text2);letter-spacing:2px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
-  .music-info a{color:var(--accent);text-decoration:none;margin-left:auto;}
-  .music-info a:hover{text-decoration:underline;}
-  .music-frame{flex:1;}
-  .music-frame iframe{width:100%;height:100%;border:none;}
- 
-  /* TOAST */
-  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--accent);color:var(--pad-text);font-family:var(--font-mono);font-size:11px;letter-spacing:1px;padding:10px 20px;border-radius:2px;z-index:9999;transition:transform .3s;white-space:nowrap;}
-  .toast.show{transform:translateX(-50%) translateY(0);}
-  .toast.err{background:var(--accent3);color:#fff;}
- 
-  ::-webkit-scrollbar{width:4px;}
-  ::-webkit-scrollbar-track{background:transparent;}
-  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
- 
-  @media(max-width:560px){
-    .notes-sidebar{width:130px;}
-    .device{padding:.85rem;margin:0 .5rem .75rem;}
-    .tabs{padding:.5rem .75rem .35rem;}
-    .fin-date{width:130px;}
-    .fin-time{width:95px;}
-  }
-  @media(max-width:400px){.notes-sidebar{display:none;}}
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600&display=swap');
+:root{
+  --bg:#0a0e14;--surface:#111820;--surface2:#1a2330;
+  --border:#1e3040;--accent:#5bc8e8;--accent2:#00ff88;
+  --accent3:#ff6b6b;--text:#c8dce8;--text2:#4a7090;
+  --screen-bg:#000d14;--screen-text:#00d4ff;--screen-dim:#003355;
+  --pad:#5bc8e8;--pad-text:#001a28;
+  --font-mono:'Share Tech Mono',monospace;--font-ui:'Rajdhani',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-ui);height:100dvh;display:flex;flex-direction:column;overflow:hidden;transition:background .4s,color .4s;}
+
+/* HEADER */
+header{display:flex;align-items:center;justify-content:space-between;padding:.6rem 1.2rem;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.theme-picker{display:flex;align-items:center;gap:6px;}
+.theme-label{font-family:var(--font-mono);font-size:9px;color:var(--text2);letter-spacing:1px;margin-right:4px;}
+.theme-dot{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .15s,border-color .15s;flex-shrink:0;}
+.theme-dot:hover{transform:scale(1.25);}
+.theme-dot.active{border-color:var(--text);transform:scale(1.2);}
+.app-title{font-family:var(--font-mono);font-size:11px;color:var(--accent);letter-spacing:2px;}
+
+/* TABS */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;padding:.6rem 1.2rem .35rem;flex-shrink:0;}
+.tab{padding:5px 14px;border-radius:2px;border:1px solid var(--border);font-family:var(--font-mono);font-size:11px;letter-spacing:2px;cursor:pointer;background:transparent;color:var(--text2);transition:all .15s;}
+.tab:hover{border-color:var(--accent);color:var(--accent);}
+.tab.active{background:var(--accent);color:var(--pad-text);border-color:var(--accent);}
+
+.main-wrap{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.panel{display:none;flex:1;overflow-y:auto;overflow-x:hidden;}
+.panel.active{display:block;}
+
+/* DEVICE / SCREEN */
+.device{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1rem;margin:0 1rem 1rem;}
+.screen{background:var(--screen-bg);border:1px solid #002233;border-radius:3px;padding:9px 13px;margin-bottom:1rem;font-family:var(--font-mono);}
+.screen-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.screen-label{color:var(--screen-text);font-size:11px;letter-spacing:2px;}
+.screen-right{color:var(--screen-text);font-size:18px;letter-spacing:1px;}
+.screen-row{display:flex;gap:14px;flex-wrap:wrap;}
+.screen-info{color:var(--screen-dim);font-size:10px;letter-spacing:1px;}
+
+/* BUTTONS */
+.btn{padding:6px 14px;border-radius:2px;border:1px solid var(--border);background:transparent;color:var(--text);font-family:var(--font-mono);font-size:11px;cursor:pointer;letter-spacing:1px;transition:all .1s;}
+.btn:hover{border-color:var(--accent);color:var(--accent);}
+.btn.active{background:var(--accent);color:var(--pad-text);border-color:var(--accent);}
+.btn.danger{border-color:var(--accent3);color:var(--accent3);}
+.btn.danger:hover{background:var(--accent3);color:#fff;}
+.btn.green{border-color:var(--accent2);color:var(--accent2);}
+.btn.green:hover{background:var(--accent2);color:#001a10;}
+
+/* ═══ DRAW ═══ */
+.draw-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:5px;padding:.55rem .9rem;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.tool-btn{padding:4px 9px;border-radius:2px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:var(--font-mono);font-size:10px;letter-spacing:1px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.tool-btn:hover{border-color:var(--accent);color:var(--accent);}
+.tool-btn.active{background:var(--accent);color:var(--pad-text);border-color:var(--accent);}
+.tool-btn.red{border-color:var(--accent3);color:var(--accent3);}
+.tool-btn.red:hover{background:var(--accent3);color:#fff;}
+.tsep{width:1px;height:20px;background:var(--border);margin:0 2px;}
+.crow{display:flex;gap:4px;align-items:center;}
+.csw{width:16px;height:16px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .12s;flex-shrink:0;}
+.csw:hover{transform:scale(1.25);}
+.csw.active{border-color:var(--text);transform:scale(1.15);}
+input[type=color].cpick{width:20px;height:20px;border-radius:2px;border:1px solid var(--border);cursor:pointer;padding:0;background:transparent;}
+.szw{display:flex;align-items:center;gap:4px;font-family:var(--font-mono);font-size:9px;color:var(--text2);letter-spacing:1px;}
+input[type=range].szr{width:65px;accent-color:var(--accent);}
+.zoom-wrap{display:flex;align-items:center;gap:3px;font-family:var(--font-mono);font-size:9px;color:var(--text2);letter-spacing:1px;}
+.zbtn{padding:2px 7px;border-radius:2px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:var(--font-mono);font-size:12px;cursor:pointer;transition:all .12s;line-height:1.2;}
+.zbtn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* INFINITE CANVAS */
+.canvas-outer{
+  flex:1;overflow:hidden;position:relative;
+  /* crosshair default, overridden when panning */
+  cursor:crosshair;
+  user-select:none;
+}
+.canvas-outer.panning{cursor:grabbing;}
+.canvas-viewport{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform;}
+/* the actual canvas never intercepts pointer events — outer does */
+#drawCanvas{display:block;pointer-events:none;}
+
+/* ═══ NOTES ═══ */
+.notes-sidebar{width:195px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--surface);}
+.nsb-head{padding:9px 11px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:9px;color:var(--text2);letter-spacing:1px;}
+.nsb-head span{flex:1;}
+.sbtn{padding:3px 8px;border:1px solid var(--accent2);background:transparent;color:var(--accent2);font-family:var(--font-mono);font-size:10px;cursor:pointer;border-radius:2px;letter-spacing:1px;transition:all .1s;}
+.sbtn:hover{background:var(--accent2);color:#001a10;}
+.sbtn.del{border-color:var(--accent3);color:var(--accent3);}
+.sbtn.del:hover{background:var(--accent3);color:#fff;}
+.note-list{flex:1;overflow-y:auto;padding:4px;display:flex;flex-direction:column;gap:2px;}
+.note-item{padding:6px 8px;border-radius:2px;cursor:pointer;border:1px solid transparent;transition:all .12s;}
+.note-item:hover{background:var(--surface2);border-color:var(--border);}
+.note-item.active{background:var(--surface2);border-color:var(--accent);}
+.ni-title{font-family:var(--font-mono);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ni-date{font-family:var(--font-mono);font-size:8px;color:var(--text2);margin-top:2px;}
+.note-editor{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.note-title-in{padding:11px 15px 7px;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:var(--font-mono);font-size:14px;letter-spacing:1px;outline:none;}
+.note-title-in::placeholder{color:var(--text2);}
+.note-body-in{flex:1;padding:11px 15px;background:transparent;border:none;color:var(--text);font-family:var(--font-mono);font-size:11px;line-height:1.8;resize:none;outline:none;}
+.note-body-in::placeholder{color:var(--text2);}
+.note-empty{flex:1;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:10px;color:var(--text2);letter-spacing:2px;}
+
+/* ═══ REMINDERS & ALARMS ═══ */
+.rem-wrap{padding:.9rem;display:flex;flex-direction:column;gap:10px;}
+.rem-form{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:.9rem;display:flex;flex-direction:column;gap:8px;}
+.form-label{font-family:var(--font-mono);font-size:9px;color:var(--accent);letter-spacing:2px;margin-bottom:2px;}
+.frow{display:flex;gap:7px;flex-wrap:wrap;align-items:center;}
+.fin{flex:1;min-width:110px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--text);font-family:var(--font-mono);font-size:11px;outline:none;transition:border-color .15s;}
+.fin:focus{border-color:var(--accent);}
+.fin::placeholder{color:var(--text2);}
+.fin-sm{flex:0 0 auto;}
+.fin-date{width:140px;}
+.fin-time{width:100px;}
+/* Alarm type selector */
+.type-sel{display:flex;gap:4px;}
+.type-opt{padding:3px 9px;border-radius:2px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;cursor:pointer;transition:all .12s;}
+.type-opt:hover{border-color:var(--accent);color:var(--accent);}
+.type-opt.active{background:var(--accent);color:var(--pad-text);border-color:var(--accent);}
+.type-opt.alarm-opt.active{background:var(--accent3);border-color:var(--accent3);color:#fff;}
+
+.rem-list{display:flex;flex-direction:column;gap:5px;}
+.rem-card{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:9px 11px;display:flex;align-items:center;gap:9px;transition:border-color .15s;}
+.rem-card:hover{border-color:var(--accent);}
+.rem-card.alarm-card{border-left:3px solid var(--accent3);}
+.rem-card.done{opacity:.4;}
+.rem-card.done .rem-title{text-decoration:line-through;}
+.rem-chk{width:15px;height:15px;border:1px solid var(--accent);border-radius:2px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:10px;transition:background .12s;}
+.rem-card.done .rem-chk{background:var(--accent);color:var(--pad-text);}
+.rem-info{flex:1;min-width:0;}
+.rem-title{font-family:var(--font-mono);font-size:11px;}
+.rem-time{font-family:var(--font-mono);font-size:9px;color:var(--text2);margin-top:2px;letter-spacing:1px;}
+.rem-badge{font-family:var(--font-mono);font-size:8px;padding:1px 5px;border-radius:2px;background:var(--accent3);color:#fff;margin-left:5px;letter-spacing:1px;}
+.rem-del{background:none;border:none;color:var(--text2);cursor:pointer;font-size:13px;padding:2px 4px;transition:color .15s;}
+.rem-del:hover{color:var(--accent3);}
+.notif-bar{background:var(--surface);border:1px solid var(--accent);border-radius:2px;padding:7px 11px;font-family:var(--font-mono);font-size:9px;color:var(--text2);display:flex;align-items:center;gap:8px;letter-spacing:1px;}
+.notif-bar button{margin-left:auto;padding:3px 9px;background:var(--accent);border:none;color:var(--pad-text);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;cursor:pointer;border-radius:2px;}
+
+/* ALARM OVERLAY */
+.alarm-overlay{
+  display:none;position:fixed;inset:0;z-index:9999;
+  background:rgba(0,0,0,.85);align-items:center;justify-content:center;flex-direction:column;gap:20px;
+}
+.alarm-overlay.ringing{display:flex;}
+.alarm-box{
+  background:var(--surface);border:2px solid var(--accent3);border-radius:4px;
+  padding:2rem 2.5rem;text-align:center;max-width:340px;width:90%;
+  font-family:var(--font-mono);
+  animation:alarmPulse 1s infinite;
+}
+@keyframes alarmPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,107,107,.6)}50%{box-shadow:0 0 0 16px rgba(255,107,107,0)}}
+.alarm-icon{font-size:48px;margin-bottom:.5rem;}
+.alarm-title{color:var(--accent3);font-size:14px;letter-spacing:2px;margin-bottom:.4rem;}
+.alarm-name{color:var(--text);font-size:16px;margin-bottom:1.2rem;}
+.alarm-dismiss{padding:9px 24px;background:var(--accent3);border:none;color:#fff;font-family:var(--font-mono);font-size:12px;letter-spacing:2px;cursor:pointer;border-radius:2px;transition:opacity .15s;}
+.alarm-dismiss:hover{opacity:.85;}
+
+/* MUSIC */
+.music-wrap{display:flex;flex-direction:column;height:100%;}
+.music-info{padding:.55rem .9rem;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:9px;color:var(--text2);letter-spacing:2px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.music-info a{color:var(--accent);text-decoration:none;margin-left:auto;}
+.music-info a:hover{text-decoration:underline;}
+.music-frame{flex:1;}
+.music-frame iframe{width:100%;height:100%;border:none;}
+
+/* TOAST */
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--accent);color:var(--pad-text);font-family:var(--font-mono);font-size:11px;letter-spacing:1px;padding:9px 18px;border-radius:2px;z-index:9998;transition:transform .3s;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.err{background:var(--accent3);color:#fff;}
+
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+@media(max-width:560px){
+  .notes-sidebar{width:125px;}
+  .device{padding:.75rem;margin:0 .5rem .6rem;}
+  .fin-date{width:125px;}.fin-time{width:90px;}
+}
+@media(max-width:400px){.notes-sidebar{display:none;}}
 </style>
 </head>
 <body>
+
+<!-- ALARM OVERLAY -->
+<div class="alarm-overlay" id="alarmOverlay">
+  <div class="alarm-box">
+    <div class="alarm-icon">⏰</div>
+    <div class="alarm-title">SVEGLIA</div>
+    <div class="alarm-name" id="alarmName">—</div>
+    <button class="alarm-dismiss" onclick="dismissAlarm()">■ FERMA</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
- 
+
 <header>
   <div class="theme-picker">
     <span class="theme-label">TEMA</span>
@@ -165,168 +205,167 @@
   </div>
   <span class="app-title">MYSPACE</span>
 </header>
- 
+
 <div class="tabs">
   <button class="tab active" onclick="switchTab('draw',this)">✏ DISEGNO</button>
   <button class="tab" onclick="switchTab('notes',this)">📄 APPUNTI</button>
   <button class="tab" onclick="switchTab('reminders',this)">⏰ PROMEMORIA</button>
   <button class="tab" onclick="switchTab('music',this)">♪ MUSICA</button>
 </div>
- 
+
 <div class="main-wrap">
- 
-  <!-- ══════════════ DRAW ══════════════ -->
-  <div id="panel-draw" class="panel active" style="display:flex;flex-direction:column;">
-    <div class="draw-toolbar">
-      <button class="tool-btn active" id="tool-pen"    onclick="setTool('pen',this)">✏ PEN</button>
-      <button class="tool-btn"        id="tool-brush"  onclick="setTool('brush',this)">⬤ BRUSH</button>
-      <button class="tool-btn"        id="tool-marker" onclick="setTool('marker',this)">▌ MARKER</button>
-      <button class="tool-btn"        id="tool-eraser" onclick="setTool('eraser',this)">◻ ERASER</button>
-      <div class="tsep"></div>
-      <div class="crow">
-        <div class="csw active" style="background:#c8dce8" onclick="setColor('#c8dce8',this)"></div>
-        <div class="csw" style="background:#5bc8e8"        onclick="setColor('#5bc8e8',this)"></div>
-        <div class="csw" style="background:#00ff88"        onclick="setColor('#00ff88',this)"></div>
-        <div class="csw" style="background:#ff6b6b"        onclick="setColor('#ff6b6b',this)"></div>
-        <div class="csw" style="background:#ffd166"        onclick="setColor('#ffd166',this)"></div>
-        <div class="csw" style="background:#b06ef3"        onclick="setColor('#b06ef3',this)"></div>
-        <div class="csw" style="background:#ff6eb4"        onclick="setColor('#ff6eb4',this)"></div>
-        <div class="csw" style="background:#ffffff"        onclick="setColor('#ffffff',this)"></div>
-        <div class="csw" style="background:#0a0e14;border:1px solid #1e3040" onclick="setColor('#0a0e14',this)"></div>
-        <input type="color" class="cpick" id="cpick" value="#c8dce8" onchange="setColor(this.value,null)">
-      </div>
-      <div class="tsep"></div>
-      <div class="szw">SIZE <input type="range" class="szr" id="szr" min="1" max="60" value="6" oninput="szv.textContent=this.value;cSz=+this.value"> <span id="szv">6</span></div>
-      <div class="tsep"></div>
-      <div class="zoom-wrap">
-        ZOOM
-        <button class="zbtn" onclick="zoom(-0.25)">−</button>
-        <span id="zoomVal">100%</span>
-        <button class="zbtn" onclick="zoom(+0.25)">+</button>
-        <button class="zbtn" onclick="resetZoom()">↺</button>
-      </div>
-      <div class="tsep"></div>
-      <button class="tool-btn red" onclick="clearC()">✕ CLR</button>
-      <button class="tool-btn"     onclick="dlC()">↓ PNG</button>
+
+<!-- ══════════════ DRAW PANEL ══════════════ -->
+<div id="panel-draw" class="panel active" style="display:flex;flex-direction:column;">
+  <div class="draw-toolbar">
+    <button class="tool-btn active" id="tool-pen"    onclick="setTool('pen',this)">✏ PEN</button>
+    <button class="tool-btn"        id="tool-brush"  onclick="setTool('brush',this)">⬤ BRUSH</button>
+    <button class="tool-btn"        id="tool-marker" onclick="setTool('marker',this)">▌ MARKER</button>
+    <button class="tool-btn"        id="tool-eraser" onclick="setTool('eraser',this)">◻ ERASER</button>
+    <div class="tsep"></div>
+    <div class="crow">
+      <div class="csw active" style="background:#c8dce8"                               onclick="setColor('#c8dce8',this)"></div>
+      <div class="csw" style="background:#5bc8e8"                                      onclick="setColor('#5bc8e8',this)"></div>
+      <div class="csw" style="background:#00ff88"                                      onclick="setColor('#00ff88',this)"></div>
+      <div class="csw" style="background:#ff6b6b"                                      onclick="setColor('#ff6b6b',this)"></div>
+      <div class="csw" style="background:#ffd166"                                      onclick="setColor('#ffd166',this)"></div>
+      <div class="csw" style="background:#b06ef3"                                      onclick="setColor('#b06ef3',this)"></div>
+      <div class="csw" style="background:#ff6eb4"                                      onclick="setColor('#ff6eb4',this)"></div>
+      <div class="csw" style="background:#ffffff"                                      onclick="setColor('#ffffff',this)"></div>
+      <div class="csw" style="background:#0a0e14;border:1px solid #1e3040"            onclick="setColor('#0a0e14',this)"></div>
+      <input type="color" class="cpick" id="cpick" value="#c8dce8" onchange="setColor(this.value,null)">
     </div>
- 
-    <div class="device" style="flex:1;margin-bottom:0;border-radius:0 0 4px 4px;border-top:none;padding:8px 10px;display:flex;flex-direction:column;gap:8px;">
-      <div class="screen" style="margin-bottom:0;flex-shrink:0;">
-        <div class="screen-top">
-          <span class="screen-label">DISEGNO</span>
-          <span class="screen-right" id="draw-tool-display">PEN</span>
-        </div>
-        <div class="screen-row">
-          <span class="screen-info" id="draw-color-display">COL: #c8dce8</span>
-          <span class="screen-info" id="draw-size-display">SZ: 6</span>
-          <span class="screen-info" id="draw-zoom-display">ZOOM: 100%</span>
-        </div>
+    <div class="tsep"></div>
+    <div class="szw">SZ <input type="range" class="szr" id="szr" min="1" max="60" value="6" oninput="szv.textContent=this.value;cSz=+this.value"> <span id="szv">6</span></div>
+    <div class="tsep"></div>
+    <div class="zoom-wrap">
+      ZOOM
+      <button class="zbtn" onclick="doZoom(-0.5)">−</button>
+      <span id="zoomVal" style="min-width:40px;text-align:center">100%</span>
+      <button class="zbtn" onclick="doZoom(+0.5)">+</button>
+      <button class="zbtn" onclick="resetView()" title="Reset view">↺</button>
+    </div>
+    <div class="tsep"></div>
+    <button class="tool-btn red" onclick="clearC()">✕ CLR</button>
+    <button class="tool-btn"     onclick="dlC()">↓ PNG</button>
+  </div>
+
+  <!-- SCREEN inside draw -->
+  <div style="padding:6px 10px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;">
+    <div class="screen" style="margin-bottom:0;">
+      <div class="screen-top">
+        <span class="screen-label">DISEGNO</span>
+        <span class="screen-right" id="dToolDisp">PEN</span>
       </div>
-      <!-- zoom+pan canvas container -->
-      <div class="canvas-outer" id="canvasOuter">
-        <div class="canvas-viewport" id="canvasVP">
-          <canvas id="drawCanvas"></canvas>
-        </div>
+      <div class="screen-row">
+        <span class="screen-info" id="dColDisp">COL: #c8dce8</span>
+        <span class="screen-info" id="dSzDisp">SZ: 6</span>
+        <span class="screen-info" id="dZoomDisp">ZOOM: 100%</span>
+        <span class="screen-info" style="color:var(--screen-dim)">ALT+DRAG = PAN · SCROLL = ZOOM</span>
       </div>
     </div>
   </div>
- 
-  <!-- ══════════════ NOTES ══════════════ -->
-  <div id="panel-notes" class="panel" style="display:none;flex-direction:column;">
-    <div class="device" style="margin-bottom:0;border-radius:0;border-left:none;border-right:none;border-top:none;padding:.65rem 1rem;">
-      <div class="screen" style="margin-bottom:0;">
-        <div class="screen-top">
-          <span class="screen-label">APPUNTI</span>
-          <span class="screen-right" id="notes-count">0 NOTE</span>
-        </div>
-        <div class="screen-row">
-          <span class="screen-info" id="note-cur-title">NESSUNA NOTA SELEZIONATA</span>
-        </div>
-      </div>
+
+  <!-- infinite canvas container: ALL pointer events go here -->
+  <div class="canvas-outer" id="canvasOuter">
+    <div class="canvas-viewport" id="canvasVP">
+      <canvas id="drawCanvas" width="3000" height="3000"></canvas>
     </div>
-    <div style="flex:1;display:flex;overflow:hidden;">
-      <div class="notes-sidebar">
-        <div class="nsb-head">
-          <span>NOTE</span>
-          <button class="sbtn" onclick="newNote()">+</button>
-          <button class="sbtn del" id="delNoteBtn" onclick="delNote()" title="Elimina nota" style="display:none">✕</button>
-        </div>
-        <div class="note-list" id="noteList"></div>
+  </div>
+</div>
+
+<!-- ══════════════ NOTES PANEL ══════════════ -->
+<div id="panel-notes" class="panel" style="display:none;flex-direction:column;">
+  <div style="padding:6px 10px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;">
+    <div class="screen" style="margin-bottom:0;">
+      <div class="screen-top">
+        <span class="screen-label">APPUNTI</span>
+        <span class="screen-right" id="notes-count">0 NOTE</span>
       </div>
-      <div class="note-editor" id="noteEditor">
-        <div class="note-empty" id="noteEmpty">[ SELEZIONA O CREA UNA NOTA ]</div>
-        <input type="text" class="note-title-in" id="noteTitleIn" placeholder="TITOLO..." oninput="saveNote()" style="display:none">
-        <textarea class="note-body-in" id="noteBodyIn" placeholder="Scrivi qui..." oninput="saveNote()" style="display:none"></textarea>
+      <div class="screen-row">
+        <span class="screen-info" id="note-cur-title">NESSUNA NOTA SELEZIONATA</span>
       </div>
     </div>
   </div>
- 
-  <!-- ══════════════ REMINDERS ══════════════ -->
-  <div id="panel-reminders" class="panel">
-    <div class="device" style="margin-bottom:0;border-radius:0;border-left:none;border-right:none;border-top:none;padding:.65rem 1rem;">
-      <div class="screen" style="margin-bottom:0;">
-        <div class="screen-top">
-          <span class="screen-label">PROMEMORIA</span>
-          <span class="screen-right" id="rem-count-display">0 ATTIVI</span>
-        </div>
-        <div class="screen-row">
-          <span class="screen-info" id="rem-next-display">NESSUN PROSSIMO EVENTO</span>
-        </div>
+  <div style="flex:1;display:flex;overflow:hidden;">
+    <div class="notes-sidebar">
+      <div class="nsb-head">
+        <span>NOTE</span>
+        <button class="sbtn" onclick="newNote()">+</button>
+        <button class="sbtn del" id="delNoteBtn" onclick="delNote()" style="display:none">✕</button>
       </div>
+      <div class="note-list" id="noteList"></div>
     </div>
-    <div class="rem-wrap">
-      <div id="notifBar" class="notif-bar" style="display:none">
-        🔔 NOTIFICHE NON ATTIVE
-        <button onclick="askNotif()">ATTIVA</button>
-      </div>
-      <div id="swRegBar" class="notif-bar" style="display:none;border-color:var(--accent2);">
-        📲 REGISTRA APP PER NOTIFICHE IN BACKGROUND
-        <button class="sw-reg-btn" onclick="registerSW()">INSTALLA</button>
-      </div>
-      <div class="rem-form">
-        <div class="form-label">+ NUOVO PROMEMORIA</div>
-        <div class="frow">
-          <input type="text" class="fin" id="remTitle" placeholder="COSA DEVI RICORDARE?" style="flex:2;min-width:160px">
-        </div>
-        <div class="frow">
-          <input type="date" class="fin fin-date" id="remDay">
-          <input type="time" class="fin fin-time" id="remHour">
-          <button class="btn green" onclick="addRem()">+ AGGIUNGI</button>
-        </div>
-      </div>
-      <div class="rem-list" id="remList"></div>
+    <div class="note-editor">
+      <div class="note-empty" id="noteEmpty">[ SELEZIONA O CREA UNA NOTA ]</div>
+      <input  type="text"  class="note-title-in" id="noteTitleIn" placeholder="TITOLO..."     oninput="saveNote()" style="display:none">
+      <textarea            class="note-body-in"  id="noteBodyIn"  placeholder="Scrivi qui..." oninput="saveNote()" style="display:none"></textarea>
     </div>
   </div>
- 
-  <!-- ══════════════ MUSIC ══════════════ -->
-  <div id="panel-music" class="panel" style="display:none;flex-direction:column;">
-    <div class="device" style="margin-bottom:0;border-radius:0;border-left:none;border-right:none;border-top:none;padding:.65rem 1rem;">
-      <div class="screen" style="margin-bottom:0;">
-        <div class="screen-top">
-          <span class="screen-label">MUSICA</span>
-          <span class="screen-right">♪ SYNTH</span>
-        </div>
-        <div class="screen-row">
-          <span class="screen-info">VERSION 3.0</span>
-          <span class="screen-info">© 2026 ISMAELE</span>
-        </div>
+</div>
+
+<!-- ══════════════ REMINDERS PANEL ══════════════ -->
+<div id="panel-reminders" class="panel">
+  <div style="padding:6px 10px;background:var(--surface);border-bottom:1px solid var(--border);">
+    <div class="screen" style="margin-bottom:0;">
+      <div class="screen-top">
+        <span class="screen-label">PROMEMORIA</span>
+        <span class="screen-right" id="rem-count-display">0 ATTIVI</span>
       </div>
-    </div>
-    <div class="music-wrap" style="flex:1;">
-      <div class="music-info">
-        ♪ SINTETIZZATORE — VERSION 3.0
-        <a href="https://idk34-di.github.io/synthesizer/" target="_blank">↗ APRI IN NUOVA SCHEDA</a>
-      </div>
-      <div class="music-frame">
-        <iframe src="https://idk34-di.github.io/synthesizer/" allowfullscreen loading="lazy" title="Synthesizer"></iframe>
+      <div class="screen-row">
+        <span class="screen-info" id="rem-next-display">NESSUN PROSSIMO EVENTO</span>
       </div>
     </div>
   </div>
- 
+  <div class="rem-wrap">
+    <div id="notifBar" class="notif-bar" style="display:none">
+      🔔 ATTIVA LE NOTIFICHE PER RICEVERE GLI ALLARMI
+      <button onclick="askNotif()">ATTIVA</button>
+    </div>
+    <div class="rem-form">
+      <div class="form-label">+ NUOVO</div>
+      <div class="frow">
+        <input type="text" class="fin" id="remTitle" placeholder="DESCRIZIONE..." style="flex:2;min-width:150px">
+      </div>
+      <div class="frow">
+        <input type="date" class="fin fin-date" id="remDay">
+        <input type="time" class="fin fin-time" id="remHour">
+      </div>
+      <div class="frow">
+        <span style="font-family:var(--font-mono);font-size:9px;color:var(--text2);letter-spacing:1px">TIPO:</span>
+        <div class="type-sel">
+          <button class="type-opt active"     id="type-reminder" onclick="selType('reminder')">📋 PROMEMORIA</button>
+          <button class="type-opt alarm-opt"  id="type-alarm"    onclick="selType('alarm')">⏰ SVEGLIA</button>
+        </div>
+        <button class="btn green" style="margin-left:auto" onclick="addRem()">+ AGGIUNGI</button>
+      </div>
+    </div>
+    <div class="rem-list" id="remList"></div>
+  </div>
+</div>
+
+<!-- ══════════════ MUSIC PANEL ══════════════ -->
+<div id="panel-music" class="panel" style="display:none;flex-direction:column;">
+  <div style="padding:6px 10px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;">
+    <div class="screen" style="margin-bottom:0;">
+      <div class="screen-top"><span class="screen-label">MUSICA</span><span class="screen-right">♪ SYNTH</span></div>
+      <div class="screen-row"><span class="screen-info">VERSION 3.0</span><span class="screen-info">© 2026 ISMAELE</span></div>
+    </div>
+  </div>
+  <div class="music-wrap" style="flex:1;">
+    <div class="music-info">♪ SINTETIZZATORE — VERSION 3.0 <a href="https://idk34-di.github.io/synthesizer/" target="_blank">↗ APRI IN NUOVA SCHEDA</a></div>
+    <div class="music-frame"><iframe src="https://idk34-di.github.io/synthesizer/" allowfullscreen loading="lazy" title="Synthesizer"></iframe></div>
+  </div>
+</div>
+
 </div><!-- /main-wrap -->
- 
+
 <script>
-// ═══════════════════ THEMES ═══════════════════
+'use strict';
+
+// ══════════════════════════════════════════════
+//  THEMES
+// ══════════════════════════════════════════════
 const THEMES=[
   {name:'Cyan Night', dot:'#5bc8e8',vars:{'--bg':'#0a0e14','--surface':'#111820','--surface2':'#1a2330','--border':'#1e3040','--accent':'#5bc8e8','--accent2':'#00ff88','--accent3':'#ff6b6b','--text':'#c8dce8','--text2':'#4a7090','--screen-bg':'#000d14','--screen-text':'#00d4ff','--screen-dim':'#003355','--pad':'#5bc8e8','--pad-text':'#001a28'}},
   {name:'Purple Haze',dot:'#b06ef3',vars:{'--bg':'#0d0814','--surface':'#160e20','--surface2':'#1f1530','--border':'#2d1f45','--accent':'#b06ef3','--accent2':'#f06edf','--accent3':'#ff6b6b','--text':'#d8c8f0','--text2':'#5a3a80','--screen-bg':'#08040f','--screen-text':'#c87fff','--screen-dim':'#2a0a50','--pad':'#b06ef3','--pad-text':'#0d0814'}},
@@ -347,149 +386,223 @@ document.getElementById('theme-dots').innerHTML=THEMES.map((t,i)=>
   `<div class="theme-dot" style="background:${t.dot}" title="${t.name}" onclick="applyTheme(${i})"></div>`
 ).join('');
 applyTheme(parseInt(localStorage.getItem('ms_theme')||'0'));
- 
-// ═══════════════════ TABS ═══════════════════
+
+// ══════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════
 function switchTab(name,btn){
   document.querySelectorAll('.panel').forEach(p=>{p.classList.remove('active');p.style.display='none';});
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
   const panel=document.getElementById('panel-'+name);
-  if(name==='draw')panel.style.display='flex';
-  else if(name==='notes'||name==='music')panel.style.display='flex';
-  else panel.style.display='block';
+  panel.style.display=(name==='draw'||name==='notes'||name==='music')?'flex':'block';
   panel.classList.add('active');
   if(btn)btn.classList.add('active');
-  if(name==='draw')setTimeout(()=>{rsz();},60);
+  if(name==='draw')setTimeout(initCanvas,30);
   if(name==='notes')updateNotesScreen();
-  if(name==='reminders'){updateRemScreen();checkSWBar();}
+  if(name==='reminders'){updateRemScreen();}
 }
- 
-// ═══════════════════ CANVAS / ZOOM / PAN ═══════════════════
-const outer=document.getElementById('canvasOuter');
-const vp=document.getElementById('canvasVP');
-const cv=document.getElementById('drawCanvas');
-const ctx=cv.getContext('2d');
- 
-let cTool='pen',cCol='#c8dce8',cSz=6;
-let drawing=false,lx=0,ly=0;
-let camX=0,camY=0,camZ=1;
-let panMode=false,panSX=0,panSY=0,panCX=0,panCY=0;
- 
-function rsz(){
-  const W=outer.clientWidth,H=outer.clientHeight;
-  if(!cv.width||!cv.height){
-    cv.width=Math.max(W,1200);cv.height=Math.max(H,900);
-  }
-  applyTransform();
-}
+
+// ══════════════════════════════════════════════
+//  INFINITE CANVAS — fixed pointer-event model
+// ══════════════════════════════════════════════
+const outer  = document.getElementById('canvasOuter');
+const vp     = document.getElementById('canvasVP');
+const cv     = document.getElementById('drawCanvas');
+const ctx    = cv.getContext('2d');
+
+let cTool='pen', cCol='#c8dce8', cSz=6;
+// camera
+let camX=0, camY=0, camZ=1;
+// drawing state
+let isDrawing=false, lastX=0, lastY=0;
+// panning state (alt+drag / middle-btn / space+drag)
+let isPanning=false, panStartX=0, panStartY=0, panCamX=0, panCamY=0;
+// pinch
+let lastPinchDist=null, pinchMidX=0, pinchMidY=0;
+// space bar held
+let spaceHeld=false;
+
 function applyTransform(){
   vp.style.transform=`translate(${camX}px,${camY}px) scale(${camZ})`;
   const pct=Math.round(camZ*100)+'%';
   document.getElementById('zoomVal').textContent=pct;
-  const d=document.getElementById('draw-zoom-display');if(d)d.textContent='ZOOM: '+pct;
+  const d=document.getElementById('dZoomDisp');if(d)d.textContent='ZOOM: '+pct;
 }
-function zoom(delta){
-  const newZ=Math.min(Math.max(camZ+delta,0.25),4);
-  const cx=outer.clientWidth/2,cy=outer.clientHeight/2;
-  camX=cx-(cx-camX)*(newZ/camZ);
-  camY=cy-(cy-camY)*(newZ/camZ);
-  camZ=newZ;applyTransform();
+
+function initCanvas(){
+  // Just make sure the outer div has correct size; canvas is already big
+  applyTransform();
 }
-function resetZoom(){camX=0;camY=0;camZ=1;applyTransform();}
- 
-// Pinch-to-zoom
-let touches={},lastPinchDist=null;
-outer.addEventListener('touchstart',e=>{
-  Array.from(e.touches).forEach(t=>touches[t.identifier]={x:t.clientX,y:t.clientY});
-  if(e.touches.length===2){
-    lastPinchDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-    drawing=false;
-  } else if(e.touches.length===1&&!drawing){
-    startDraw(e);
-  }
-},{passive:false});
-outer.addEventListener('touchmove',e=>{
-  e.preventDefault();
-  if(e.touches.length===2&&lastPinchDist){
-    const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-    const delta=(d-lastPinchDist)/200;
-    const newZ=Math.min(Math.max(camZ+delta,0.25),4);
-    const mx=(e.touches[0].clientX+e.touches[1].clientX)/2;
-    const my=(e.touches[0].clientY+e.touches[1].clientY)/2;
-    const r=outer.getBoundingClientRect();
-    const ox=mx-r.left,oy=my-r.top;
-    camX=ox-(ox-camX)*(newZ/camZ);
-    camY=oy-(oy-camY)*(newZ/camZ);
-    camZ=newZ;lastPinchDist=d;applyTransform();
-  } else if(e.touches.length===1){
-    onMv(e);
-  }
-},{passive:false});
-outer.addEventListener('touchend',e=>{
-  if(e.touches.length<2)lastPinchDist=null;
-  drawing=false;
-},{passive:false});
- 
-// Mouse pan (middle button or alt+drag)
-outer.addEventListener('mousedown',e=>{
-  if(e.button===1||e.altKey){
-    panMode=true;panSX=e.clientX;panSY=e.clientY;panCX=camX;panCY=camY;
-    outer.classList.add('grabbing');e.preventDefault();
-  } else if(e.button===0){startDraw(e);}
-});
-outer.addEventListener('mousemove',e=>{
-  if(panMode){camX=panCX+(e.clientX-panSX);camY=panCY+(e.clientY-panSY);applyTransform();}
-  else onMv(e);
-});
-outer.addEventListener('mouseup',e=>{
-  if(panMode){panMode=false;outer.classList.remove('grabbing');}
-  else drawing=false;
-});
-outer.addEventListener('mouseleave',()=>{drawing=false;});
-// Wheel zoom
-outer.addEventListener('wheel',e=>{e.preventDefault();zoom(e.deltaY<0?0.15:-0.15);},{passive:false});
- 
-function clientToCanvas(cx,cy){
+
+// Convert screen coords → canvas coords
+function screenToCanvas(sx, sy){
   const r=outer.getBoundingClientRect();
-  const ox=(cx-r.left-camX)/camZ;
-  const oy=(cy-r.top-camY)/camZ;
-  return{x:ox,y:oy};
+  return {
+    x: (sx - r.left - camX) / camZ,
+    y: (sy - r.top  - camY) / camZ,
+  };
 }
-function gpC(e){
-  if(e.touches)return clientToCanvas(e.touches[0].clientX,e.touches[0].clientY);
-  return clientToCanvas(e.clientX,e.clientY);
+
+function getEventPos(e){
+  if(e.touches && e.touches.length>0){
+    return {x: e.touches[0].clientX, y: e.touches[0].clientY};
+  }
+  return {x: e.clientX, y: e.clientY};
 }
-function startDraw(e){
-  drawing=true;const p=gpC(e);lx=p.x;ly=p.y;
+
+// ── ZOOM ──
+function doZoom(delta, pivotSX, pivotSY){
+  const r=outer.getBoundingClientRect();
+  const px = (pivotSX!==undefined) ? pivotSX-r.left : r.width/2;
+  const py = (pivotSY!==undefined) ? pivotSY-r.top  : r.height/2;
+  const oldZ=camZ;
+  // UNLIMITED: allow any positive value, practical range 0.05–50
+  camZ=Math.max(0.05, camZ+delta*camZ*0.6);
+  // keep pivot point fixed on screen
+  camX = px - (px-camX)*(camZ/oldZ);
+  camY = py - (py-camY)*(camZ/oldZ);
+  applyTransform();
 }
-function onMv(e){
-  if(!drawing||panMode)return;
-  const p=gpC(e);
-  ctx.beginPath();ctx.moveTo(lx,ly);
-  if(cTool==='eraser'){ctx.globalCompositeOperation='destination-out';ctx.strokeStyle='rgba(0,0,0,1)';ctx.lineWidth=cSz*3;}
-  else{ctx.globalCompositeOperation='source-over';ctx.strokeStyle=cCol;ctx.lineWidth=cTool==='brush'?cSz*2.5:cTool==='marker'?cSz*1.5:cSz;ctx.globalAlpha=cTool==='marker'?0.55:1;}
-  ctx.lineCap='round';ctx.lineJoin='round';ctx.filter=cTool==='brush'?'blur(0.8px)':'none';
-  ctx.lineTo(p.x,p.y);ctx.stroke();
-  ctx.globalAlpha=1;ctx.filter='none';ctx.globalCompositeOperation='source-over';
-  lx=p.x;ly=p.y;
+function resetView(){camX=0;camY=0;camZ=1;applyTransform();}
+
+// ── DRAW ──
+function startStroke(sx, sy){
+  isDrawing=true;
+  const p=screenToCanvas(sx,sy);
+  lastX=p.x; lastY=p.y;
+  // dot on click
+  ctx.beginPath();
+  if(cTool==='eraser'){
+    ctx.globalCompositeOperation='destination-out';
+    ctx.arc(p.x,p.y,(cSz*3)/2,0,Math.PI*2);
+    ctx.fill();
+    ctx.globalCompositeOperation='source-over';
+  } else {
+    ctx.globalCompositeOperation='source-over';
+    ctx.fillStyle=cCol;
+    ctx.globalAlpha=cTool==='marker'?0.55:1;
+    ctx.arc(p.x,p.y,cSz/2,0,Math.PI*2);
+    ctx.fill();
+    ctx.globalAlpha=1;
+  }
 }
+function continueStroke(sx, sy){
+  if(!isDrawing)return;
+  const p=screenToCanvas(sx,sy);
+  ctx.beginPath();
+  ctx.moveTo(lastX,lastY);
+  if(cTool==='eraser'){
+    ctx.globalCompositeOperation='destination-out';
+    ctx.strokeStyle='rgba(0,0,0,1)';
+    ctx.lineWidth=cSz*3;
+    ctx.globalAlpha=1;
+  } else {
+    ctx.globalCompositeOperation='source-over';
+    ctx.strokeStyle=cCol;
+    ctx.lineWidth=cTool==='brush'?cSz*2.5:cTool==='marker'?cSz*1.5:cSz;
+    ctx.globalAlpha=cTool==='marker'?0.55:1;
+  }
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.filter=cTool==='brush'?'blur(1px)':'none';
+  ctx.lineTo(p.x,p.y);
+  ctx.stroke();
+  ctx.globalAlpha=1; ctx.filter='none'; ctx.globalCompositeOperation='source-over';
+  lastX=p.x; lastY=p.y;
+}
+function endStroke(){ isDrawing=false; }
+
+// ── POINTER EVENTS on outer div ──
+outer.addEventListener('mousedown', e=>{
+  e.preventDefault();
+  // middle button or alt+left or space+left → pan
+  if(e.button===1 || e.altKey || spaceHeld){
+    isPanning=true;
+    panStartX=e.clientX; panStartY=e.clientY;
+    panCamX=camX; panCamY=camY;
+    outer.classList.add('panning');
+  } else if(e.button===0){
+    startStroke(e.clientX, e.clientY);
+  }
+});
+window.addEventListener('mousemove', e=>{
+  if(isPanning){
+    camX=panCamX+(e.clientX-panStartX);
+    camY=panCamY+(e.clientY-panStartY);
+    applyTransform();
+  } else if(isDrawing){
+    continueStroke(e.clientX, e.clientY);
+  }
+});
+window.addEventListener('mouseup', e=>{
+  if(isPanning){ isPanning=false; outer.classList.remove('panning'); }
+  else endStroke();
+});
+
+// Wheel zoom (unlimited)
+outer.addEventListener('wheel', e=>{
+  e.preventDefault();
+  const delta= e.deltaY<0 ? 0.15 : -0.15;
+  doZoom(delta, e.clientX, e.clientY);
+}, {passive:false});
+
+// Keyboard space = pan mode
+window.addEventListener('keydown', e=>{ if(e.code==='Space'&&document.getElementById('panel-draw').classList.contains('active')){spaceHeld=true;outer.style.cursor='grab';e.preventDefault();}});
+window.addEventListener('keyup',   e=>{ if(e.code==='Space'){spaceHeld=false;outer.style.cursor='crosshair';}});
+
+// Touch: draw (1 finger) or pinch-zoom (2 fingers)
+outer.addEventListener('touchstart', e=>{
+  e.preventDefault();
+  if(e.touches.length===2){
+    isDrawing=false;
+    const t0=e.touches[0],t1=e.touches[1];
+    lastPinchDist=Math.hypot(t0.clientX-t1.clientX,t0.clientY-t1.clientY);
+    pinchMidX=(t0.clientX+t1.clientX)/2;
+    pinchMidY=(t0.clientY+t1.clientY)/2;
+  } else if(e.touches.length===1){
+    startStroke(e.touches[0].clientX, e.touches[0].clientY);
+  }
+},{passive:false});
+outer.addEventListener('touchmove', e=>{
+  e.preventDefault();
+  if(e.touches.length===2&&lastPinchDist!==null){
+    const t0=e.touches[0],t1=e.touches[1];
+    const d=Math.hypot(t0.clientX-t1.clientX,t0.clientY-t1.clientY);
+    const mx=(t0.clientX+t1.clientX)/2;
+    const my=(t0.clientY+t1.clientY)/2;
+    const delta=(d-lastPinchDist)/lastPinchDist;
+    doZoom(delta, mx, my);
+    // also pan with midpoint movement
+    camX+=mx-pinchMidX; camY+=my-pinchMidY;
+    applyTransform();
+    lastPinchDist=d; pinchMidX=mx; pinchMidY=my;
+  } else if(e.touches.length===1){
+    continueStroke(e.touches[0].clientX, e.touches[0].clientY);
+  }
+},{passive:false});
+outer.addEventListener('touchend', e=>{
+  if(e.touches.length<2)lastPinchDist=null;
+  if(e.touches.length===0)endStroke();
+},{passive:false});
+
+// Toolbar helpers
 function setTool(t,btn){
   cTool=t;
   document.querySelectorAll('.tool-btn[id^="tool-"]').forEach(b=>b.classList.remove('active'));
   document.getElementById('tool-'+t).classList.add('active');
-  const d=document.getElementById('draw-tool-display');if(d)d.textContent=t.toUpperCase();
+  const d=document.getElementById('dToolDisp');if(d)d.textContent=t.toUpperCase();
 }
 function setColor(c,el){
   cCol=c;
   document.querySelectorAll('.csw').forEach(s=>s.classList.remove('active'));
   if(el)el.classList.add('active');
   document.getElementById('cpick').value=c;
-  const d=document.getElementById('draw-color-display');if(d)d.textContent='COL: '+c;
+  const d=document.getElementById('dColDisp');if(d)d.textContent='COL: '+c;
   if(cTool==='eraser')setTool('pen',document.getElementById('tool-pen'));
 }
 document.getElementById('szr').addEventListener('input',function(){
   cSz=+this.value;
   document.getElementById('szv').textContent=this.value;
-  const d=document.getElementById('draw-size-display');if(d)d.textContent='SZ: '+this.value;
+  const d=document.getElementById('dSzDisp');if(d)d.textContent='SZ: '+this.value;
 });
 function clearC(){ctx.clearRect(0,0,cv.width,cv.height);}
 function dlC(){
@@ -499,15 +612,15 @@ function dlC(){
   tc.fillRect(0,0,tmp.width,tmp.height);tc.drawImage(cv,0,0);
   const a=document.createElement('a');a.download='disegno-'+Date.now()+'.png';a.href=tmp.toDataURL();a.click();
 }
-setTimeout(rsz,200);
-window.addEventListener('resize',()=>{if(document.getElementById('panel-draw').classList.contains('active'))rsz();});
- 
-// ═══════════════════ NOTES ═══════════════════
+setTimeout(initCanvas,200);
+
+// ══════════════════════════════════════════════
+//  NOTES
+// ══════════════════════════════════════════════
 let notes=JSON.parse(localStorage.getItem('ms_notes')||'[]'),curNid=null;
 function updateNotesScreen(){
-  const cnt=document.getElementById('notes-count');if(cnt)cnt.textContent=notes.length+' NOTE';
-  const cur=document.getElementById('note-cur-title');
-  if(cur){const n=notes.find(x=>x.id===curNid);cur.textContent=n?(n.title||'SENZA TITOLO'):'NESSUNA NOTA SELEZIONATA';}
+  const c=document.getElementById('notes-count');if(c)c.textContent=notes.length+' NOTE';
+  const t=document.getElementById('note-cur-title');if(t){const n=notes.find(x=>x.id===curNid);t.textContent=n?(n.title||'SENZA TITOLO'):'NESSUNA NOTA SELEZIONATA';}
 }
 function rnotes(){
   const l=document.getElementById('noteList');l.innerHTML='';
@@ -547,141 +660,186 @@ function saveNote(){
 }
 function svN(){localStorage.setItem('ms_notes',JSON.stringify(notes));}
 rnotes();
- 
-// ═══════════════════ REMINDERS ═══════════════════
-let rems=JSON.parse(localStorage.getItem('ms_rems')||'[]'),rt={};
- 
-// Impostare i default di data/ora
-(function(){
+
+// ══════════════════════════════════════════════
+//  REMINDERS + ALARMS
+// ══════════════════════════════════════════════
+let rems=JSON.parse(localStorage.getItem('ms_rems')||'[]');
+let remTimers={};
+let curType='reminder'; // 'reminder' | 'alarm'
+let alarmAudioCtx=null, alarmOscillators=[];
+
+// default date/time = now+1h
+(()=>{
   const n=new Date(Date.now()+3600000);n.setSeconds(0,0);
   document.getElementById('remDay').value=n.toISOString().slice(0,10);
   document.getElementById('remHour').value=n.toTimeString().slice(0,5);
 })();
- 
+
+function selType(t){
+  curType=t;
+  document.getElementById('type-reminder').classList.toggle('active',t==='reminder');
+  document.getElementById('type-alarm').classList.toggle('active',t==='alarm');
+}
+
 function updateRemScreen(){
   const active=rems.filter(r=>!r.done&&r.date&&new Date(r.date)>new Date());
-  const cnt=document.getElementById('rem-count-display');if(cnt)cnt.textContent=active.length+' ATTIVI';
+  const c=document.getElementById('rem-count-display');if(c)c.textContent=active.length+' ATTIVI';
   const next=[...active].sort((a,b)=>new Date(a.date)-new Date(b.date))[0];
-  const nd=document.getElementById('rem-next-display');
-  if(nd)nd.textContent=next?'PROSSIMO: '+next.title.toUpperCase().slice(0,28):'NESSUN PROSSIMO EVENTO';
+  const n=document.getElementById('rem-next-display');
+  if(n)n.textContent=next?'PROSSIMO: '+next.title.toUpperCase().slice(0,30):'NESSUN PROSSIMO EVENTO';
 }
+
 function rrems(){
   const l=document.getElementById('remList');l.innerHTML='';
   if(!rems.length){
-    l.innerHTML='<div style="font-family:var(--font-mono);font-size:9px;color:var(--text2);padding:.75rem 0;letter-spacing:1px">[ NESSUN PROMEMORIA ]</div>';
+    l.innerHTML='<div style="font-family:var(--font-mono);font-size:9px;color:var(--text2);padding:.6rem 0;letter-spacing:1px">[ NESSUN PROMEMORIA ]</div>';
     updateRemScreen();return;
   }
   [...rems].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(r=>{
-    const el=document.createElement('div');el.className='rem-card'+(r.done?' done':'');
+    const el=document.createElement('div');
+    el.className='rem-card'+(r.done?' done':'')+(r.type==='alarm'?' alarm-card':'');
     const d=r.date?new Date(r.date).toLocaleString('it-IT',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'SENZA DATA';
-    el.innerHTML=`<div class="rem-chk" onclick="togR('${r.id}')">${r.done?'✓':''}</div><div class="rem-info"><div class="rem-title">${r.title}</div><div class="rem-time">⏰ ${d}</div></div><button class="rem-del" onclick="delR('${r.id}')">✕</button>`;
+    const badge=r.type==='alarm'?'<span class="rem-badge">SVEGLIA</span>':'';
+    el.innerHTML=`<div class="rem-chk" onclick="togR('${r.id}')">${r.done?'✓':''}</div>
+      <div class="rem-info">
+        <div class="rem-title">${r.title}${badge}</div>
+        <div class="rem-time">${r.type==='alarm'?'⏰':'📋'} ${d}</div>
+      </div>
+      <button class="rem-del" onclick="delR('${r.id}')">✕</button>`;
     l.appendChild(el);
   });
   updateRemScreen();
 }
+
 function addRem(){
   const t=document.getElementById('remTitle').value.trim();
   const day=document.getElementById('remDay').value;
   const hour=document.getElementById('remHour').value;
   if(!t){document.getElementById('remTitle').focus();return;}
-  const dateStr=day&&hour?day+'T'+hour:(day?day+'T00:00':'');
-  const r={id:'r'+Date.now(),title:t,date:dateStr,done:false};
+  const dateStr=day?(day+'T'+(hour||'00:00')):'';
+  const r={id:'r'+Date.now(),title:t,date:dateStr,done:false,type:curType};
   rems.push(r);svR();rrems();schR(r);
   document.getElementById('remTitle').value='';
-  showToast('✓ PROMEMORIA AGGIUNTO');
+  showToast('✓ '+(curType==='alarm'?'SVEGLIA':'PROMEMORIA')+' AGGIUNTO');
 }
 function togR(id){const r=rems.find(x=>x.id===id);if(r){r.done=!r.done;svR();rrems();}}
-function delR(id){rems=rems.filter(x=>x.id!==id);if(rt[id]){clearTimeout(rt[id]);delete rt[id];}svR();rrems();}
+function delR(id){
+  rems=rems.filter(x=>x.id!==id);
+  if(remTimers[id]){clearTimeout(remTimers[id]);delete remTimers[id];}
+  svR();rrems();
+}
 function svR(){localStorage.setItem('ms_rems',JSON.stringify(rems));}
+
 function schR(r){
   if(!r.date||r.done)return;
   const ms=new Date(r.date).getTime()-Date.now();
   if(ms<0)return;
-  rt[r.id]=setTimeout(()=>fireR(r),ms);
+  remTimers[r.id]=setTimeout(()=>fireR(r), ms);
 }
+
+// ── FIRE: reminder vs alarm ──
 function fireR(r){
-  // Web Notification
+  if(r.type==='alarm'){
+    triggerAlarm(r);
+  } else {
+    triggerReminder(r);
+  }
+  // mark done after firing
+  const found=rems.find(x=>x.id===r.id);
+  if(found){found.done=true;svR();rrems();}
+}
+
+function triggerReminder(r){
+  // Web notification
   if(typeof Notification!=='undefined'&&Notification.permission==='granted'){
-    new Notification('⏰ MYSPACE',{body:r.title,icon:'',badge:'',requireInteraction:true});
+    new Notification('📋 MYSPACE — PROMEMORIA',{body:r.title,requireInteraction:false});
   }
-  // ServiceWorker notification (funziona anche con app in background)
-  if('serviceWorker' in navigator&&navigator.serviceWorker.controller){
-    navigator.serviceWorker.controller.postMessage({type:'NOTIFY',title:'⏰ MYSPACE',body:r.title});
-  }
-  // Suono
+  // Short beep
   try{
     const a=new(window.AudioContext||window.webkitAudioContext)();
     const o=a.createOscillator();const g=a.createGain();
     o.connect(g);g.connect(a.destination);
     o.frequency.value=880;
-    g.gain.setValueAtTime(0.3,a.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.7);
-    o.start();o.stop(a.currentTime+0.7);
+    g.gain.setValueAtTime(0.25,a.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.6);
+    o.start();o.stop(a.currentTime+0.6);
+  }catch(e){}
+  showToast('📋 '+r.title);
+}
+
+function triggerAlarm(r){
+  // Show fullscreen overlay
+  document.getElementById('alarmName').textContent=r.title;
+  document.getElementById('alarmOverlay').classList.add('ringing');
+  // Web notification (persistent)
+  if(typeof Notification!=='undefined'&&Notification.permission==='granted'){
+    new Notification('⏰ SVEGLIA — MYSPACE',{body:r.title,requireInteraction:true});
+  }
+  // Looping alarm sound
+  startAlarmSound();
+}
+
+function startAlarmSound(){
+  stopAlarmSound();
+  try{
+    alarmAudioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    function beepLoop(){
+      if(!alarmAudioCtx)return;
+      const t=alarmAudioCtx.currentTime;
+      [[0,880],[0.15,1100],[0.3,880],[0.45,1100]].forEach(([dt,freq])=>{
+        const o=alarmAudioCtx.createOscillator();
+        const g=alarmAudioCtx.createGain();
+        o.type='square';o.frequency.value=freq;
+        g.gain.setValueAtTime(0,t+dt);
+        g.gain.linearRampToValueAtTime(0.3,t+dt+0.02);
+        g.gain.exponentialRampToValueAtTime(0.001,t+dt+0.13);
+        o.connect(g);g.connect(alarmAudioCtx.destination);
+        o.start(t+dt);o.stop(t+dt+0.15);
+        alarmOscillators.push(o);
+      });
+      // repeat every 1.2s
+      alarmOscillators._timer=setTimeout(beepLoop,1200);
+    }
+    beepLoop();
   }catch(e){}
 }
+
+function stopAlarmSound(){
+  if(alarmOscillators._timer){clearTimeout(alarmOscillators._timer);}
+  alarmOscillators=[];
+  if(alarmAudioCtx){try{alarmAudioCtx.close();}catch(e){}alarmAudioCtx=null;}
+}
+
+function dismissAlarm(){
+  stopAlarmSound();
+  document.getElementById('alarmOverlay').classList.remove('ringing');
+}
+
+// ── NOTIFICATIONS ──
 function askNotif(){
   Notification.requestPermission().then(p=>{
     if(p==='granted'){document.getElementById('notifBar').style.display='none';showToast('✓ NOTIFICHE ATTIVATE');}
     else showToast('✕ NOTIFICHE NEGATE',true);
   });
 }
-function checkSWBar(){
-  if('serviceWorker' in navigator&&typeof Notification!=='undefined'&&Notification.permission!=='granted'){
-    document.getElementById('notifBar').style.display='flex';
-  }
-}
 if(typeof Notification!=='undefined'&&Notification.permission==='default')
   document.getElementById('notifBar').style.display='flex';
-rems.forEach(schR);rrems();
- 
-// ═══════════════════ SERVICE WORKER (notifiche in background) ═══════════════════
-const SW_CODE=`
-self.addEventListener('message',e=>{
-  if(e.data&&e.data.type==='NOTIFY'){
-    self.registration.showNotification(e.data.title||'⏰ MYSPACE',{
-      body:e.data.body||'',
-      requireInteraction:true,
-      icon:''
-    });
-  }
-});
-self.addEventListener('push',e=>{
-  const d=e.data?e.data.json():{};
-  e.waitUntil(self.registration.showNotification(d.title||'⏰ MYSPACE',{body:d.body||'',requireInteraction:true}));
-});
-self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(clients.openWindow('/'));});
-`;
-let swReg=null;
-async function registerSW(){
-  if(!('serviceWorker' in navigator)){showToast('✕ NON SUPPORTATO',true);return;}
-  try{
-    const blob=new Blob([SW_CODE],{type:'application/javascript'});
-    const url=URL.createObjectURL(blob);
-    swReg=await navigator.serviceWorker.register(url,{scope:'/'});
-    document.getElementById('swRegBar').style.display='none';
-    showToast('✓ APP INSTALLATA — NOTIFICHE ATTIVE IN BACKGROUND');
-    // Chiedi anche permesso notifiche se non ancora
-    if(Notification.permission==='default')askNotif();
-  }catch(err){showToast('✕ ERRORE: '+err.message,true);}
-}
-// Prova auto-registrazione se già supportata
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.getRegistrations().then(regs=>{
-    if(regs.length===0&&Notification.permission==='granted'){
-      // mostra bottone installa
-      document.getElementById('swRegBar').style.display='flex';
-    }
-  });
-}
- 
-// ═══════════════════ TOAST ═══════════════════
+
+// Schedule all existing reminders on load
+rems.forEach(schR);
+rrems();
+
+// ══════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════
 let toastT=null;
 function showToast(msg,err=false){
   const el=document.getElementById('toast');el.textContent=msg;
   el.className='toast show'+(err?' err':'');
-  if(toastT)clearTimeout(toastT);toastT=setTimeout(()=>el.className='toast',2800);
+  if(toastT)clearTimeout(toastT);
+  toastT=setTimeout(()=>el.className='toast',2800);
 }
 </script>
 </body>
 </html>
- 
