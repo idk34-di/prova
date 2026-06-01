@@ -76,13 +76,11 @@ input[type=range].szr{width:65px;accent-color:var(--accent);}
 /* INFINITE CANVAS */
 .canvas-outer{
   flex:1;overflow:hidden;position:relative;
-  /* crosshair default, overridden when panning */
   cursor:crosshair;
   user-select:none;
 }
 .canvas-outer.panning{cursor:grabbing;}
 .canvas-viewport{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform;}
-/* the actual canvas never intercepts pointer events — outer does */
 #drawCanvas{display:block;pointer-events:none;}
 
 /* ═══ NOTES ═══ */
@@ -106,67 +104,34 @@ input[type=range].szr{width:65px;accent-color:var(--accent);}
 .note-body-in::placeholder{color:var(--text2);}
 .note-empty{flex:1;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:10px;color:var(--text2);letter-spacing:2px;}
 
-/* ═══ REMINDERS & ALARMS ═══ */
-.rem-wrap{padding:.9rem;display:flex;flex-direction:column;gap:10px;}
-.rem-form{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:.9rem;display:flex;flex-direction:column;gap:8px;}
+/* ═══ MIND MAP ═══ */
+.mindmap-wrap{padding:.9rem;display:flex;flex-direction:column;gap:10px;height:100%;}
+.mindmap-toolbar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
+.mindmap-form{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:.9rem;display:flex;flex-direction:column;gap:8px;}
 .form-label{font-family:var(--font-mono);font-size:9px;color:var(--accent);letter-spacing:2px;margin-bottom:2px;}
 .frow{display:flex;gap:7px;flex-wrap:wrap;align-items:center;}
 .fin{flex:1;min-width:110px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--text);font-family:var(--font-mono);font-size:11px;outline:none;transition:border-color .15s;}
 .fin:focus{border-color:var(--accent);}
 .fin::placeholder{color:var(--text2);}
-.fin-sm{flex:0 0 auto;}
-.fin-date{width:140px;}
-.fin-time{width:100px;}
-/* Alarm type selector */
-.type-sel{display:flex;gap:4px;}
-.type-opt{padding:3px 9px;border-radius:2px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;cursor:pointer;transition:all .12s;}
-.type-opt:hover{border-color:var(--accent);color:var(--accent);}
-.type-opt.active{background:var(--accent);color:var(--pad-text);border-color:var(--accent);}
-.type-opt.alarm-opt.active{background:var(--accent3);border-color:var(--accent3);color:#fff;}
+.mindmap-canvas{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:2px;position:relative;overflow:auto;}
+.mindmap-canvas svg{width:100%;height:100%;min-width:800px;min-height:600px;}
+.mindmap-node{cursor:pointer;transition:all .2s;}
+.mindmap-node circle{fill:var(--accent);stroke:var(--accent2);stroke-width:2;}
+.mindmap-node:hover circle{r:35;}
+.mindmap-node text{font-family:var(--font-mono);font-size:12px;fill:var(--pad-text);text-anchor:middle;pointer-events:none;}
+.mindmap-node.selected circle{fill:var(--accent3);}
+.mindmap-link{stroke:var(--border);stroke-width:2;fill:none;}
 
-.rem-list{display:flex;flex-direction:column;gap:5px;}
-.rem-card{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:9px 11px;display:flex;align-items:center;gap:9px;transition:border-color .15s;}
-.rem-card:hover{border-color:var(--accent);}
-.rem-card.alarm-card{border-left:3px solid var(--accent3);}
-.rem-card.done{opacity:.4;}
-.rem-card.done .rem-title{text-decoration:line-through;}
-.rem-chk{width:15px;height:15px;border:1px solid var(--accent);border-radius:2px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:10px;transition:background .12s;}
-.rem-card.done .rem-chk{background:var(--accent);color:var(--pad-text);}
-.rem-info{flex:1;min-width:0;}
-.rem-title{font-family:var(--font-mono);font-size:11px;}
-.rem-time{font-family:var(--font-mono);font-size:9px;color:var(--text2);margin-top:2px;letter-spacing:1px;}
-.rem-badge{font-family:var(--font-mono);font-size:8px;padding:1px 5px;border-radius:2px;background:var(--accent3);color:#fff;margin-left:5px;letter-spacing:1px;}
-.rem-del{background:none;border:none;color:var(--text2);cursor:pointer;font-size:13px;padding:2px 4px;transition:color .15s;}
-.rem-del:hover{color:var(--accent3);}
-.notif-bar{background:var(--surface);border:1px solid var(--accent);border-radius:2px;padding:7px 11px;font-family:var(--font-mono);font-size:9px;color:var(--text2);display:flex;align-items:center;gap:8px;letter-spacing:1px;}
-.notif-bar button{margin-left:auto;padding:3px 9px;background:var(--accent);border:none;color:var(--pad-text);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;cursor:pointer;border-radius:2px;}
-
-/* ALARM OVERLAY */
-.alarm-overlay{
-  display:none;position:fixed;inset:0;z-index:9999;
-  background:rgba(0,0,0,.85);align-items:center;justify-content:center;flex-direction:column;gap:20px;
-}
-.alarm-overlay.ringing{display:flex;}
-.alarm-box{
-  background:var(--surface);border:2px solid var(--accent3);border-radius:4px;
-  padding:2rem 2.5rem;text-align:center;max-width:340px;width:90%;
-  font-family:var(--font-mono);
-  animation:alarmPulse 1s infinite;
-}
-@keyframes alarmPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,107,107,.6)}50%{box-shadow:0 0 0 16px rgba(255,107,107,0)}}
-.alarm-icon{font-size:48px;margin-bottom:.5rem;}
-.alarm-title{color:var(--accent3);font-size:14px;letter-spacing:2px;margin-bottom:.4rem;}
-.alarm-name{color:var(--text);font-size:16px;margin-bottom:1.2rem;}
-.alarm-dismiss{padding:9px 24px;background:var(--accent3);border:none;color:#fff;font-family:var(--font-mono);font-size:12px;letter-spacing:2px;cursor:pointer;border-radius:2px;transition:opacity .15s;}
-.alarm-dismiss:hover{opacity:.85;}
-
-/* MUSIC */
-.music-wrap{display:flex;flex-direction:column;height:100%;}
-.music-info{padding:.55rem .9rem;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:9px;color:var(--text2);letter-spacing:2px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.music-info a{color:var(--accent);text-decoration:none;margin-left:auto;}
-.music-info a:hover{text-decoration:underline;}
-.music-frame{flex:1;}
-.music-frame iframe{width:100%;height:100%;border:none;}
+/* ═══ ASK AI ═══ */
+.ai-wrap{padding:.9rem;display:flex;flex-direction:column;gap:10px;height:100%;}
+.ai-form{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:.9rem;display:flex;flex-direction:column;gap:8px;}
+.ai-input{width:100%;min-height:80px;padding:9px;background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--text);font-family:var(--font-mono);font-size:11px;resize:vertical;outline:none;}
+.ai-input:focus{border-color:var(--accent);}
+.ai-input::placeholder{color:var(--text2);}
+.ai-result{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:2px;padding:11px 15px;overflow-y:auto;font-family:var(--font-mono);font-size:11px;line-height:1.8;color:var(--text);}
+.ai-result.loading{color:var(--text2);}
+.ai-result.loading::after{content:' ▌';animation:blink .8s infinite;}
+@keyframes blink{0%,50%{opacity:1;}51%,100%{opacity:.3;}}
 
 /* TOAST */
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--accent);color:var(--pad-text);font-family:var(--font-mono);font-size:11px;letter-spacing:1px;padding:9px 18px;border-radius:2px;z-index:9998;transition:transform .3s;white-space:nowrap;}
@@ -178,22 +143,12 @@ input[type=range].szr{width:65px;accent-color:var(--accent);}
 @media(max-width:560px){
   .notes-sidebar{width:125px;}
   .device{padding:.75rem;margin:0 .5rem .6rem;}
-  .fin-date{width:125px;}.fin-time{width:90px;}
+  .fin-date{width:125px;}
 }
 @media(max-width:400px){.notes-sidebar{display:none;}}
 </style>
 </head>
 <body>
-
-<!-- ALARM OVERLAY -->
-<div class="alarm-overlay" id="alarmOverlay">
-  <div class="alarm-box">
-    <div class="alarm-icon">⏰</div>
-    <div class="alarm-title">SVEGLIA</div>
-    <div class="alarm-name" id="alarmName">—</div>
-    <button class="alarm-dismiss" onclick="dismissAlarm()">■ FERMA</button>
-  </div>
-</div>
 
 <div class="toast" id="toast"></div>
 
@@ -208,7 +163,8 @@ input[type=range].szr{width:65px;accent-color:var(--accent);}
 <div class="tabs">
   <button class="tab active" onclick="switchTab('draw',this)">✏ DISEGNO</button>
   <button class="tab" onclick="switchTab('notes',this)">📄 APPUNTI</button>
-  <button class="tab" onclick="switchTab('reminders',this)">⏰ PROMEMORIA</button>
+  <button class="tab" onclick="switchTab('mindmap',this)">🧠 MAPPE</button>
+  <button class="tab" onclick="switchTab('ai',this)">🤖 IA</button>
   <button class="tab" onclick="switchTab('music',this)">♪ MUSICA</button>
 </div>
 
@@ -265,10 +221,10 @@ input[type=range].szr{width:65px;accent-color:var(--accent);}
     </div>
   </div>
 
-  <!-- infinite canvas container: ALL pointer events go here -->
+  <!-- infinite canvas: MUCH LARGER -->
   <div class="canvas-outer" id="canvasOuter">
     <div class="canvas-viewport" id="canvasVP">
-      <canvas id="drawCanvas" width="3000" height="3000"></canvas>
+      <canvas id="drawCanvas" width="6000" height="6000"></canvas>
     </div>
   </div>
 </div>
@@ -303,43 +259,47 @@ input[type=range].szr{width:65px;accent-color:var(--accent);}
   </div>
 </div>
 
-<!-- ══════════════ REMINDERS PANEL ══════════════ -->
-<div id="panel-reminders" class="panel">
+<!-- ══════════════ MINDMAP PANEL ══════════════ -->
+<div id="panel-mindmap" class="panel">
   <div style="padding:6px 10px;background:var(--surface);border-bottom:1px solid var(--border);">
     <div class="screen" style="margin-bottom:0;">
       <div class="screen-top">
-        <span class="screen-label">PROMEMORIA</span>
-        <span class="screen-right" id="rem-count-display">0 ATTIVI</span>
-      </div>
-      <div class="screen-row">
-        <span class="screen-info" id="rem-next-display">NESSUN PROSSIMO EVENTO</span>
+        <span class="screen-label">MAPPE MENTALI</span>
+        <span class="screen-right" id="mindmap-count">0 NODI</span>
       </div>
     </div>
   </div>
-  <div class="rem-wrap">
-    <div id="notifBar" class="notif-bar" style="display:none">
-      🔔 ATTIVA LE NOTIFICHE PER RICEVERE GLI ALLARMI
-      <button onclick="askNotif()">ATTIVA</button>
-    </div>
-    <div class="rem-form">
-      <div class="form-label">+ NUOVO</div>
+  <div class="mindmap-wrap">
+    <div class="mindmap-form">
+      <div class="form-label">+ NUOVO NODO</div>
       <div class="frow">
-        <input type="text" class="fin" id="remTitle" placeholder="DESCRIZIONE..." style="flex:2;min-width:150px">
-      </div>
-      <div class="frow">
-        <input type="date" class="fin fin-date" id="remDay">
-        <input type="time" class="fin fin-time" id="remHour">
-      </div>
-      <div class="frow">
-        <span style="font-family:var(--font-mono);font-size:9px;color:var(--text2);letter-spacing:1px">TIPO:</span>
-        <div class="type-sel">
-          <button class="type-opt active"     id="type-reminder" onclick="selType('reminder')">📋 PROMEMORIA</button>
-          <button class="type-opt alarm-opt"  id="type-alarm"    onclick="selType('alarm')">⏰ SVEGLIA</button>
-        </div>
-        <button class="btn green" style="margin-left:auto" onclick="addRem()">+ AGGIUNGI</button>
+        <input type="text" class="fin" id="mmTitle" placeholder="CONCETTO..." style="flex:2;min-width:150px">
+        <button class="btn green" onclick="addMindmapNode()">+ AGGIUNGI</button>
       </div>
     </div>
-    <div class="rem-list" id="remList"></div>
+    <div class="mindmap-canvas" id="mindmapCanvas">
+      <svg id="mindmapSvg"></svg>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ASK AI PANEL ══════════════ -->
+<div id="panel-ai" class="panel">
+  <div style="padding:6px 10px;background:var(--surface);border-bottom:1px solid var(--border);">
+    <div class="screen" style="margin-bottom:0;">
+      <div class="screen-top">
+        <span class="screen-label">CHIEDI ALL'IA</span>
+        <span class="screen-right">🤖 GPT</span>
+      </div>
+    </div>
+  </div>
+  <div class="ai-wrap">
+    <div class="ai-form">
+      <div class="form-label">DOMANDA</div>
+      <textarea class="ai-input" id="aiInput" placeholder="Scrivi qui la tua domanda..."></textarea>
+      <button class="btn green" onclick="askAI()" style="align-self:flex-end">↗ INVIA</button>
+    </div>
+    <div class="ai-result" id="aiResult">[ RISPOSTA APPARIRÀ QUI ]</div>
   </div>
 </div>
 
@@ -353,7 +313,9 @@ input[type=range].szr{width:65px;accent-color:var(--accent);}
   </div>
   <div class="music-wrap" style="flex:1;">
     <div class="music-info">♪ SINTETIZZATORE — VERSION 3.0 <a href="https://idk34-di.github.io/synthesizer/" target="_blank">↗ APRI IN NUOVA SCHEDA</a></div>
-    <div class="music-frame"><iframe src="https://idk34-di.github.io/synthesizer/" allowfullscreen loading="lazy" title="Synthesizer"></iframe></div>
+    <div style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:2px;margin:.9rem;display:flex;align-items:center;justify-content:center;color:var(--text2);font-family:var(--font-mono);">
+      [ SINTETIZZATORE - CARICAMENTO... ]
+    </div>
   </div>
 </div>
 
@@ -393,16 +355,16 @@ function switchTab(name,btn){
   document.querySelectorAll('.panel').forEach(p=>{p.classList.remove('active');p.style.display='none';});
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
   const panel=document.getElementById('panel-'+name);
-  panel.style.display=(name==='draw'||name==='notes'||name==='music')?'flex':'block';
+  panel.style.display=(name==='draw'||name==='notes'||name==='mindmap'||name==='ai'||name==='music')?'flex':'block';
   panel.classList.add('active');
   if(btn)btn.classList.add('active');
   if(name==='draw')setTimeout(initCanvas,30);
   if(name==='notes')updateNotesScreen();
-  if(name==='reminders'){updateRemScreen();}
+  if(name==='mindmap')updateMindmapScreen();
 }
 
 // ══════════════════════════════════════════════
-//  INFINITE CANVAS — fixed pointer-event model
+//  INFINITE CANVAS
 // ══════════════════════════════════════════════
 const outer  = document.getElementById('canvasOuter');
 const vp     = document.getElementById('canvasVP');
@@ -410,15 +372,10 @@ const cv     = document.getElementById('drawCanvas');
 const ctx    = cv.getContext('2d');
 
 let cTool='pen', cCol='#c8dce8', cSz=6;
-// camera
 let camX=0, camY=0, camZ=1;
-// drawing state
 let isDrawing=false, lastX=0, lastY=0;
-// panning state (alt+drag / middle-btn / space+drag)
 let isPanning=false, panStartX=0, panStartY=0, panCamX=0, panCamY=0;
-// pinch
 let lastPinchDist=null, pinchMidX=0, pinchMidY=0;
-// space bar held
 let spaceHeld=false;
 
 function applyTransform(){
@@ -429,11 +386,9 @@ function applyTransform(){
 }
 
 function initCanvas(){
-  // Just make sure the outer div has correct size; canvas is already big
   applyTransform();
 }
 
-// Convert screen coords → canvas coords
 function screenToCanvas(sx, sy){
   const r=outer.getBoundingClientRect();
   return {
@@ -442,34 +397,22 @@ function screenToCanvas(sx, sy){
   };
 }
 
-function getEventPos(e){
-  if(e.touches && e.touches.length>0){
-    return {x: e.touches[0].clientX, y: e.touches[0].clientY};
-  }
-  return {x: e.clientX, y: e.clientY};
-}
-
-// ── ZOOM ──
 function doZoom(delta, pivotSX, pivotSY){
   const r=outer.getBoundingClientRect();
   const px = (pivotSX!==undefined) ? pivotSX-r.left : r.width/2;
   const py = (pivotSY!==undefined) ? pivotSY-r.top  : r.height/2;
   const oldZ=camZ;
-  // UNLIMITED: allow any positive value, practical range 0.05–50
   camZ=Math.max(0.05, camZ+delta*camZ*0.6);
-  // keep pivot point fixed on screen
   camX = px - (px-camX)*(camZ/oldZ);
   camY = py - (py-camY)*(camZ/oldZ);
   applyTransform();
 }
 function resetView(){camX=0;camY=0;camZ=1;applyTransform();}
 
-// ── DRAW ──
 function startStroke(sx, sy){
   isDrawing=true;
   const p=screenToCanvas(sx,sy);
   lastX=p.x; lastY=p.y;
-  // dot on click
   ctx.beginPath();
   if(cTool==='eraser'){
     ctx.globalCompositeOperation='destination-out';
@@ -510,10 +453,8 @@ function continueStroke(sx, sy){
 }
 function endStroke(){ isDrawing=false; }
 
-// ── POINTER EVENTS on outer div ──
 outer.addEventListener('mousedown', e=>{
   e.preventDefault();
-  // middle button or alt+left or space+left → pan
   if(e.button===1 || e.altKey || spaceHeld){
     isPanning=true;
     panStartX=e.clientX; panStartY=e.clientY;
@@ -537,18 +478,15 @@ window.addEventListener('mouseup', e=>{
   else endStroke();
 });
 
-// Wheel zoom (unlimited)
 outer.addEventListener('wheel', e=>{
   e.preventDefault();
   const delta= e.deltaY<0 ? 0.15 : -0.15;
   doZoom(delta, e.clientX, e.clientY);
 }, {passive:false});
 
-// Keyboard space = pan mode
 window.addEventListener('keydown', e=>{ if(e.code==='Space'&&document.getElementById('panel-draw').classList.contains('active')){spaceHeld=true;outer.style.cursor='grab';e.preventDefault();}});
 window.addEventListener('keyup',   e=>{ if(e.code==='Space'){spaceHeld=false;outer.style.cursor='crosshair';}});
 
-// Touch: draw (1 finger) or pinch-zoom (2 fingers)
 outer.addEventListener('touchstart', e=>{
   e.preventDefault();
   if(e.touches.length===2){
@@ -570,7 +508,6 @@ outer.addEventListener('touchmove', e=>{
     const my=(t0.clientY+t1.clientY)/2;
     const delta=(d-lastPinchDist)/lastPinchDist;
     doZoom(delta, mx, my);
-    // also pan with midpoint movement
     camX+=mx-pinchMidX; camY+=my-pinchMidY;
     applyTransform();
     lastPinchDist=d; pinchMidX=mx; pinchMidY=my;
@@ -583,7 +520,6 @@ outer.addEventListener('touchend', e=>{
   if(e.touches.length===0)endStroke();
 },{passive:false});
 
-// Toolbar helpers
 function setTool(t,btn){
   cTool=t;
   document.querySelectorAll('.tool-btn[id^="tool-"]').forEach(b=>b.classList.remove('active'));
@@ -661,173 +597,127 @@ function svN(){localStorage.setItem('ms_notes',JSON.stringify(notes));}
 rnotes();
 
 // ══════════════════════════════════════════════
-//  REMINDERS + ALARMS
+//  MIND MAP
 // ══════════════════════════════════════════════
-let rems=JSON.parse(localStorage.getItem('ms_rems')||'[]');
-let remTimers={};
-let curType='reminder'; // 'reminder' | 'alarm'
-let alarmAudioCtx=null, alarmOscillators=[];
+let mindmapNodes=JSON.parse(localStorage.getItem('ms_mindmap')||'[]');
+const colors=['#5bc8e8','#00ff88','#ff6b6b','#ffd166','#b06ef3','#ff6eb4'];
 
-// default date/time = now+1h
-(()=>{
-  const n=new Date(Date.now()+3600000);n.setSeconds(0,0);
-  document.getElementById('remDay').value=n.toISOString().slice(0,10);
-  document.getElementById('remHour').value=n.toTimeString().slice(0,5);
-})();
-
-function selType(t){
-  curType=t;
-  document.getElementById('type-reminder').classList.toggle('active',t==='reminder');
-  document.getElementById('type-alarm').classList.toggle('active',t==='alarm');
+function updateMindmapScreen(){
+  const c=document.getElementById('mindmap-count');
+  if(c)c.textContent=mindmapNodes.length+' NODI';
+  renderMindmap();
 }
 
-function updateRemScreen(){
-  const active=rems.filter(r=>!r.done&&r.date&&new Date(r.date)>new Date());
-  const c=document.getElementById('rem-count-display');if(c)c.textContent=active.length+' ATTIVI';
-  const next=[...active].sort((a,b)=>new Date(a.date)-new Date(b.date))[0];
-  const n=document.getElementById('rem-next-display');
-  if(n)n.textContent=next?'PROSSIMO: '+next.title.toUpperCase().slice(0,30):'NESSUN PROSSIMO EVENTO';
+function addMindmapNode(){
+  const title=document.getElementById('mmTitle').value.trim();
+  if(!title){document.getElementById('mmTitle').focus();return;}
+  const node={
+    id:'mm'+Date.now(),
+    title:title,
+    x:Math.random()*400+200,
+    y:Math.random()*300+150,
+    color:colors[mindmapNodes.length%colors.length]
+  };
+  mindmapNodes.push(node);
+  saveMindmap();
+  updateMindmapScreen();
+  document.getElementById('mmTitle').value='';
+  showToast('✓ NODO AGGIUNTO');
 }
 
-function rrems(){
-  const l=document.getElementById('remList');l.innerHTML='';
-  if(!rems.length){
-    l.innerHTML='<div style="font-family:var(--font-mono);font-size:9px;color:var(--text2);padding:.6rem 0;letter-spacing:1px">[ NESSUN PROMEMORIA ]</div>';
-    updateRemScreen();return;
-  }
-  [...rems].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(r=>{
-    const el=document.createElement('div');
-    el.className='rem-card'+(r.done?' done':'')+(r.type==='alarm'?' alarm-card':'');
-    const d=r.date?new Date(r.date).toLocaleString('it-IT',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'SENZA DATA';
-    const badge=r.type==='alarm'?'<span class="rem-badge">SVEGLIA</span>':'';
-    el.innerHTML=`<div class="rem-chk" onclick="togR('${r.id}')">${r.done?'✓':''}</div>
-      <div class="rem-info">
-        <div class="rem-title">${r.title}${badge}</div>
-        <div class="rem-time">${r.type==='alarm'?'⏰':'📋'} ${d}</div>
-      </div>
-      <button class="rem-del" onclick="delR('${r.id}')">✕</button>`;
-    l.appendChild(el);
-  });
-  updateRemScreen();
+function delMindmapNode(id){
+  mindmapNodes=mindmapNodes.filter(n=>n.id!==id);
+  saveMindmap();
+  updateMindmapScreen();
 }
 
-function addRem(){
-  const t=document.getElementById('remTitle').value.trim();
-  const day=document.getElementById('remDay').value;
-  const hour=document.getElementById('remHour').value;
-  if(!t){document.getElementById('remTitle').focus();return;}
-  const dateStr=day?(day+'T'+(hour||'00:00')):'';
-  const r={id:'r'+Date.now(),title:t,date:dateStr,done:false,type:curType};
-  rems.push(r);svR();rrems();schR(r);
-  document.getElementById('remTitle').value='';
-  showToast('✓ '+(curType==='alarm'?'SVEGLIA':'PROMEMORIA')+' AGGIUNTO');
-}
-function togR(id){const r=rems.find(x=>x.id===id);if(r){r.done=!r.done;svR();rrems();}}
-function delR(id){
-  rems=rems.filter(x=>x.id!==id);
-  if(remTimers[id]){clearTimeout(remTimers[id]);delete remTimers[id];}
-  svR();rrems();
-}
-function svR(){localStorage.setItem('ms_rems',JSON.stringify(rems));}
-
-function schR(r){
-  if(!r.date||r.done)return;
-  const ms=new Date(r.date).getTime()-Date.now();
-  if(ms<0)return;
-  remTimers[r.id]=setTimeout(()=>fireR(r), ms);
+function saveMindmap(){
+  localStorage.setItem('ms_mindmap',JSON.stringify(mindmapNodes));
 }
 
-// ── FIRE: reminder vs alarm ──
-function fireR(r){
-  if(r.type==='alarm'){
-    triggerAlarm(r);
-  } else {
-    triggerReminder(r);
-  }
-  // mark done after firing
-  const found=rems.find(x=>x.id===r.id);
-  if(found){found.done=true;svR();rrems();}
-}
-
-function triggerReminder(r){
-  // Web notification
-  if(typeof Notification!=='undefined'&&Notification.permission==='granted'){
-    new Notification('📋 MYSPACE — PROMEMORIA',{body:r.title,requireInteraction:false});
-  }
-  // Short beep
-  try{
-    const a=new(window.AudioContext||window.webkitAudioContext)();
-    const o=a.createOscillator();const g=a.createGain();
-    o.connect(g);g.connect(a.destination);
-    o.frequency.value=880;
-    g.gain.setValueAtTime(0.25,a.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.6);
-    o.start();o.stop(a.currentTime+0.6);
-  }catch(e){}
-  showToast('📋 '+r.title);
-}
-
-function triggerAlarm(r){
-  // Show fullscreen overlay
-  document.getElementById('alarmName').textContent=r.title;
-  document.getElementById('alarmOverlay').classList.add('ringing');
-  // Web notification (persistent)
-  if(typeof Notification!=='undefined'&&Notification.permission==='granted'){
-    new Notification('⏰ SVEGLIA — MYSPACE',{body:r.title,requireInteraction:true});
-  }
-  // Looping alarm sound
-  startAlarmSound();
-}
-
-function startAlarmSound(){
-  stopAlarmSound();
-  try{
-    alarmAudioCtx=new(window.AudioContext||window.webkitAudioContext)();
-    function beepLoop(){
-      if(!alarmAudioCtx)return;
-      const t=alarmAudioCtx.currentTime;
-      [[0,880],[0.15,1100],[0.3,880],[0.45,1100]].forEach(([dt,freq])=>{
-        const o=alarmAudioCtx.createOscillator();
-        const g=alarmAudioCtx.createGain();
-        o.type='square';o.frequency.value=freq;
-        g.gain.setValueAtTime(0,t+dt);
-        g.gain.linearRampToValueAtTime(0.3,t+dt+0.02);
-        g.gain.exponentialRampToValueAtTime(0.001,t+dt+0.13);
-        o.connect(g);g.connect(alarmAudioCtx.destination);
-        o.start(t+dt);o.stop(t+dt+0.15);
-        alarmOscillators.push(o);
-      });
-      // repeat every 1.2s
-      alarmOscillators._timer=setTimeout(beepLoop,1200);
+function renderMindmap(){
+  const svg=document.getElementById('mindmapSvg');
+  svg.innerHTML='';
+  if(mindmapNodes.length===0)return;
+  
+  // Draw connections
+  for(let i=0;i<mindmapNodes.length;i++){
+    for(let j=i+1;j<mindmapNodes.length;j++){
+      const n1=mindmapNodes[i],n2=mindmapNodes[j];
+      const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1',n1.x);
+      line.setAttribute('y1',n1.y);
+      line.setAttribute('x2',n2.x);
+      line.setAttribute('y2',n2.y);
+      line.setAttribute('class','mindmap-link');
+      svg.appendChild(line);
     }
-    beepLoop();
-  }catch(e){}
-}
-
-function stopAlarmSound(){
-  if(alarmOscillators._timer){clearTimeout(alarmOscillators._timer);}
-  alarmOscillators=[];
-  if(alarmAudioCtx){try{alarmAudioCtx.close();}catch(e){}alarmAudioCtx=null;}
-}
-
-function dismissAlarm(){
-  stopAlarmSound();
-  document.getElementById('alarmOverlay').classList.remove('ringing');
-}
-
-// ── NOTIFICATIONS ──
-function askNotif(){
-  Notification.requestPermission().then(p=>{
-    if(p==='granted'){document.getElementById('notifBar').style.display='none';showToast('✓ NOTIFICHE ATTIVATE');}
-    else showToast('✕ NOTIFICHE NEGATE',true);
+  }
+  
+  // Draw nodes
+  mindmapNodes.forEach(n=>{
+    const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('class','mindmap-node');
+    
+    const circle=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx',n.x);
+    circle.setAttribute('cy',n.y);
+    circle.setAttribute('r','30');
+    circle.setAttribute('fill',n.color);
+    
+    const text=document.createElementNS('http://www.w3.org/2000/svg','text');
+    text.setAttribute('x',n.x);
+    text.setAttribute('y',n.y);
+    text.setAttribute('dy','0.35em');
+    text.textContent=n.title.slice(0,10);
+    
+    g.appendChild(circle);
+    g.appendChild(text);
+    g.onclick=()=>delMindmapNode(n.id);
+    svg.appendChild(g);
   });
 }
-if(typeof Notification!=='undefined'&&Notification.permission==='default')
-  document.getElementById('notifBar').style.display='flex';
 
-// Schedule all existing reminders on load
-rems.forEach(schR);
-rrems();
+// ══════════════════════════════════════════════
+//  ASK AI (via OpenRouter/external API)
+// ══════════════════════════════════════════════
+async function askAI(){
+  const question=document.getElementById('aiInput').value.trim();
+  if(!question){document.getElementById('aiInput').focus();return;}
+  
+  const resultEl=document.getElementById('aiResult');
+  resultEl.textContent='⏳ ELABORAZIONE...';
+  resultEl.className='ai-result loading';
+  
+  try{
+    // Using Hugging Face Inference API (free tier) or a public endpoint
+    const response=await fetch('https://api-inference.huggingface.co/models/mistral-community/Mistral-7B-Instruct-v0.1',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({inputs:question})
+    });
+    
+    if(!response.ok)throw new Error('Errore API');
+    
+    const data=await response.json();
+    let text=data[0]?.generated_text||'Nessuna risposta';
+    
+    // Clean response
+    text=text.replace(question,'').trim();
+    
+    resultEl.textContent=text;
+    resultEl.className='ai-result';
+    showToast('✓ RISPOSTA RICEVUTA');
+  }catch(e){
+    resultEl.textContent='✕ ERRORE: '+e.message+'\n\nProva a usare una chiave API valida o una connessione diretta a un servizio IA.';
+    resultEl.className='ai-result';
+    showToast('✕ ERRORE API',true);
+  }
+}
+
+document.getElementById('aiInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.ctrlKey)askAI();
+});
 
 // ══════════════════════════════════════════════
 //  TOAST
