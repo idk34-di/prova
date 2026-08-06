@@ -68,7 +68,7 @@ input[type=range].szr{width:65px;accent-color:var(--accent);}
 .zbtn{padding:2px 7px;border-radius:2px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:var(--font-mono);font-size:12px;cursor:pointer;transition:all .12s;line-height:1.2;}
 .zbtn:hover{border-color:var(--accent);color:var(--accent);}
 
-.canvas-outer{flex:1;overflow:hidden;position:relative;cursor:crosshair;user-select:none;}
+.canvas-outer{flex:1;overflow:hidden;position:relative;cursor:crosshair;user-select:none;min-height:200px;}
 .canvas-outer.panning{cursor:grabbing;}
 #drawCanvas{display:block;width:100%;height:100%;touch-action:none;}
 
@@ -101,7 +101,7 @@ input[type=range].szr{width:65px;accent-color:var(--accent);}
 .fin{flex:1;min-width:110px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--text);font-family:var(--font-mono);font-size:11px;outline:none;transition:border-color .15s;}
 .fin:focus{border-color:var(--accent);}
 .fin::placeholder{color:var(--text2);}
-.mindmap-canvas{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:2px;position:relative;overflow:auto;}
+.mindmap-canvas{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:2px;position:relative;overflow:auto;min-height:260px;}
 .mindmap-canvas svg{width:100%;height:100%;min-width:800px;min-height:600px;}
 .mindmap-node{cursor:pointer;}
 .mindmap-node circle{fill:var(--accent);stroke:var(--accent2);stroke-width:2;}
@@ -270,7 +270,7 @@ input[type=range].szr{width:65px;accent-color:var(--accent);}
   <div style="padding:6px 10px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;">
     <div class="screen" style="margin-bottom:0;">
       <div class="screen-top"><span class="screen-label">MUSICA</span><span class="screen-right">SYNTH</span></div>
-      <div class="screen-row"><span class="screen-info">VERSION 3.0</span><span class="screen-info">© 2026 ISMAELE</span></div>
+      <div class="screen-row"><span class="screen-info">VERSION 3.0</span><span class="screen-info">&copy; 2026 ISMAELE</span></div>
     </div>
   </div>
   <div class="music-empty">
@@ -283,6 +283,10 @@ input[type=range].szr{width:65px;accent-color:var(--accent);}
 
 <script>
 'use strict';
+
+/* readiness flag declared FIRST so early calls (e.g. from applyTheme) never
+   touch canvas/notes/mindmap variables before they exist */
+let canvasReady=false;
 
 /* THEMES */
 const THEMES=[
@@ -300,7 +304,7 @@ function applyTheme(idx){
   for(const[k,v]of Object.entries(t.vars))document.documentElement.style.setProperty(k,v);
   document.querySelectorAll('.theme-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
   localStorage.setItem('ms_theme',idx);
-  if(typeof redraw==='function') redraw();
+  if(canvasReady) redraw();
 }
 document.getElementById('theme-dots').innerHTML=THEMES.map((t,i)=>
   `<div class="theme-dot" style="background:${t.dot}" title="${t.name}" onclick="applyTheme(${i})"></div>`
@@ -348,8 +352,8 @@ function screenToWorld(sx,sy){ return {x:(sx-camX)/camZ, y:(sy-camY)/camZ}; }
 function toolWidth(tool,size){ return tool==='brush'?size*2.5:tool==='marker'?size*1.5:size; }
 
 function resizeCanvas(){
-  const w=outer.clientWidth, h=outer.clientHeight;
-  if(w<1||h<1)return;
+  const w=outer.clientWidth||outer.offsetWidth||800;
+  const h=outer.clientHeight||outer.offsetHeight||500;
   cv.width=Math.max(1,Math.round(w*dpr));
   cv.height=Math.max(1,Math.round(h*dpr));
   cv.style.width=w+'px'; cv.style.height=h+'px';
@@ -372,10 +376,11 @@ function drawStrokeOnCtx(c,s){
   c.lineCap='round'; c.lineJoin='round';
   c.beginPath();
   const p0=worldToScreen(s.points[0].x,s.points[0].y);
-  c.moveTo(p0.x,p0.y);
   if(s.points.length===1){
+    c.moveTo(p0.x,p0.y);
     c.lineTo(p0.x+0.01,p0.y+0.01);
   } else {
+    c.moveTo(p0.x,p0.y);
     for(let i=1;i<s.points.length;i++){
       const p=worldToScreen(s.points[i].x,s.points[i].y);
       c.lineTo(p.x,p.y);
@@ -399,7 +404,7 @@ function redraw(){
   const zv=document.getElementById('zoomVal'); if(zv)zv.textContent=pct;
   const zd=document.getElementById('dZoomDisp'); if(zd)zd.textContent='ZOOM: '+pct;
 }
-function initCanvas(){ resizeCanvas(); }
+function initCanvas(){ resizeCanvas(); canvasReady=true; }
 
 function startStroke(clientX,clientY){
   isDrawing=true;
@@ -537,7 +542,7 @@ function openNote(id){
 function delNote(){
   if(!curNid)return;
   const n=notes.find(x=>x.id===curNid);
-  if(!confirm('Eliminare la nota "'+(n?.title||'senza titolo')+'"?'))return;
+  if(!confirm('Eliminare la nota "'+(n?n.title||'senza titolo':'')+'"?'))return;
   notes=notes.filter(x=>x.id!==curNid); curNid=null;
   document.getElementById('noteEmpty').style.display='';
   document.getElementById('noteTitleIn').style.display='none';
@@ -556,9 +561,8 @@ rnotes();
 /* MIND MAP */
 let mindmapNodes=JSON.parse(localStorage.getItem('ms_mindmap')||'[]');
 let mindmapLinks=JSON.parse(localStorage.getItem('ms_mindmap_links')||'[]');
-const colors=['#5bc8e8','#00ff88','#ff6b6b','#ffd166','#b06ef3','#ff6eb4'];
+const mmColors=['#5bc8e8','#00ff88','#ff6b6b','#ffd166','#b06ef3','#ff6eb4'];
 let mmSelected=null, mmLinkArmed=null;
-let mmDragId=null, mmDragOffX=0, mmDragOffY=0, mmMoved=false, mmDownX=0, mmDownY=0;
 
 function saveMindmap(){
   localStorage.setItem('ms_mindmap',JSON.stringify(mindmapNodes));
@@ -572,12 +576,13 @@ function updateMindmapScreen(){
   renderMmEditor();
 }
 function addMindmapNode(){
-  const title=document.getElementById('mmTitle').value.trim();
-  if(!title){document.getElementById('mmTitle').focus();return;}
-  const node={id:'mm'+Date.now(), title, x:Math.random()*400+200, y:Math.random()*300+150, r:30, color:colors[mindmapNodes.length%colors.length]};
+  const el=document.getElementById('mmTitle');
+  const title=el.value.trim();
+  if(!title){el.focus();return;}
+  const node={id:'mm'+Date.now()+Math.floor(Math.random()*1000), title, x:Math.random()*400+200, y:Math.random()*300+150, r:30, color:mmColors[mindmapNodes.length%mmColors.length]};
   mindmapNodes.push(node);
   saveMindmap(); updateMindmapScreen();
-  document.getElementById('mmTitle').value='';
+  el.value='';
   showToast('NODO AGGIUNTO');
 }
 function toggleLink(a,b){
@@ -619,18 +624,19 @@ function renderMindmap(){
 }
 function onNodeDown(e,id){
   e.preventDefault();
-  mmDownX=e.clientX; mmDownY=e.clientY; mmMoved=false;
+  const downX=e.clientX, downY=e.clientY;
+  let moved=false;
   const svg=document.getElementById('mindmapSvg');
   const p=svgPoint(svg,e.clientX,e.clientY);
   const n=findNode(id);
-  mmDragId=id; mmDragOffX=p.x-n.x; mmDragOffY=p.y-n.y;
+  const offX=p.x-n.x, offY=p.y-n.y;
   const onMove=(ev)=>{
     const cx=ev.touches?ev.touches[0].clientX:ev.clientX;
     const cy=ev.touches?ev.touches[0].clientY:ev.clientY;
-    if(Math.abs(cx-mmDownX)>4||Math.abs(cy-mmDownY)>4)mmMoved=true;
-    if(mmMoved){
+    if(Math.abs(cx-downX)>4||Math.abs(cy-downY)>4)moved=true;
+    if(moved){
       const pp=svgPoint(svg,cx,cy);
-      n.x=pp.x-mmDragOffX; n.y=pp.y-mmDragOffY;
+      n.x=pp.x-offX; n.y=pp.y-offY;
       renderMindmap();
     }
   };
@@ -639,9 +645,8 @@ function onNodeDown(e,id){
     window.removeEventListener('mouseup',onUp);
     window.removeEventListener('touchmove',onMove);
     window.removeEventListener('touchend',onUp);
-    if(mmMoved){ saveMindmap(); }
+    if(moved){ saveMindmap(); }
     else { onNodeClick(id); }
-    mmDragId=null;
   };
   window.addEventListener('mousemove',onMove);
   window.addEventListener('mouseup',onUp);
@@ -681,21 +686,21 @@ function renderMmEditor(){
   const n=findNode(mmSelected);
   if(!n){ host.style.display='none'; host.innerHTML=''; return; }
   host.style.display='flex';
-  host.innerHTML=`
-    <div class="mm-editor-row">
-      <input type="text" class="mm-title-in" id="mmTitleEdit" value="${(n.title||'').replace(/"/g,'&quot;')}" placeholder="TESTO NODO...">
-      <button class="tool-btn" onclick="mmArmLink()">COLLEGA</button>
-      <button class="tool-btn red" onclick="mmDeleteSelected()">ELIMINA</button>
-      <button class="tool-btn" onclick="mmCloseEditor()">CHIUDI</button>
-    </div>
-    <div class="mm-editor-row">
-      <span class="form-label" style="margin:0">COLORE</span>
-      ${colors.map(c=>`<div class="mm-swatch${c===n.color?' active':''}" style="background:${c}" onclick="mmSetColor('${c}')"></div>`).join('')}
-      <span class="tsep"></span>
-      <span class="form-label" style="margin:0">DIM</span>
-      <input type="range" class="mm-range" min="16" max="60" value="${n.r||30}" oninput="mmSetSize(this.value)">
-    </div>
-  `;
+  const swatches=mmColors.map(c=>'<div class="mm-swatch'+(c===n.color?' active':'')+'" style="background:'+c+'" onclick="mmSetColor(\''+c+'\')"></div>').join('');
+  host.innerHTML=
+    '<div class="mm-editor-row">'+
+      '<input type="text" class="mm-title-in" id="mmTitleEdit" value="'+(n.title||'').replace(/"/g,'&quot;')+'" placeholder="TESTO NODO...">'+
+      '<button class="tool-btn" onclick="mmArmLink()">COLLEGA</button>'+
+      '<button class="tool-btn red" onclick="mmDeleteSelected()">ELIMINA</button>'+
+      '<button class="tool-btn" onclick="mmCloseEditor()">CHIUDI</button>'+
+    '</div>'+
+    '<div class="mm-editor-row">'+
+      '<span class="form-label" style="margin:0">COLORE</span>'+
+      swatches+
+      '<span class="tsep"></span>'+
+      '<span class="form-label" style="margin:0">DIM</span>'+
+      '<input type="range" class="mm-range" min="16" max="60" value="'+(n.r||30)+'" oninput="mmSetSize(this.value)">'+
+    '</div>';
   document.getElementById('mmTitleEdit').addEventListener('input', function(){ mmSetTitle(this.value); });
 }
 
