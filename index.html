@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -137,17 +137,17 @@ input[type=range].szr{width:65px;accent-color:var(--accent);}
 
 <header>
   <div class="theme-picker">
-    <span class="theme-label">TEMA</span>
+    <span class="theme-label">THEME</span>
     <div id="theme-dots" style="display:flex;gap:6px"></div>
   </div>
-  <span class="app-title">MYSPACE</span>
+  <span class="app-title">WORKSPACE</span>
 </header>
 
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('draw',this)">DISEGNO</button>
-  <button class="tab" onclick="switchTab('notes',this)">APPUNTI</button>
-  <button class="tab" onclick="switchTab('mindmap',this)">MAPPE</button>
-  <button class="tab" onclick="openMusicTab(this)">MUSICA</button>
+  <button class="tab active" onclick="switchTab('draw',this)">DRAW</button>
+  <button class="tab" onclick="switchTab('notes',this)">NOTES</button>
+  <button class="tab" onclick="switchTab('mindmap',this)">MAPS</button>
+  <button class="tab" onclick="openMusicTab(this)">MUSIC</button>
 </div>
 
 <div class="main-wrap">
@@ -190,7 +190,7 @@ input[type=range].szr{width:65px;accent-color:var(--accent);}
   <div style="padding:6px 10px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;">
     <div class="screen" style="margin-bottom:0;">
       <div class="screen-top">
-        <span class="screen-label">DISEGNO</span>
+        <span class="screen-label">DRAW</span>
         <span class="screen-right" id="dToolDisp">PEN</span>
       </div>
       <div class="screen-row">
@@ -212,27 +212,27 @@ input[type=range].szr{width:65px;accent-color:var(--accent);}
   <div style="padding:6px 10px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;">
     <div class="screen" style="margin-bottom:0;">
       <div class="screen-top">
-        <span class="screen-label">APPUNTI</span>
-        <span class="screen-right" id="notes-count">0 NOTE</span>
+        <span class="screen-label">NOTES</span>
+        <span class="screen-right" id="notes-count">0 NOTES</span>
       </div>
       <div class="screen-row">
-        <span class="screen-info" id="note-cur-title">NESSUNA NOTA SELEZIONATA</span>
+        <span class="screen-info" id="note-cur-title">NO NOTE SELECTED</span>
       </div>
     </div>
   </div>
   <div style="flex:1;display:flex;overflow:hidden;">
     <div class="notes-sidebar">
       <div class="nsb-head">
-        <span>NOTE</span>
+        <span>NOTES</span>
         <button class="sbtn" onclick="newNote()">+</button>
         <button class="sbtn del" id="delNoteBtn" onclick="delNote()" style="display:none">X</button>
       </div>
       <div class="note-list" id="noteList"></div>
     </div>
     <div class="note-editor">
-      <div class="note-empty" id="noteEmpty">[ SELEZIONA O CREA UNA NOTA ]</div>
-      <input  type="text"  class="note-title-in" id="noteTitleIn" placeholder="TITOLO..."     oninput="saveNote()" style="display:none">
-      <textarea            class="note-body-in"  id="noteBodyIn"  placeholder="Scrivi qui..." oninput="saveNote()" style="display:none"></textarea>
+      <div class="note-empty" id="noteEmpty">[ SELECT OR CREATE A NOTE ]</div>
+      <input  type="text"  class="note-title-in" id="noteTitleIn" placeholder="TITLE..."      oninput="saveNote()" style="display:none">
+      <textarea            class="note-body-in"  id="noteBodyIn"  placeholder="Write here..." oninput="saveNote()" style="display:none"></textarea>
     </div>
   </div>
 </div>
@@ -242,20 +242,20 @@ input[type=range].szr{width:65px;accent-color:var(--accent);}
   <div style="padding:6px 10px;background:var(--surface);border-bottom:1px solid var(--border);">
     <div class="screen" style="margin-bottom:0;">
       <div class="screen-top">
-        <span class="screen-label">MAPPE MENTALI</span>
-        <span class="screen-right" id="mindmap-count">0 NODI</span>
+        <span class="screen-label">MIND MAPS</span>
+        <span class="screen-right" id="mindmap-count">0 NODES</span>
       </div>
       <div class="screen-row">
-        <span class="screen-info" style="color:var(--screen-dim)">TRASCINA PER SPOSTARE . CLICCA UN NODO PER MODIFICARLO</span>
+        <span class="screen-info" style="color:var(--screen-dim)">DRAG TO MOVE . CLICK A NODE TO EDIT</span>
       </div>
     </div>
   </div>
   <div class="mindmap-wrap">
     <div class="mindmap-form">
-      <div class="form-label">NUOVO NODO</div>
+      <div class="form-label">NEW NODE</div>
       <div class="frow">
-        <input type="text" class="fin" id="mmTitle" placeholder="CONCETTO..." style="flex:2;min-width:150px">
-        <button class="btn green" onclick="addMindmapNode()">AGGIUNGI</button>
+        <input type="text" class="fin" id="mmTitle" placeholder="CONCEPT..." style="flex:2;min-width:150px">
+        <button class="btn green" onclick="addMindmapNode()">ADD</button>
       </div>
     </div>
     <div class="mindmap-canvas" id="mindmapCanvas">
@@ -269,13 +269,13 @@ input[type=range].szr{width:65px;accent-color:var(--accent);}
 <div id="panel-music" class="panel" style="display:none;flex-direction:column;">
   <div style="padding:6px 10px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;">
     <div class="screen" style="margin-bottom:0;">
-      <div class="screen-top"><span class="screen-label">MUSICA</span><span class="screen-right">SYNTH</span></div>
+      <div class="screen-top"><span class="screen-label">MUSIC</span><span class="screen-right">SYNTH</span></div>
       <div class="screen-row"><span class="screen-info">VERSION 3.0</span><span class="screen-info">&copy; 2026 ISMAELE</span></div>
     </div>
   </div>
   <div class="music-empty">
-    <div>SINTETIZZATORE APERTO IN UNA NUOVA SCHEDA</div>
-    <button class="btn" onclick="openSynth()">APRI DI NUOVO</button>
+    <div>SYNTHESIZER OPENED IN A NEW TAB</div>
+    <button class="btn" onclick="openSynth()">OPEN AGAIN</button>
   </div>
 </div>
 
@@ -303,13 +303,13 @@ function applyTheme(idx){
   const t=THEMES[idx];
   for(const[k,v]of Object.entries(t.vars))document.documentElement.style.setProperty(k,v);
   document.querySelectorAll('.theme-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
-  localStorage.setItem('ms_theme',idx);
+  localStorage.setItem('app_theme',idx);
   if(canvasReady) redraw();
 }
 document.getElementById('theme-dots').innerHTML=THEMES.map((t,i)=>
   `<div class="theme-dot" style="background:${t.dot}" title="${t.name}" onclick="applyTheme(${i})"></div>`
 ).join('');
-applyTheme(parseInt(localStorage.getItem('ms_theme')||'0'));
+applyTheme(parseInt(localStorage.getItem('app_theme')||'0'));
 
 /* TABS */
 function switchTab(name,btn){
@@ -506,24 +506,24 @@ document.getElementById('szr').addEventListener('input',function(){
 function clearC(){ strokes=[]; curStroke=null; redraw(); }
 function dlC(){
   const a=document.createElement('a');
-  a.download='disegno-'+Date.now()+'.png';
+  a.download='drawing-'+Date.now()+'.png';
   a.href=cv.toDataURL('image/png');
   a.click();
 }
 setTimeout(initCanvas,200);
 
 /* NOTES */
-let notes=JSON.parse(localStorage.getItem('ms_notes')||'[]'),curNid=null;
+let notes=JSON.parse(localStorage.getItem('app_notes')||'[]'),curNid=null;
 function updateNotesScreen(){
-  const c=document.getElementById('notes-count'); if(c)c.textContent=notes.length+' NOTE';
+  const c=document.getElementById('notes-count'); if(c)c.textContent=notes.length+' NOTES';
   const t=document.getElementById('note-cur-title');
-  if(t){const n=notes.find(x=>x.id===curNid); t.textContent=n?(n.title||'SENZA TITOLO'):'NESSUNA NOTA SELEZIONATA';}
+  if(t){const n=notes.find(x=>x.id===curNid); t.textContent=n?(n.title||'UNTITLED'):'NO NOTE SELECTED';}
 }
 function rnotes(){
   const l=document.getElementById('noteList'); l.innerHTML='';
   notes.forEach(n=>{
     const el=document.createElement('div'); el.className='note-item'+(n.id===curNid?' active':'');
-    el.innerHTML=`<div class="ni-title">${n.title||'SENZA TITOLO'}</div><div class="ni-date">${new Date(n.upd).toLocaleDateString('it-IT',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</div>`;
+    el.innerHTML=`<div class="ni-title">${n.title||'UNTITLED'}</div><div class="ni-date">${new Date(n.upd).toLocaleDateString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</div>`;
     el.onclick=()=>openNote(n.id); l.appendChild(el);
   });
   updateNotesScreen();
@@ -542,12 +542,12 @@ function openNote(id){
 function delNote(){
   if(!curNid)return;
   const n=notes.find(x=>x.id===curNid);
-  if(!confirm('Eliminare la nota "'+(n?n.title||'senza titolo':'')+'"?'))return;
+  if(!confirm('Delete the note "'+(n?n.title||'untitled':'')+'"?'))return;
   notes=notes.filter(x=>x.id!==curNid); curNid=null;
   document.getElementById('noteEmpty').style.display='';
   document.getElementById('noteTitleIn').style.display='none';
   document.getElementById('noteBodyIn').style.display='none';
-  svN(); rnotes(); showToast('NOTA ELIMINATA');
+  svN(); rnotes(); showToast('NOTE DELETED');
 }
 function saveNote(){
   if(!curNid)return; const n=notes.find(x=>x.id===curNid); if(!n)return;
@@ -555,23 +555,23 @@ function saveNote(){
   n.body=document.getElementById('noteBodyIn').value; n.upd=Date.now();
   notes.sort((a,b)=>b.upd-a.upd); svN(); rnotes();
 }
-function svN(){ localStorage.setItem('ms_notes',JSON.stringify(notes)); }
+function svN(){ localStorage.setItem('app_notes',JSON.stringify(notes)); }
 rnotes();
 
 /* MIND MAP */
-let mindmapNodes=JSON.parse(localStorage.getItem('ms_mindmap')||'[]');
-let mindmapLinks=JSON.parse(localStorage.getItem('ms_mindmap_links')||'[]');
+let mindmapNodes=JSON.parse(localStorage.getItem('app_mindmap')||'[]');
+let mindmapLinks=JSON.parse(localStorage.getItem('app_mindmap_links')||'[]');
 const mmColors=['#5bc8e8','#00ff88','#ff6b6b','#ffd166','#b06ef3','#ff6eb4'];
 let mmSelected=null, mmLinkArmed=null;
 
 function saveMindmap(){
-  localStorage.setItem('ms_mindmap',JSON.stringify(mindmapNodes));
-  localStorage.setItem('ms_mindmap_links',JSON.stringify(mindmapLinks));
+  localStorage.setItem('app_mindmap',JSON.stringify(mindmapNodes));
+  localStorage.setItem('app_mindmap_links',JSON.stringify(mindmapLinks));
 }
 function findNode(id){ return mindmapNodes.find(n=>n.id===id); }
 
 function updateMindmapScreen(){
-  const c=document.getElementById('mindmap-count'); if(c)c.textContent=mindmapNodes.length+' NODI';
+  const c=document.getElementById('mindmap-count'); if(c)c.textContent=mindmapNodes.length+' NODES';
   renderMindmap();
   renderMmEditor();
 }
@@ -583,12 +583,12 @@ function addMindmapNode(){
   mindmapNodes.push(node);
   saveMindmap(); updateMindmapScreen();
   el.value='';
-  showToast('NODO AGGIUNTO');
+  showToast('NODE ADDED');
 }
 function toggleLink(a,b){
   const idx=mindmapLinks.findIndex(l=>(l.a===a&&l.b===b)||(l.a===b&&l.b===a));
-  if(idx>=0){ mindmapLinks.splice(idx,1); showToast('COLLEGAMENTO RIMOSSO'); }
-  else { mindmapLinks.push({a,b}); showToast('COLLEGAMENTO CREATO'); }
+  if(idx>=0){ mindmapLinks.splice(idx,1); showToast('LINK REMOVED'); }
+  else { mindmapLinks.push({a,b}); showToast('LINK CREATED'); }
   saveMindmap();
 }
 function svgPoint(svg,clientX,clientY){
@@ -666,7 +666,7 @@ function onNodeClick(id){
 function mmArmLink(){
   if(!mmSelected)return;
   mmLinkArmed=mmSelected;
-  showToast('SELEZIONA UN NODO DA COLLEGARE');
+  showToast('SELECT A NODE TO LINK');
   renderMindmap();
 }
 function mmSetColor(c){ const n=findNode(mmSelected); if(!n)return; n.color=c; saveMindmap(); updateMindmapScreen(); }
@@ -678,7 +678,7 @@ function mmDeleteSelected(){
   mindmapLinks=mindmapLinks.filter(l=>l.a!==mmSelected&&l.b!==mmSelected);
   mmSelected=null;
   saveMindmap(); updateMindmapScreen();
-  showToast('NODO ELIMINATO');
+  showToast('NODE DELETED');
 }
 function mmCloseEditor(){ mmSelected=null; mmLinkArmed=null; updateMindmapScreen(); }
 function renderMmEditor(){
@@ -689,16 +689,16 @@ function renderMmEditor(){
   const swatches=mmColors.map(c=>'<div class="mm-swatch'+(c===n.color?' active':'')+'" style="background:'+c+'" onclick="mmSetColor(\''+c+'\')"></div>').join('');
   host.innerHTML=
     '<div class="mm-editor-row">'+
-      '<input type="text" class="mm-title-in" id="mmTitleEdit" value="'+(n.title||'').replace(/"/g,'&quot;')+'" placeholder="TESTO NODO...">'+
-      '<button class="tool-btn" onclick="mmArmLink()">COLLEGA</button>'+
-      '<button class="tool-btn red" onclick="mmDeleteSelected()">ELIMINA</button>'+
-      '<button class="tool-btn" onclick="mmCloseEditor()">CHIUDI</button>'+
+      '<input type="text" class="mm-title-in" id="mmTitleEdit" value="'+(n.title||'').replace(/"/g,'&quot;')+'" placeholder="NODE TEXT...">'+
+      '<button class="tool-btn" onclick="mmArmLink()">LINK</button>'+
+      '<button class="tool-btn red" onclick="mmDeleteSelected()">DELETE</button>'+
+      '<button class="tool-btn" onclick="mmCloseEditor()">CLOSE</button>'+
     '</div>'+
     '<div class="mm-editor-row">'+
-      '<span class="form-label" style="margin:0">COLORE</span>'+
+      '<span class="form-label" style="margin:0">COLOR</span>'+
       swatches+
       '<span class="tsep"></span>'+
-      '<span class="form-label" style="margin:0">DIM</span>'+
+      '<span class="form-label" style="margin:0">SIZE</span>'+
       '<input type="range" class="mm-range" min="16" max="60" value="'+(n.r||30)+'" oninput="mmSetSize(this.value)">'+
     '</div>';
   document.getElementById('mmTitleEdit').addEventListener('input', function(){ mmSetTitle(this.value); });
