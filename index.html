@@ -333,26 +333,29 @@ input.addEventListener('input', render);
 render();
 
 // ═══════════════ COPIA PULITA (senza sfondo nero, senza tag html visibili) ═══════════════
-// IMPORTANTE: i colori vanno letti dall'elemento REALE, visibile in pagina (getComputedStyle
-// su un clone "staccato" dal documento non riesce a risolvere le regole CSS applicate: per
-// questo prima il testo copiato usciva senza colore anche se la copia "riusciva").
+// IMPORTANTE: il colore va assegnato ESPLICITAMENTE a ogni frammento di testo,
+// anche a quelli non racchiusi in uno <span> da hljs, altrimenti l'ereditarietà
+// CSS può non sopravvivere all'incolla in molte app (Word, Outlook, ecc.),
+// facendo apparire il codice quasi monocolore.
 function escapeHtml(str){
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
-function walkColored(node){
+function walkColored(node, parentColor){
   if(node.nodeType === Node.TEXT_NODE){
-    return escapeHtml(node.textContent);
+    const text = escapeHtml(node.textContent);
+    if(!text) return '';
+    return '<span style="color:' + parentColor + ';">' + text + '</span>';
   }
   if(node.nodeType === Node.ELEMENT_NODE){
     const color = getComputedStyle(node).color;
-    const inner = Array.from(node.childNodes).map(walkColored).join('');
+    const inner = Array.from(node.childNodes).map(n => walkColored(n, color)).join('');
     return '<span style="color:' + color + ';background:transparent;">' + inner + '</span>';
   }
   return '';
 }
 function buildCleanFragment(sourceEl){
-  const inner = Array.from(sourceEl.childNodes).map(walkColored).join('');
   const baseColor = getComputedStyle(sourceEl).color;
+  const inner = Array.from(sourceEl.childNodes).map(n => walkColored(n, baseColor)).join('');
   return '<pre style="margin:0;background:transparent;font-family:ui-monospace,Consolas,monospace;font-size:13px;white-space:pre-wrap;color:' + baseColor + ';">' + inner + '</pre>';
 }
 
