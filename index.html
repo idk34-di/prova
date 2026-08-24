@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VERSION 1.7</title>
+<title>VERSION 1.5</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
 
@@ -55,31 +55,29 @@
   .screen-info{ color:var(--screen-dim); font-size:10px; letter-spacing:1px; }
   .screen-info.on{ color:var(--screen-text); }
 
-  .panels{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:1.25rem; }
-  @media (max-width:720px){ .panels{ grid-template-columns:1fr; } }
-
-  .panel{
+  .editor-wrap{
+    position:relative; height:420px;
     background:var(--screen-bg); border:1px solid #002233; border-radius:3px;
-    overflow:hidden; display:flex; flex-direction:column; min-height:320px;
+    margin-bottom:1.25rem; overflow:hidden;
   }
-  .panel-bar{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:6px 10px; border-bottom:1px solid #002233;
-    font-family:var(--font-mono); font-size:9px; letter-spacing:2px; color:var(--screen-dim);
+  @media (max-width:600px){ .editor-wrap{ height:340px; } }
+  .editor-wrap pre.editor-highlight, .editor-wrap textarea{
+    position:absolute; inset:0; margin:0; padding:12px; box-sizing:border-box;
+    font-family:var(--font-mono); font-size:12.5px; line-height:1.6;
+    white-space:pre-wrap; word-wrap:break-word; overflow:auto; border:0;
   }
-  textarea{
-    flex:1; resize:none; border:0; background:transparent; color:var(--screen-text);
-    font-family:var(--font-mono); font-size:12.5px; line-height:1.6; padding:12px;
+  .editor-wrap pre.editor-highlight{
+    pointer-events:none; background:transparent; color:var(--screen-text);
   }
-  textarea:focus{ outline:none; }
-  textarea::placeholder{ color:var(--screen-dim); }
-
-  .out-wrap{ flex:1; overflow:auto; }
-  pre{ margin:0; height:100%; }
-  pre code.hljs{
-    background:transparent !important; padding:12px !important; display:block;
-    font-family:var(--font-mono) !important; font-size:12.5px; line-height:1.6; min-height:100%;
+  .editor-wrap pre.editor-highlight code.hljs{
+    background:transparent !important; padding:0 !important; display:block;
+    font-family:inherit !important; font-size:inherit; line-height:inherit;
   }
+  .editor-wrap textarea{
+    background:transparent; color:transparent; caret-color:var(--screen-text);
+    -webkit-text-fill-color:transparent; resize:none; outline:none; z-index:2;
+  }
+  .editor-wrap textarea::placeholder{ color:var(--screen-dim); -webkit-text-fill-color:var(--screen-dim); }
 
   .controls-panel{ border-top:1px solid var(--border); padding-top:1rem; margin-top:.5rem; }
   .btn-row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
@@ -173,15 +171,9 @@ pre code.hljs{display:block;overflow-x:auto;padding:1em}code.hljs{padding:3px 5p
       </div>
     </div>
 
-    <div class="panels">
-      <div class="panel">
-        <div class="panel-bar"><span>INPUT</span></div>
-        <textarea id="input" spellcheck="false" placeholder="Incolla qui il tuo codice..."></textarea>
-      </div>
-      <div class="panel">
-        <div class="panel-bar"><span>OUTPUT</span></div>
-        <div class="out-wrap"><pre><code id="output" class="hljs"></code></pre></div>
-      </div>
+    <div class="editor-wrap">
+      <pre class="editor-highlight" aria-hidden="true"><code id="output" class="hljs"></code></pre>
+      <textarea id="input" spellcheck="false" placeholder="Incolla o scrivi qui il tuo codice..."></textarea>
     </div>
 
     <div class="controls-panel">
@@ -296,6 +288,12 @@ const output = document.getElementById('output');
 const screenLang = document.getElementById('screenLang');
 const infoLines = document.getElementById('infoLines');
 const infoChars = document.getElementById('infoChars');
+
+const editorHighlight = document.querySelector('.editor-highlight');
+input.addEventListener('scroll', () => {
+  editorHighlight.scrollTop = input.scrollTop;
+  editorHighlight.scrollLeft = input.scrollLeft;
+});
 
 function render(){
   const code = input.value;
