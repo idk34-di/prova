@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VERSION 1.6</title>
+<title>VERSION 1.7</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
 
@@ -333,10 +333,9 @@ input.addEventListener('input', render);
 render();
 
 // ═══════════════ COPIA PULITA (senza sfondo nero, senza tag html visibili) ═══════════════
-// IMPORTANTE: il colore va assegnato ESPLICITAMENTE a ogni frammento di testo,
-// anche a quelli non racchiusi in uno <span> da hljs, altrimenti l'ereditarietà
-// CSS può non sopravvivere all'incolla in molte app (Word, Outlook, ecc.),
-// facendo apparire il codice quasi monocolore.
+// IMPORTANTE: i colori vanno letti dall'elemento REALE, visibile in pagina (getComputedStyle
+// su un clone "staccato" dal documento non riesce a risolvere le regole CSS applicate: per
+// questo prima il testo copiato usciva senza colore anche se la copia "riusciva").
 function escapeHtml(str){
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
