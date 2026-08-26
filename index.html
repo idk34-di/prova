@@ -53,19 +53,6 @@
     letter-spacing: 1px; margin-right: 4px; white-space: nowrap;
   }
 
-  .auth-btn{
-    padding:5px 14px; border-radius:2px; border:1px solid var(--border);
-    font-family:var(--font-mono); font-size:11px; letter-spacing:2px;
-    cursor:pointer; background:transparent; color:var(--text2); transition:all .15s;
-  }
-  .auth-btn:hover{ border-color:var(--accent); color:var(--accent); }
-  .user-info{
-    font-family:var(--font-mono); font-size:11px; color:var(--accent2);
-    letter-spacing:1px; cursor:pointer; white-space:nowrap; max-width:140px;
-    overflow:hidden; text-overflow:ellipsis;
-  }
-  @media (max-width:560px){ .user-info{ max-width:70px; } }
-
   main {
     max-width: 860px; margin: 0 auto;
     padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 1rem;
@@ -187,7 +174,7 @@
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 4px; padding: 1rem 1.25rem;
   }
-  .songs-title { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 2px; margin-bottom: .75rem; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .songs-title { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 2px; margin-bottom: .75rem; }
   .songs-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: .75rem; }
   .song-name-input {
     background: var(--surface2); border: 1px solid var(--border);
@@ -211,11 +198,6 @@
   .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
   .btn-sm.danger:hover { border-color: var(--accent3); color: var(--accent3); }
   .btn-sm.load:hover { border-color: var(--accent2); color: var(--accent2); }
-  .sync-badge{
-    font-family:var(--font-mono); font-size:9px; letter-spacing:1px;
-    color:var(--text2); white-space:nowrap;
-  }
-  .sync-badge.on{ color:var(--accent2); }
 
   .toast {
     position: fixed; bottom: 24px; left: 50%;
@@ -289,9 +271,10 @@
     <div id="theme-dots" style="display:flex;gap:6px;align-items:center"></div>
   </div>
   <div class="header-right">
+    <span id="contatore" style="font-family:var(--font-mono);font-size:11px;color:var(--text2);margin-right:6px;">👁 …</span>
+    <button id="login-btn" class="btn" onclick="accedi()" style="margin-right:6px;">ACCEDI</button>
+    <span id="user-info" style="display:none;color:var(--accent2);cursor:pointer;font-family:var(--font-mono);font-size:11px;margin-right:6px;" onclick="esci()"></span>
     <div class="rec-indicator" id="rec-dot"></div>
-    <button id="login-btn" class="auth-btn" onclick="accedi()">ACCEDI</button>
-    <span id="user-info" class="user-info" style="display:none;" onclick="esci()"></span>
   </div>
 </header>
 
@@ -300,10 +283,7 @@
   <div id="device-container"></div>
 
   <div class="songs-section">
-    <div class="songs-title">
-      <span>♪ SAVED SONGS</span>
-      <span class="sync-badge" id="syncBadge">LOCALE</span>
-    </div>
+    <div class="songs-title">♪ SAVED SONGS</div>
     <div class="songs-row">
       <input class="song-name-input" id="song-name-input" placeholder="Song name..." maxlength="40">
       <button class="btn save-btn" onclick="saveSong()">↓ SAVE</button>
@@ -462,43 +442,8 @@ DEVICES.forEach(d=>{state.sequences[d.id]=Array(8).fill(null).map(()=>Array(stat
 
 // ═══════════════ SONGS ═══════════════
 let savedSongs=[];
-let songsRemotiCaricati = false;
-let songsSalvataggioTimer = null;
-
 function loadSongsFromStorage(){try{const r=localStorage.getItem('beatSongs');if(r)savedSongs=JSON.parse(r);}catch(e){savedSongs=[];}}
-function saveSongsToStorage(){try{localStorage.setItem('beatSongs',JSON.stringify(savedSongs));}catch(e){showToast('Storage full!',true);}}
-
-/* Salva sempre in locale, e su Firestore se l'utente ha eseguito l'accesso (debounce) */
-function persistSongs(){
-  saveSongsToStorage();
-  const user = (typeof auth !== 'undefined') ? auth.currentUser : null;
-  if(!user || !songsRemotiCaricati) return;
-  clearTimeout(songsSalvataggioTimer);
-  songsSalvataggioTimer = setTimeout(() => {
-    db.collection("utenti").doc(user.uid).set({ savedSongs }, { merge: true })
-      .catch(e => console.error("Errore salvataggio canzoni:", e));
-  }, 800);
-}
-
-async function caricaCanzoniUtente(uid){
-  try{
-    const doc = await db.collection("utenti").doc(uid).get();
-    if(doc.exists && Array.isArray(doc.data().savedSongs)){
-      savedSongs = doc.data().savedSongs;
-      saveSongsToStorage();
-    } else {
-      songsRemotiCaricati = true;
-      await db.collection("utenti").doc(uid).set({ savedSongs }, { merge: true });
-    }
-    songsRemotiCaricati = true;
-    renderSongs();
-    const badge = document.getElementById('syncBadge');
-    if(badge){ badge.textContent = 'SYNC ✓'; badge.classList.add('on'); }
-  }catch(e){
-    console.error("Errore caricamento canzoni:", e);
-    showToast('SYNC FALLITA', true);
-  }
-}
+function saveSongsToStorage(){try{localStorage.setItem('beatSongs',JSON.stringify(savedSongs));}catch(e){showToast('Storage full!',true);}salvaDatiUtente();}
 
 function saveSong(){
   const inp=document.getElementById('song-name-input');
@@ -508,7 +453,7 @@ function saveSong(){
     volume:state.volume,filterFreq:state.filterFreq,release:state.release,fx:{...state.fx},
     activeDevice:state.activeDevice,sequences:JSON.parse(JSON.stringify(state.sequences)),
     customPads,theme:activeTheme});
-  persistSongs(); inp.value=''; renderSongs(); showToast('✓ '+name+' saved!');
+  saveSongsToStorage(); inp.value=''; renderSongs(); showToast('✓ '+name+' saved!');
 }
 
 function loadSong(idx){
@@ -528,7 +473,7 @@ function loadSong(idx){
   renderTabs();renderDevice();showToast('♪ '+s.name+' loaded!');
 }
 
-function deleteSong(idx){const name=savedSongs[idx].name;savedSongs.splice(idx,1);persistSongs();renderSongs();showToast('Deleted: '+name);}
+function deleteSong(idx){const name=savedSongs[idx].name;savedSongs.splice(idx,1);saveSongsToStorage();renderSongs();showToast('Deleted: '+name);}
 
 function exportSong(idx){
   const s=savedSongs[idx],json=JSON.stringify(s,null,2),blob=new Blob([json],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
@@ -539,7 +484,7 @@ function exportSong(idx){
 function importSongFile(event){
   const file=event.target.files[0];if(!file)return;
   const reader=new FileReader();
-  reader.onload=e=>{try{const s=JSON.parse(e.target.result);if(!s.version||!s.sequences)throw new Error('Invalid file');savedSongs.push(s);persistSongs();renderSongs();showToast('↑ '+(s.name||'song')+' imported!');}catch(err){showToast('Error: '+err.message,true);}};
+  reader.onload=e=>{try{const s=JSON.parse(e.target.result);if(!s.version||!s.sequences)throw new Error('Invalid file');savedSongs.push(s);saveSongsToStorage();renderSongs();showToast('↑ '+(s.name||'song')+' imported!');}catch(err){showToast('Error: '+err.message,true);}};
   reader.readAsText(file);event.target.value='';
 }
 
@@ -675,8 +620,6 @@ renderSongs();
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script>
-'use strict';
-
 const firebaseConfig = {
   apiKey: "AIzaSyA0-O7pTF_M_DmJ2mkvlGqkJuoD5Lc_WjE",
   authDomain: "workspace-5e87a.firebaseapp.com",
@@ -686,30 +629,6 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-/* LOGIN GOOGLE (stessa logica di workspace/codex) */
-function accedi() {
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => {
-    console.error("Errore login:", e);
-    showToast('LOGIN FALLITO', true);
-  });
-}
-function esci() {
-  auth.signOut();
-}
-auth.onAuthStateChanged((user) => {
-  document.getElementById("login-btn").style.display = user ? "none" : "";
-  document.getElementById("user-info").style.display = user ? "" : "none";
-  if (user) {
-    document.getElementById("user-info").textContent = user.displayName || user.email;
-    caricaCanzoniUtente(user.uid);
-  } else {
-    songsRemotiCaricati = false;
-    const badge = document.getElementById('syncBadge');
-    if(badge){ badge.textContent = 'LOCALE'; badge.classList.remove('on'); }
-  }
-});
-
-/* CONTATORE VISITE (documento dedicato "visite_synth", stessa logica di workspace) */
 async function incrementaContatore() {
   try {
     const ref = db.collection("stats").doc("visite_synth");
@@ -718,11 +637,65 @@ async function incrementaContatore() {
       const attuale = doc.exists ? doc.data().count : 0;
       t.set(ref, { count: attuale + 1 });
     });
-  } catch (e) {
-    console.error("Errore contatore:", e);
-  }
+    const doc = await ref.get();
+    document.getElementById("contatore").textContent = "👁 " + doc.data().count;
+  } catch (e) { console.error("Errore contatore:", e); }
 }
 incrementaContatore();
+
+function accedi() {
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => {
+    console.error("Errore login:", e);
+    showToast('LOGIN FAILED', true);
+  });
+}
+function esci() { auth.signOut(); }
+
+let datiRemotiCaricati = false;
+
+auth.onAuthStateChanged(async (user) => {
+  document.getElementById("login-btn").style.display = user ? "none" : "";
+  document.getElementById("user-info").style.display = user ? "" : "none";
+  if (user) {
+    document.getElementById("user-info").textContent = user.displayName || user.email;
+    await caricaDatiUtente(user.uid);
+  } else {
+    datiRemotiCaricati = false;
+  }
+});
+
+async function caricaDatiUtente(uid) {
+  try {
+    const doc = await db.collection("utenti").doc(uid).get();
+    if (doc.exists) {
+      const dati = doc.data();
+      savedSongs = dati.songs || [];
+      localStorage.setItem('beatSongs', JSON.stringify(savedSongs));
+    } else {
+      datiRemotiCaricati = true;
+      await salvaDatiUtente(true);
+    }
+    datiRemotiCaricati = true;
+    renderSongs();
+    showToast('DATI SINCRONIZZATI');
+  } catch (e) {
+    console.error("Errore caricamento dati:", e);
+    showToast('SYNC FAILED', true);
+  }
+}
+
+let salvataggioTimer = null;
+function salvaDatiUtente(immediato) {
+  const user = auth.currentUser;
+  if (!user || !datiRemotiCaricati) return;
+  const esegui = () => {
+    db.collection("utenti").doc(user.uid).set({ songs: savedSongs }, { merge: true })
+      .catch(e => console.error("Errore salvataggio:", e));
+  };
+  if (immediato) { esegui(); return; }
+  clearTimeout(salvataggioTimer);
+  salvataggioTimer = setTimeout(esegui, 800);
+}
 </script>
 </body>
 </html>
