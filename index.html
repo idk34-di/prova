@@ -1,1 +1,700 @@
-HELLO
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>SOCIAL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#05070a; --bg2:#0b0f16; --panel:#0e131c; --panel2:#111826;
+    --border:#1c2733; --text:#dceaf2; --muted:#7d94a3;
+    --accent:#00eaff; --accent2:#ff2fb0; --danger:#ff4d5e; --ok:#3dffa0;
+    --glow: 0 0 14px rgba(0,234,255,.35);
+  }
+  body[data-theme="purple"]{
+    --bg:#08050d; --bg2:#0f0a1a; --panel:#140d21; --panel2:#180f28;
+    --border:#2a1c3d; --text:#ece0ff; --muted:#8f7fa8;
+    --accent:#b26bff; --accent2:#ff5ed1; --glow: 0 0 14px rgba(178,107,255,.35);
+  }
+  body[data-theme="sunset"]{
+    --bg:#0c0705; --bg2:#160c08; --panel:#1c110b; --panel2:#22140d;
+    --border:#3a2115; --text:#ffe9dc; --muted:#b58a72;
+    --accent:#ff7a45; --accent2:#ffd166; --glow: 0 0 14px rgba(255,122,69,.35);
+  }
+  body[data-theme="ice"]{
+    --bg:#050a0d; --bg2:#0a1319; --panel:#0e1a22; --panel2:#112028;
+    --border:#1a323f; --text:#e4f6ff; --muted:#7fa3b3;
+    --accent:#8fd9ff; --accent2:#ffffff; --glow: 0 0 14px rgba(143,217,255,.35);
+  }
+  body[data-theme="matrix"]{
+    --bg:#040604; --bg2:#080c08; --panel:#0a120a; --panel2:#0d160d;
+    --border:#173318; --text:#d8ffe0; --muted:#5f9a6a;
+    --accent:#00ff66; --accent2:#00b8ff; --glow: 0 0 14px rgba(0,255,102,.35);
+  }
+  body[data-theme="pink"]{
+    --bg:#0a0509; --bg2:#120910; --panel:#1a0d16; --panel2:#20101b;
+    --border:#3a1a2d; --text:#ffe0f2; --muted:#a87d97;
+    --accent:#ff4fd8; --accent2:#7a5cff; --glow: 0 0 14px rgba(255,79,216,.35);
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:
+      radial-gradient(ellipse at top, var(--bg2), var(--bg) 60%);
+    color:var(--text);
+    font-family:'Rajdhani', sans-serif;
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  ::selection{ background:var(--accent); color:#000; }
+  a{ color:inherit; }
+  button, input, textarea{ font-family:'Rajdhani', sans-serif; }
+
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 20px; border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg, var(--panel), transparent);
+    position:sticky; top:0; z-index:50; backdrop-filter: blur(8px);
+  }
+  .side{ display:flex; align-items:center; gap:10px; min-width:120px; }
+  .site-link{
+    font-family:'Share Tech Mono', monospace;
+    font-size:1.4rem; letter-spacing:.35em; text-transform:uppercase;
+    color:var(--accent); text-decoration:none; text-shadow:var(--glow);
+    transition:color .2s;
+  }
+  .site-link:hover{ color:var(--accent2); }
+
+  .theme-picker{ display:flex; gap:6px; }
+  .pad{
+    width:20px; height:20px; border-radius:4px; cursor:pointer;
+    border:1px solid var(--border); opacity:.55; transition:.15s;
+  }
+  .pad.active{ opacity:1; box-shadow:0 0 10px currentColor; transform:scale(1.1); }
+  .pad:hover{ opacity:1; }
+  .pad[data-t="cyan"]{ background:#00eaff; color:#00eaff; }
+  .pad[data-t="purple"]{ background:#b26bff; color:#b26bff; }
+  .pad[data-t="sunset"]{ background:#ff7a45; color:#ff7a45; }
+  .pad[data-t="ice"]{ background:#8fd9ff; color:#8fd9ff; }
+  .pad[data-t="matrix"]{ background:#00ff66; color:#00ff66; }
+  .pad[data-t="pink"]{ background:#ff4fd8; color:#ff4fd8; }
+
+  .profile-chip{
+    display:flex; align-items:center; gap:8px; cursor:pointer;
+    border:1px solid var(--border); border-radius:20px; padding:4px 10px 4px 4px;
+    background:var(--panel);
+  }
+  .profile-chip img{ width:26px; height:26px; border-radius:50%; object-fit:cover; border:1px solid var(--border); }
+  .profile-chip span{ font-size:.85rem; color:var(--muted); }
+
+  .fx-btn{
+    font-family:'Share Tech Mono', monospace;
+    font-size:.72rem; letter-spacing:.12em; text-transform:uppercase;
+    padding:7px 14px; border-radius:6px; border:1px solid var(--border);
+    background:var(--panel2); color:var(--text); cursor:pointer;
+    transition:.15s; text-align:center;
+  }
+  .fx-btn:hover{ border-color:var(--accent); color:var(--accent); box-shadow:var(--glow); }
+  .fx-btn.active{ border-color:var(--accent); color:var(--accent); box-shadow:var(--glow); }
+  .fx-btn.danger:hover{ border-color:var(--danger); color:var(--danger); box-shadow:0 0 12px rgba(255,77,94,.35); }
+  .fx-btn.solid{ background:var(--accent); color:#000; border-color:var(--accent); font-weight:700; }
+  .fx-btn.solid:hover{ color:#000; filter:brightness(1.1); }
+  .fx-btn:disabled{ opacity:.35; cursor:not-allowed; }
+
+  main{ max-width:620px; margin:0 auto; padding:28px 16px; }
+
+  .lcd{
+    border:1px solid var(--border); border-radius:10px; background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,.015) 0px, rgba(255,255,255,.015) 1px, transparent 1px, transparent 3px),
+      var(--panel);
+    padding:34px 24px; text-align:center;
+  }
+  .lcd h1{
+    font-family:'Share Tech Mono', monospace; font-size:1.1rem;
+    letter-spacing:.25em; color:var(--accent); text-shadow:var(--glow);
+    text-transform:uppercase; margin-bottom:10px;
+  }
+  .lcd p{ color:var(--muted); font-size:.95rem; margin-bottom:20px; line-height:1.5; }
+
+  .google-btn{
+    display:inline-flex; align-items:center; gap:10px;
+    background:var(--panel2); border:1px solid var(--border); color:var(--text);
+    padding:10px 20px; border-radius:8px; cursor:pointer; font-size:.95rem;
+    font-weight:600; transition:.15s;
+  }
+  .google-btn:hover{ border-color:var(--accent); box-shadow:var(--glow); }
+  .g-icon{ width:18px; height:18px; }
+
+  .card{
+    border:1px solid var(--border); border-radius:12px; background:var(--panel);
+    margin-bottom:22px; overflow:hidden;
+  }
+  .card-pad{ padding:18px; }
+
+  /* profile setup */
+  .avatar-picker{
+    width:96px; height:96px; border-radius:50%; margin:0 auto 18px;
+    border:2px dashed var(--border); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; overflow:hidden; position:relative; background:var(--panel2);
+  }
+  .avatar-picker img{ width:100%; height:100%; object-fit:cover; }
+  .avatar-picker .hint{ font-size:.7rem; color:var(--muted); text-align:center; padding:6px; }
+  .avatar-picker:hover{ border-color:var(--accent); }
+  .field{
+    width:100%; background:var(--panel2); border:1px solid var(--border); color:var(--text);
+    border-radius:8px; padding:12px 14px; font-size:1rem; margin-bottom:14px; outline:none;
+  }
+  .field:focus{ border-color:var(--accent); box-shadow:var(--glow); }
+
+  /* composer */
+  .composer textarea{
+    width:100%; background:var(--panel2); border:1px solid var(--border); color:var(--text);
+    border-radius:8px; padding:12px 14px; font-size:1rem; resize:none; min-height:60px; outline:none;
+  }
+  .composer textarea:focus{ border-color:var(--accent); box-shadow:var(--glow); }
+  .composer-row{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .composer-preview{ margin-top:12px; border-radius:8px; overflow:hidden; border:1px solid var(--border); position:relative; }
+  .composer-preview img, .composer-preview video{ width:100%; max-height:340px; object-fit:cover; display:block; }
+  .composer-preview .clear{
+    position:absolute; top:8px; right:8px; background:rgba(0,0,0,.6); border:1px solid var(--border);
+    color:var(--text); border-radius:50%; width:26px; height:26px; cursor:pointer; font-size:.9rem;
+  }
+
+  /* post card */
+  .post-head{ display:flex; align-items:center; gap:10px; padding:14px 18px; }
+  .post-head img{ width:38px; height:38px; border-radius:50%; object-fit:cover; border:1px solid var(--border); }
+  .post-head .who{ flex:1; }
+  .post-head .name{ font-weight:600; font-size:.95rem; }
+  .post-head .time{ font-size:.75rem; color:var(--muted); font-family:'Share Tech Mono', monospace; }
+
+  .post-media img, .post-media video{ width:100%; max-height:520px; object-fit:cover; display:block; background:#000; }
+  .post-caption{ padding:14px 18px 4px; font-size:.95rem; line-height:1.4; }
+  .post-actions{ display:flex; gap:8px; padding:14px 18px; flex-wrap:wrap; }
+  .count{ font-family:'Share Tech Mono', monospace; margin-left:4px; }
+
+  .comments{ border-top:1px solid var(--border); padding:12px 18px 16px; display:none; }
+  .comments.open{ display:block; }
+  .comment{ display:flex; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); }
+  .comment:last-child{ border-bottom:none; }
+  .comment img{ width:28px; height:28px; border-radius:50%; object-fit:cover; border:1px solid var(--border); flex-shrink:0; }
+  .comment .body{ flex:1; }
+  .comment .name{ font-size:.82rem; font-weight:600; }
+  .comment .text{ font-size:.9rem; margin-top:2px; line-height:1.35; }
+  .comment .meta{ display:flex; gap:10px; margin-top:5px; align-items:center; }
+  .comment .meta .fx-btn{ padding:3px 9px; font-size:.62rem; }
+  .comment.flagged{ opacity:.55; }
+
+  .comment-input{ display:flex; gap:8px; margin-top:12px; }
+  .comment-input input{
+    flex:1; background:var(--panel2); border:1px solid var(--border); color:var(--text);
+    border-radius:20px; padding:9px 14px; font-size:.9rem; outline:none;
+  }
+  .comment-input input:focus{ border-color:var(--accent); }
+
+  .empty{ text-align:center; color:var(--muted); padding:50px 20px; font-size:.95rem; }
+  .footer-counter{
+    text-align:center; margin-top:30px; color:var(--muted); font-family:'Share Tech Mono', monospace;
+    font-size:.75rem; letter-spacing:.15em;
+  }
+
+  @media(max-width:480px){
+    .site-link{ font-size:1.1rem; letter-spacing:.2em; }
+    header{ padding:12px 14px; }
+    .side{ min-width:70px; }
+  }
+</style>
+</head>
+<body data-theme="cyan">
+
+<header>
+  <div class="side">
+    <div class="theme-picker" id="themePicker">
+      <div class="pad" data-t="cyan"></div>
+      <div class="pad" data-t="purple"></div>
+      <div class="pad" data-t="sunset"></div>
+      <div class="pad" data-t="ice"></div>
+      <div class="pad" data-t="matrix"></div>
+      <div class="pad" data-t="pink"></div>
+    </div>
+  </div>
+  <a class="site-link" href="https://idk34-di.github.io/" target="_blank" rel="noopener">SOCIAL</a>
+  <div class="side" style="justify-content:flex-end;">
+    <div id="authArea"></div>
+  </div>
+</header>
+
+<main id="app">
+  <div class="empty">Caricamento...</div>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script>
+/* ---------- THEME ---------- */
+const THEME_KEY = 'theme';
+function applyTheme(t){
+  document.body.setAttribute('data-theme', t);
+  document.querySelectorAll('.pad').forEach(p=>p.classList.toggle('active', p.dataset.t===t));
+  localStorage.setItem(THEME_KEY, t);
+}
+document.querySelectorAll('.pad').forEach(p=>{
+  p.addEventListener('click', ()=>applyTheme(p.dataset.t));
+});
+applyTheme(localStorage.getItem(THEME_KEY) || 'cyan');
+
+/* ---------- FIREBASE ---------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyA0-O7pTF_M_DmJ2mkvlGqkJuoD5Lc_WjE",
+  authDomain: "workspace-5e87a.firebaseapp.com",
+  projectId: "workspace-5e87a",
+  storageBucket: "workspace-5e87a.appspot.com",
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
+const provider = new firebase.auth.GoogleAuthProvider();
+
+const REPORT_LIMIT_COMMENT = 10;
+const REPORT_LIMIT_POST = 20;
+const MAX_MEDIA_MB = 50;
+
+let currentUser = null;
+let currentProfile = null;
+let pendingFile = null;
+let pendingType = null;
+
+const app = document.getElementById('app');
+const authArea = document.getElementById('authArea');
+
+/* ---------- VISIT COUNTER ---------- */
+function bumpVisitCounter(){
+  const now = new Date();
+  const key = `visite_social_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  db.collection('stats').doc(key).set({
+    count: firebase.firestore.FieldValue.increment(1)
+  }, { merge:true }).catch(()=>{});
+}
+bumpVisitCounter();
+
+/* ---------- AUTH ---------- */
+auth.onAuthStateChanged(async (user)=>{
+  currentUser = user;
+  if(!user){
+    currentProfile = null;
+    renderAuthArea();
+    renderLogin();
+    return;
+  }
+  const snap = await db.collection('users').doc(user.uid).get();
+  if(snap.exists && snap.data().displayName){
+    currentProfile = snap.data();
+    renderAuthArea();
+    renderFeedPage();
+  } else {
+    currentProfile = null;
+    renderAuthArea();
+    renderProfileSetup();
+  }
+});
+
+function renderAuthArea(){
+  if(!currentUser){
+    authArea.innerHTML = `<button class="fx-btn" id="loginBtn">Accedi</button>`;
+    document.getElementById('loginBtn').onclick = ()=> auth.signInWithPopup(provider).catch(e=>alert('Accesso fallito: '+e.message));
+  } else {
+    const photo = (currentProfile && currentProfile.photoURL) || currentUser.photoURL || '';
+    const name = (currentProfile && currentProfile.displayName) || currentUser.displayName || 'Utente';
+    authArea.innerHTML = `
+      <div class="profile-chip" id="chip">
+        <img src="${photo}" alt="">
+        <span>${escapeHtml(name)}</span>
+      </div>`;
+    document.getElementById('chip').onclick = ()=>{
+      if(confirm('Vuoi disconnetterti?')) auth.signOut();
+    };
+  }
+}
+
+/* ---------- LOGIN SCREEN ---------- */
+function renderLogin(){
+  app.innerHTML = `
+    <div class="lcd">
+      <h1>Accesso richiesto</h1>
+      <p>Puoi guardare il feed pubblico, ma per pubblicare, mettere like, commentare o segnalare devi accedere con Google.</p>
+      <button class="google-btn" id="loginBtn2">
+        <svg class="g-icon" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 16 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.5-5.2l-6.2-5.2C29.3 35.4 26.8 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.6 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.6l6.2 5.2C40.9 36 44 30.7 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+        Accedi con Google
+      </button>
+    </div>
+  `;
+  document.getElementById('loginBtn2').onclick = ()=> auth.signInWithPopup(provider).catch(e=>alert('Accesso fallito: '+e.message));
+  renderPublicFeed(app, false);
+}
+
+/* ---------- PROFILE SETUP ---------- */
+function renderProfileSetup(){
+  app.innerHTML = `
+    <div class="lcd" style="text-align:left;">
+      <h1 style="text-align:center;">Crea il tuo profilo</h1>
+      <p style="text-align:center;">Scegli un nome e una foto profilo per iniziare a pubblicare.</p>
+      <div class="avatar-picker" id="avatarPicker">
+        <div class="hint">TOCCA<br>PER SCEGLIERE</div>
+      </div>
+      <input type="file" id="avatarInput" accept="image/*" style="display:none;">
+      <input type="text" class="field" id="nameInput" placeholder="Il tuo nome" maxlength="30">
+      <button class="fx-btn solid" id="saveProfileBtn" style="width:100%; padding:12px;">Salva e continua</button>
+    </div>
+  `;
+  let avatarFile = null;
+  const avatarPicker = document.getElementById('avatarPicker');
+  const avatarInput = document.getElementById('avatarInput');
+  avatarPicker.onclick = ()=> avatarInput.click();
+  avatarInput.onchange = ()=>{
+    const f = avatarInput.files[0];
+    if(!f) return;
+    avatarFile = f;
+    const url = URL.createObjectURL(f);
+    avatarPicker.innerHTML = `<img src="${url}" alt="">`;
+  };
+  document.getElementById('saveProfileBtn').onclick = async ()=>{
+    const name = document.getElementById('nameInput').value.trim();
+    if(!name){ alert('Inserisci un nome.'); return; }
+    const btn = document.getElementById('saveProfileBtn');
+    btn.disabled = true; btn.textContent = 'Salvataggio...';
+    try{
+      let photoURL = `https://api.dicebear.com/7.x/identicon/svg?seed=${currentUser.uid}`;
+      if(avatarFile){
+        const ref = storage.ref().child(`profile_pictures/${currentUser.uid}/${Date.now()}_${avatarFile.name}`);
+        await ref.put(avatarFile);
+        photoURL = await ref.getDownloadURL();
+      }
+      await db.collection('users').doc(currentUser.uid).set({
+        displayName: name,
+        photoURL: photoURL,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge:true });
+      currentProfile = { displayName:name, photoURL };
+      renderAuthArea();
+      renderFeedPage();
+    }catch(e){
+      alert('Errore nel salvataggio: '+e.message);
+      btn.disabled = false; btn.textContent = 'Salva e continua';
+    }
+  };
+}
+
+/* ---------- FEED PAGE (logged in, profile complete) ---------- */
+function renderFeedPage(){
+  app.innerHTML = `
+    <div class="card composer" id="composerCard">
+      <div class="card-pad">
+        <textarea id="captionInput" placeholder="Scrivi una didascalia (opzionale)..."></textarea>
+        <div id="previewArea"></div>
+        <div class="composer-row">
+          <button class="fx-btn" id="pickPhoto">Foto</button>
+          <button class="fx-btn" id="pickVideo">Video</button>
+          <button class="fx-btn solid" id="publishBtn" style="margin-left:auto;">Pubblica</button>
+        </div>
+        <input type="file" id="photoInput" accept="image/*" style="display:none;">
+        <input type="file" id="videoInput" accept="video/*" style="display:none;">
+      </div>
+    </div>
+    <div id="feed"></div>
+  `;
+  document.getElementById('pickPhoto').onclick = ()=> document.getElementById('photoInput').click();
+  document.getElementById('pickVideo').onclick = ()=> document.getElementById('videoInput').click();
+  document.getElementById('photoInput').onchange = (e)=> handleMediaPick(e.target.files[0], 'image');
+  document.getElementById('videoInput').onchange = (e)=> handleMediaPick(e.target.files[0], 'video');
+  document.getElementById('publishBtn').onclick = publishPost;
+
+  renderPublicFeed(document.getElementById('feed'), true);
+}
+
+function handleMediaPick(file, type){
+  if(!file) return;
+  const sizeMB = file.size / (1024*1024);
+  if(sizeMB > MAX_MEDIA_MB){
+    alert(`Il file supera i ${MAX_MEDIA_MB}MB. Scegline uno più leggero.`);
+    return;
+  }
+  pendingFile = file;
+  pendingType = type;
+  const url = URL.createObjectURL(file);
+  const previewArea = document.getElementById('previewArea');
+  previewArea.innerHTML = `
+    <div class="composer-preview">
+      <button class="clear" id="clearPreview">&times;</button>
+      ${type==='image' ? `<img src="${url}">` : `<video src="${url}" controls></video>`}
+    </div>`;
+  document.getElementById('clearPreview').onclick = ()=>{
+    pendingFile = null; pendingType = null;
+    previewArea.innerHTML = '';
+  };
+}
+
+async function publishPost(){
+  if(!pendingFile){ alert('Scegli una foto o un video da pubblicare.'); return; }
+  const caption = document.getElementById('captionInput').value.trim();
+  const btn = document.getElementById('publishBtn');
+  btn.disabled = true; btn.textContent = 'Pubblicazione...';
+  try{
+    const ref = storage.ref().child(`posts/${currentUser.uid}/${Date.now()}_${pendingFile.name}`);
+    await ref.put(pendingFile);
+    const mediaURL = await ref.getDownloadURL();
+    await db.collection('posts').add({
+      authorUid: currentUser.uid,
+      authorName: currentProfile.displayName,
+      authorPhoto: currentProfile.photoURL,
+      mediaURL,
+      mediaType: pendingType,
+      caption,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      likes: [],
+      reportCount: 0,
+      reportedBy: []
+    });
+    pendingFile = null; pendingType = null;
+    document.getElementById('captionInput').value = '';
+    document.getElementById('previewArea').innerHTML = '';
+  }catch(e){
+    alert('Errore nella pubblicazione: '+e.message);
+  }
+  btn.disabled = false; btn.textContent = 'Pubblica';
+}
+
+/* ---------- PUBLIC FEED (works logged out too, read-only) ---------- */
+function renderPublicFeed(container, interactive){
+  const feedDiv = document.createElement('div');
+  container.appendChild ? container.appendChild(feedDiv) : null;
+  db.collection('posts').orderBy('createdAt','desc').onSnapshot(snap=>{
+    if(snap.empty){
+      feedDiv.innerHTML = `<div class="empty">Nessun post ancora. Sii il primo a pubblicare.</div>`;
+      return;
+    }
+    feedDiv.innerHTML = '';
+    snap.forEach(doc=>{
+      feedDiv.appendChild(renderPostCard(doc.id, doc.data(), interactive));
+    });
+  }, err=>{
+    feedDiv.innerHTML = `<div class="empty">Errore nel caricamento del feed.</div>`;
+  });
+}
+
+function timeAgo(ts){
+  if(!ts || !ts.toDate) return '';
+  const diff = (Date.now() - ts.toDate().getTime())/1000;
+  if(diff < 60) return 'ora';
+  if(diff < 3600) return Math.floor(diff/60)+'m';
+  if(diff < 86400) return Math.floor(diff/3600)+'h';
+  if(diff < 2592000) return Math.floor(diff/86400)+'g';
+  return ts.toDate().toLocaleDateString('it-IT');
+}
+
+function escapeHtml(s){
+  return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function requireAuth(){
+  if(!currentUser){
+    alert('Devi accedere per compiere questa azione.');
+    return false;
+  }
+  if(!currentProfile){
+    alert('Completa prima il tuo profilo.');
+    return false;
+  }
+  return true;
+}
+
+function renderPostCard(postId, post, interactive){
+  const wrap = document.createElement('div');
+  wrap.className = 'card';
+  const uid = currentUser ? currentUser.uid : null;
+  const liked = uid && post.likes && post.likes.includes(uid);
+  const isOwner = uid && uid === post.authorUid;
+  const alreadyReported = uid && post.reportedBy && post.reportedBy.includes(uid);
+
+  wrap.innerHTML = `
+    <div class="post-head">
+      <img src="${post.authorPhoto || ''}" alt="">
+      <div class="who">
+        <div class="name">${escapeHtml(post.authorName || 'Utente')}</div>
+        <div class="time">${timeAgo(post.createdAt)}</div>
+      </div>
+    </div>
+    <div class="post-media">
+      ${post.mediaType==='video'
+        ? `<video src="${post.mediaURL}" controls playsinline></video>`
+        : `<img src="${post.mediaURL}" alt="">`}
+    </div>
+    ${post.caption ? `<div class="post-caption">${escapeHtml(post.caption)}</div>` : ''}
+    <div class="post-actions">
+      <button class="fx-btn like-btn ${liked?'active':''}">Like <span class="count">${(post.likes||[]).length}</span></button>
+      <button class="fx-btn comment-toggle">Commenti</button>
+      ${isOwner
+        ? `<button class="fx-btn danger delete-post">Elimina</button>`
+        : `<button class="fx-btn danger report-post" ${alreadyReported?'disabled':''}>${alreadyReported?'Segnalato':'Segnala'}</button>`}
+    </div>
+    <div class="comments" id="comments-${postId}">
+      <div class="comment-list"></div>
+      ${interactive ? `
+      <div class="comment-input">
+        <input type="text" placeholder="Scrivi un commento..." maxlength="300">
+        <button class="fx-btn solid send-comment">Invia</button>
+      </div>` : ''}
+    </div>
+  `;
+
+  // like
+  wrap.querySelector('.like-btn').onclick = async ()=>{
+    if(!interactive || !requireAuth()) return;
+    const ref = db.collection('posts').doc(postId);
+    if(liked){
+      await ref.update({ likes: firebase.firestore.FieldValue.arrayRemove(uid) });
+    } else {
+      await ref.update({ likes: firebase.firestore.FieldValue.arrayUnion(uid) });
+    }
+  };
+
+  // comment toggle
+  const commentsBox = wrap.querySelector(`#comments-${postId}`);
+  let commentsLoaded = false;
+  wrap.querySelector('.comment-toggle').onclick = ()=>{
+    commentsBox.classList.toggle('open');
+    if(commentsBox.classList.contains('open') && !commentsLoaded){
+      commentsLoaded = true;
+      loadComments(postId, post, wrap.querySelector('.comment-list'), interactive);
+    }
+  };
+
+  // send comment
+  if(interactive){
+    const input = wrap.querySelector('.comment-input input');
+    const sendBtn = wrap.querySelector('.send-comment');
+    const submit = async ()=>{
+      if(!requireAuth()) return;
+      const text = input.value.trim();
+      if(!text) return;
+      sendBtn.disabled = true;
+      try{
+        await db.collection('posts').doc(postId).collection('comments').add({
+          authorUid: currentUser.uid,
+          authorName: currentProfile.displayName,
+          authorPhoto: currentProfile.photoURL,
+          text,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          reportCount: 0,
+          reportedBy: []
+        });
+        input.value = '';
+      }catch(e){ alert('Errore: '+e.message); }
+      sendBtn.disabled = false;
+    };
+    sendBtn.onclick = submit;
+    input.addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); });
+  }
+
+  // delete own post
+  if(isOwner){
+    wrap.querySelector('.delete-post').onclick = async ()=>{
+      if(confirm('Eliminare definitivamente questo post?')){
+        await db.collection('posts').doc(postId).delete();
+      }
+    };
+  } else if(interactive){
+    // report post
+    wrap.querySelector('.report-post').onclick = async ()=>{
+      if(!requireAuth()) return;
+      if(alreadyReported) return;
+      const ref = db.collection('posts').doc(postId);
+      const newCount = (post.reportCount||0) + 1;
+      await ref.update({
+        reportCount: firebase.firestore.FieldValue.increment(1),
+        reportedBy: firebase.firestore.FieldValue.arrayUnion(uid)
+      });
+      if(newCount >= REPORT_LIMIT_POST){
+        await ref.delete();
+      }
+    };
+  }
+
+  return wrap;
+}
+
+function loadComments(postId, post, listEl, interactive){
+  db.collection('posts').doc(postId).collection('comments').orderBy('createdAt','asc')
+    .onSnapshot(snap=>{
+      const items = [];
+      snap.forEach(d=> items.push({ id:d.id, ...d.data() }));
+      // unreported first, reported ones pushed to bottom
+      items.sort((a,b)=> (a.reportCount>0?1:0) - (b.reportCount>0?1:0));
+      listEl.innerHTML = '';
+      if(items.length===0){
+        listEl.innerHTML = `<div class="empty" style="padding:14px 0;">Nessun commento.</div>`;
+        return;
+      }
+      const uid = currentUser ? currentUser.uid : null;
+      const isPostOwner = uid && uid === post.authorUid;
+      items.forEach(c=>{
+        const alreadyReported = uid && c.reportedBy && c.reportedBy.includes(uid);
+        const isCommentOwner = uid && uid === c.authorUid;
+        const flagged = (c.reportCount||0) > 0;
+        const row = document.createElement('div');
+        row.className = 'comment' + (flagged ? ' flagged' : '');
+        row.innerHTML = `
+          <img src="${c.authorPhoto||''}" alt="">
+          <div class="body">
+            <div class="name">${escapeHtml(c.authorName||'Utente')}</div>
+            <div class="text">${escapeHtml(c.text)}</div>
+            <div class="meta">
+              <span class="time" style="font-size:.68rem;color:var(--muted);">${timeAgo(c.createdAt)}</span>
+              ${interactive ? (
+                isCommentOwner
+                ? `<button class="fx-btn danger" data-act="delete">Elimina</button>`
+                : `<button class="fx-btn danger" data-act="report" ${alreadyReported?'disabled':''}>${alreadyReported?'Segnalato':'Segnala'}</button>`
+              ) : ''}
+            </div>
+          </div>
+        `;
+        if(interactive){
+          const actBtn = row.querySelector('[data-act]');
+          if(actBtn){
+            actBtn.onclick = async ()=>{
+              if(actBtn.dataset.act === 'delete'){
+                if(confirm('Eliminare questo commento?')){
+                  await db.collection('posts').doc(postId).collection('comments').doc(c.id).delete();
+                }
+                return;
+              }
+              if(!requireAuth()) return;
+              if(alreadyReported) return;
+              const cRef = db.collection('posts').doc(postId).collection('comments').doc(c.id);
+              if(isPostOwner){
+                // reported by the post creator -> immediate removal
+                await cRef.delete();
+                return;
+              }
+              const newCount = (c.reportCount||0) + 1;
+              await cRef.update({
+                reportCount: firebase.firestore.FieldValue.increment(1),
+                reportedBy: firebase.firestore.FieldValue.arrayUnion(uid)
+              });
+              if(newCount >= REPORT_LIMIT_COMMENT){
+                await cRef.delete();
+              }
+            };
+          }
+        }
+        listEl.appendChild(row);
+      });
+    });
+}
+</script>
+</body>
+</html>
