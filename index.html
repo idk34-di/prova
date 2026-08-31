@@ -1,1 +1,588 @@
-HELLO
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOCIAL</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #0a0e14; --surface: #111820; --surface2: #1a2330;
+    --border: #1e3040; --accent: #5bc8e8; --accent2: #00ff88;
+    --accent3: #ff6b6b; --text: #c8dce8; --text2: #4a7090;
+    --screen-bg: #000d14; --screen-text: #00d4ff; --screen-dim: #003355;
+    --pad: #5bc8e8; --pad-text: #001a28;
+    --font-mono: 'Share Tech Mono', monospace;
+    --font-ui: 'Rajdhani', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-ui); min-height: 100vh; overflow-x: hidden; transition: background .4s, color .4s; }
+
+  header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); background: var(--surface); position: relative; }
+  .header-center { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); font-family: var(--font-mono); font-size: 13px; letter-spacing: 4px; color: var(--accent); text-decoration: none; cursor: pointer; transition: color .15s; white-space: nowrap; }
+  .header-center:hover { color: var(--accent2); }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .live-indicator { width: 8px; height: 8px; border-radius: 50%; background: var(--accent2); opacity: 0; transition: opacity .3s; }
+  .live-indicator.active { opacity: 1; animation: blink 1s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+  .theme-picker { display: flex; gap: 6px; align-items: center; }
+  .theme-dot { width: 18px; height: 18px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform .15s, border-color .15s; flex-shrink: 0; }
+  .theme-dot:hover { transform: scale(1.25); }
+  .theme-dot.active { border-color: var(--text); transform: scale(1.2); }
+  .theme-label { font-family: var(--font-mono); font-size: 9px; color: var(--text2); letter-spacing: 1px; margin-right: 4px; white-space: nowrap; }
+
+  main { max-width: 620px; margin: 0 auto; padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 1rem; }
+
+  .device { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1.25rem; }
+
+  .screen { background: var(--screen-bg); border: 1px solid #002233; border-radius: 3px; padding: 10px 14px; margin-bottom: 1.25rem; font-family: var(--font-mono); }
+  .screen-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 10px; }
+  .screen-label { color: var(--screen-text); font-size: 11px; letter-spacing: 2px; }
+  .screen-bpm { color: var(--screen-text); font-size: 14px; letter-spacing: 1px; white-space: nowrap; }
+  .screen-row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .screen-info { color: var(--screen-dim); font-size: 10px; letter-spacing: 1px; }
+  .screen-info.on { color: var(--screen-text); font-size: 12px; letter-spacing: .5px; line-height: 1.4; }
+
+  .pads-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1rem; }
+  .pad { min-height: 54px; border-radius: 4px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; background: transparent; color: var(--text); user-select: none; padding: 6px; text-align: center; cursor: pointer; transition: all .12s; }
+  .pad:hover { border-color: var(--accent); }
+  .pad.active { background: var(--pad); color: var(--pad-text); border-color: var(--pad); }
+  .pad.danger:hover { border-color: var(--accent3); color: var(--accent3); }
+  .pad-note { font-family: var(--font-mono); font-size: 13px; font-weight: bold; }
+  .pad-sub { font-family: var(--font-mono); font-size: 9px; opacity: .7; text-transform: uppercase; }
+  .pad:disabled, .pad[data-disabled="1"] { opacity: .4; cursor: not-allowed; }
+
+  .post-media { border-radius: 3px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 1rem; background: #000; }
+  .post-media img, .post-media video { width: 100%; max-height: 460px; object-fit: cover; display: block; }
+
+  .avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; }
+  .avatar-lg { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); }
+  .avatar-picker { width: 84px; height: 84px; border-radius: 50%; border: 2px dashed var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; margin: 0 auto 1rem; background: var(--surface2); transition: border-color .15s; }
+  .avatar-picker:hover { border-color: var(--accent); }
+  .avatar-picker span { font-family: var(--font-mono); font-size: 8px; color: var(--text2); text-align: center; letter-spacing: 1px; }
+
+  .songs-section { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1rem 1.25rem; }
+  .songs-title { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 2px; margin-bottom: .75rem; }
+  .songs-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: .75rem; }
+  .song-name-input { background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: var(--font-mono); font-size: 11px; padding: 6px 10px; border-radius: 2px; flex: 1; min-width: 140px; }
+  .songs-list { display: flex; flex-direction: column; gap: 6px; }
+  .song-item { display: flex; align-items: flex-start; gap: 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 8px 12px; flex-wrap: wrap; }
+  .song-item.flagged { opacity: .5; }
+  .song-item-name { font-family: var(--font-mono); font-size: 11px; color: var(--text); flex: 1; min-width: 100px; }
+  .song-item-text { font-family: var(--font-ui); font-size: 13px; color: var(--text); width: 100%; margin-top: 2px; }
+  .song-item-meta { font-family: var(--font-mono); font-size: 10px; color: var(--text2); white-space: nowrap; }
+
+  .btn { padding: 7px 16px; border-radius: 2px; border: 1px solid var(--border); background: transparent; color: var(--text); font-family: var(--font-mono); font-size: 11px; cursor: pointer; letter-spacing: 1px; transition: all .1s; }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.primary { border-color: var(--accent); color: var(--accent); }
+  .btn.primary:hover { background: var(--accent); color: var(--pad-text); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-sm { padding: 4px 10px; border-radius: 2px; border: 1px solid var(--border); background: transparent; color: var(--text2); font-family: var(--font-mono); font-size: 10px; cursor: pointer; transition: all .1s; white-space: nowrap; }
+  .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-sm.danger:hover { border-color: var(--accent3); color: var(--accent3); }
+
+  .empty-note { font-family: var(--font-mono); font-size: 11px; color: var(--text2); text-align: center; padding: 1.5rem 0; letter-spacing: 1px; }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px); background: var(--accent); color: var(--pad-text); font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px; padding: 10px 20px; border-radius: 3px; z-index: 9999; transition: transform .3s; white-space: nowrap; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.error { background: var(--accent3); color: #fff; }
+
+  @media (max-width: 500px) {
+    .theme-label { display: none; }
+    .header-center { font-size: 10px; letter-spacing: 2px; }
+    .pads-grid { grid-template-columns: repeat(3,1fr); gap: 5px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<header>
+  <div class="theme-picker">
+    <span class="theme-label">THEME</span>
+    <div id="theme-dots" style="display:flex;gap:6px;align-items:center"></div>
+  </div>
+  <a class="header-center" href="https://idk34-di.github.io/" target="_blank" rel="noopener">SOCIAL</a>
+  <div class="header-right">
+    <span id="contatore" style="font-family:var(--font-mono);font-size:11px;color:var(--text2);margin-right:6px;">👁 …</span>
+    <button id="login-btn" class="btn" onclick="accedi()" style="margin-right:6px;">ACCEDI</button>
+    <span id="user-info" style="display:none;color:var(--accent2);cursor:pointer;font-family:var(--font-mono);font-size:11px;margin-right:6px;" onclick="esci()"></span>
+    <div class="live-indicator" id="live-dot" title="Live data"></div>
+  </div>
+</header>
+
+<main>
+  <div id="gate"></div>
+  <div class="songs-section" id="composerSection" style="display:none">
+    <div class="songs-title">✎ NEW POST</div>
+    <div class="songs-row">
+      <input class="song-name-input" id="captionInput" placeholder="Write a caption (optional)...">
+    </div>
+    <div id="previewArea"></div>
+    <div class="songs-row">
+      <button class="btn" id="pickPhoto">PHOTO</button>
+      <button class="btn" id="pickVideo">VIDEO</button>
+      <button class="btn primary" id="publishBtn" style="margin-left:auto;">PUBLISH</button>
+    </div>
+    <input type="file" id="photoInput" accept="image/*" style="display:none;">
+    <input type="file" id="videoInput" accept="video/*" style="display:none;">
+  </div>
+  <div id="feed"></div>
+</main>
+
+<script>
+// ═══════════════ THEMES (identical palette across the whole suite) ═══════════════
+const THEMES = [
+  { name:'Cyan Night',  dot:'#5bc8e8', vars:{'--bg':'#0a0e14','--surface':'#111820','--surface2':'#1a2330','--border':'#1e3040','--accent':'#5bc8e8','--accent2':'#00ff88','--accent3':'#ff6b6b','--text':'#c8dce8','--text2':'#4a7090','--screen-bg':'#000d14','--screen-text':'#00d4ff','--screen-dim':'#003355','--pad':'#5bc8e8','--pad-text':'#001a28'}},
+  { name:'Purple Haze', dot:'#b06ef3', vars:{'--bg':'#0d0814','--surface':'#160e20','--surface2':'#1f1530','--border':'#2d1f45','--accent':'#b06ef3','--accent2':'#f06edf','--accent3':'#ff6b6b','--text':'#d8c8f0','--text2':'#5a3a80','--screen-bg':'#08040f','--screen-text':'#c87fff','--screen-dim':'#2a0a50','--pad':'#b06ef3','--pad-text':'#0d0814'}},
+  { name:'Sunset',      dot:'#ff8c42', vars:{'--bg':'#14080a','--surface':'#201010','--surface2':'#301818','--border':'#451f1f','--accent':'#ff8c42','--accent2':'#ffd166','--accent3':'#ef476f','--text':'#f0d8c8','--text2':'#804030','--screen-bg':'#0f0508','--screen-text':'#ff8c42','--screen-dim':'#500f00','--pad':'#ff8c42','--pad-text':'#14080a'}},
+  { name:'Ice',         dot:'#a8d8ea', vars:{'--bg':'#f0f6fa','--surface':'#e4eef5','--surface2':'#d0e4f0','--border':'#b0ccde','--accent':'#1e7fb5','--accent2':'#16a085','--accent3':'#e74c3c','--text':'#1a3a4a','--text2':'#5a8aaa','--screen-bg':'#0a2030','--screen-text':'#5bc8e8','--screen-dim':'#0a3050','--pad':'#1e7fb5','--pad-text':'#f0f6fa'}},
+  { name:'Matrix',      dot:'#00ff41', vars:{'--bg':'#000000','--surface':'#030f03','--surface2':'#071807','--border':'#0a280a','--accent':'#00ff41','--accent2':'#00cc33','--accent3':'#ff0000','--text':'#a0ffb0','--text2':'#1a5a1a','--screen-bg':'#000000','--screen-text':'#00ff41','--screen-dim':'#003300','--pad':'#00ff41','--pad-text':'#000000'}},
+  { name:'Pink Wave',   dot:'#ff6eb4', vars:{'--bg':'#140a12','--surface':'#201020','--surface2':'#2e1530','--border':'#4a1a45','--accent':'#ff6eb4','--accent2':'#ff9de2','--accent3':'#ff3860','--text':'#f0c8e8','--text2':'#7a3a70','--screen-bg':'#0d0510','--screen-text':'#ff6eb4','--screen-dim':'#4a0a35','--pad':'#ff6eb4','--pad-text':'#140a12'}},
+];
+let activeTheme = 0;
+function applyTheme(idx) {
+  activeTheme = idx;
+  const t = THEMES[idx];
+  for (const [k,v] of Object.entries(t.vars)) document.documentElement.style.setProperty(k,v);
+  document.querySelectorAll('.theme-dot').forEach((d,i) => d.classList.toggle('active', i===idx));
+  localStorage.setItem('socialTheme', idx);
+}
+function buildThemePicker() {
+  document.getElementById('theme-dots').innerHTML = THEMES.map((t,i) =>
+    `<div class="theme-dot${i===activeTheme?' active':''}" style="background:${t.dot}" title="${t.name}" onclick="applyTheme(${i})"></div>`
+  ).join('');
+}
+const savedTheme = parseInt(localStorage.getItem('socialTheme') || '0');
+buildThemePicker();
+applyTheme(savedTheme);
+
+let toastTimer=null;
+function showToast(msg,isError=false){const el=document.getElementById('toast');el.textContent=msg;el.className='toast show'+(isError?' error':'');if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.className='toast';},2500);}
+function flashLive(){const d=document.getElementById('live-dot');d.classList.add('active');setTimeout(()=>d.classList.remove('active'),1500);}
+
+function escapeHtml(s){
+  return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function timeAgo(ts){
+  if(!ts || !ts.toDate) return 'now';
+  const diff = (Date.now() - ts.toDate().getTime())/1000;
+  if(diff < 60) return 'now';
+  if(diff < 3600) return Math.floor(diff/60)+'m';
+  if(diff < 86400) return Math.floor(diff/3600)+'h';
+  if(diff < 2592000) return Math.floor(diff/86400)+'d';
+  return ts.toDate().toLocaleDateString('en-GB');
+}
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyA0-O7pTF_M_DmJ2mkvlGqkJuoD5Lc_WjE",
+  authDomain: "workspace-5e87a.firebaseapp.com",
+  projectId: "workspace-5e87a",
+  storageBucket: "workspace-5e87a.appspot.com"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+const REPORT_LIMIT_COMMENT = 10;
+const REPORT_LIMIT_POST = 20;
+const MAX_MEDIA_MB = 50;
+
+let currentUser = null;
+let currentProfile = null;
+let pendingFile = null, pendingType = null;
+let feedUnsub = null;
+
+// ---- Monthly-resetting visit counter (same pattern as the other sites) ----
+function monthKey(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+}
+async function incrementaContatore() {
+  try {
+    const ref = db.collection("stats").doc("visite_social_" + monthKey());
+    await db.runTransaction(async (t) => {
+      const doc = await t.get(ref);
+      const attuale = doc.exists ? doc.data().count : 0;
+      t.set(ref, { count: attuale + 1 });
+    });
+    const doc = await ref.get();
+    document.getElementById("contatore").textContent = "👁 " + doc.data().count;
+  } catch (e) { console.error("Errore contatore:", e); }
+}
+incrementaContatore();
+
+function accedi() {
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => {
+    console.error("Errore login:", e);
+    showToast('LOGIN FAILED', true);
+  });
+}
+function esci() { auth.signOut(); }
+
+auth.onAuthStateChanged(async (user) => {
+  document.getElementById("login-btn").style.display = user ? "none" : "";
+  document.getElementById("user-info").style.display = user ? "" : "none";
+  currentUser = user;
+  if (user) {
+    document.getElementById("user-info").textContent = user.displayName || user.email;
+    await caricaProfilo(user.uid);
+  } else {
+    currentProfile = null;
+    document.getElementById('composerSection').style.display = 'none';
+    renderGate();
+    startFeed(false);
+  }
+  flashLive();
+});
+
+// Profile lives in the shared "utenti" collection (merge:true), same doc other
+// sites already read/write — this just adds displayName/photoURL to it.
+async function caricaProfilo(uid) {
+  try {
+    const doc = await db.collection("utenti").doc(uid).get();
+    const dati = doc.exists ? doc.data() : {};
+    if (dati.displayName && dati.photoURL) {
+      currentProfile = { displayName: dati.displayName, photoURL: dati.photoURL };
+      document.getElementById('gate').innerHTML = '';
+      document.getElementById('composerSection').style.display = '';
+      startFeed(true);
+      showToast('WELCOME BACK, ' + dati.displayName.toUpperCase());
+    } else {
+      document.getElementById('composerSection').style.display = 'none';
+      renderProfileSetup();
+      startFeed(false);
+    }
+  } catch (e) {
+    console.error("Errore caricamento profilo:", e);
+    showToast('COULD NOT LOAD PROFILE', true);
+  }
+}
+
+/* ---------- GATE: login prompt (shown when logged out) ---------- */
+function renderGate(){
+  document.getElementById('gate').innerHTML = `
+    <div class="device">
+      <div class="screen">
+        <div class="screen-top"><span class="screen-label">ACCESS</span></div>
+        <div class="screen-row"><span class="screen-info on">You can browse the feed, but you need to sign in with Google to post, like, comment or report.</span></div>
+      </div>
+      <button class="btn primary" style="width:100%;padding:10px;" onclick="accedi()">ACCEDI CON GOOGLE</button>
+    </div>
+  `;
+}
+
+/* ---------- PROFILE SETUP (shown once, first login) ---------- */
+function renderProfileSetup(){
+  document.getElementById('gate').innerHTML = `
+    <div class="device">
+      <div class="screen">
+        <div class="screen-top"><span class="screen-label">SET UP PROFILE</span></div>
+        <div class="screen-row"><span class="screen-info on">Choose a display name and a profile picture before you start posting.</span></div>
+      </div>
+      <div class="avatar-picker" id="avatarPicker"><span>TAP TO<br>CHOOSE PHOTO</span></div>
+      <input type="file" id="avatarInput" accept="image/*" style="display:none;">
+      <div class="songs-row">
+        <input class="song-name-input" id="nameInput" placeholder="Display name" maxlength="30">
+      </div>
+      <button class="btn primary" id="saveProfileBtn" style="width:100%;padding:10px;">SAVE &amp; CONTINUE</button>
+    </div>
+  `;
+  let avatarFile = null;
+  const avatarPicker = document.getElementById('avatarPicker');
+  const avatarInput = document.getElementById('avatarInput');
+  avatarPicker.onclick = ()=> avatarInput.click();
+  avatarInput.onchange = ()=>{
+    const f = avatarInput.files[0];
+    if(!f) return;
+    avatarFile = f;
+    avatarPicker.innerHTML = `<img class="avatar-lg" src="${URL.createObjectURL(f)}">`;
+  };
+  document.getElementById('saveProfileBtn').onclick = async ()=>{
+    const name = document.getElementById('nameInput').value.trim();
+    if(!name){ showToast('ENTER A NAME', true); return; }
+    const btn = document.getElementById('saveProfileBtn');
+    btn.disabled = true; btn.textContent = 'SAVING...';
+    try{
+      let photoURL = `https://api.dicebear.com/7.x/identicon/svg?seed=${currentUser.uid}`;
+      if(avatarFile){
+        const ref = storage.ref().child(`profile_pictures/${currentUser.uid}/${Date.now()}_${avatarFile.name}`);
+        await ref.put(avatarFile);
+        photoURL = await ref.getDownloadURL();
+      }
+      await db.collection('utenti').doc(currentUser.uid).set({
+        displayName: name,
+        photoURL: photoURL
+      }, { merge:true });
+      currentProfile = { displayName:name, photoURL };
+      document.getElementById('gate').innerHTML = '';
+      document.getElementById('composerSection').style.display = '';
+      startFeed(true);
+      showToast('PROFILE SAVED');
+    }catch(e){
+      console.error(e);
+      showToast('SAVE FAILED: ' + e.message, true);
+      btn.disabled = false; btn.textContent = 'SAVE & CONTINUE';
+    }
+  };
+}
+
+/* ---------- COMPOSER ---------- */
+document.getElementById('pickPhoto').onclick = ()=> document.getElementById('photoInput').click();
+document.getElementById('pickVideo').onclick = ()=> document.getElementById('videoInput').click();
+document.getElementById('photoInput').onchange = (e)=> handleMediaPick(e.target.files[0], 'image');
+document.getElementById('videoInput').onchange = (e)=> handleMediaPick(e.target.files[0], 'video');
+document.getElementById('publishBtn').onclick = publishPost;
+
+function handleMediaPick(file, type){
+  if(!file) return;
+  if(file.size / (1024*1024) > MAX_MEDIA_MB){
+    showToast(`FILE OVER ${MAX_MEDIA_MB}MB`, true);
+    return;
+  }
+  pendingFile = file; pendingType = type;
+  const url = URL.createObjectURL(file);
+  document.getElementById('previewArea').innerHTML = `
+    <div class="post-media" style="position:relative;">
+      <button class="btn-sm danger" id="clearPreview" style="position:absolute;top:6px;right:6px;z-index:2;background:var(--surface);">✕</button>
+      ${type==='image' ? `<img src="${url}">` : `<video src="${url}" controls></video>`}
+    </div>`;
+  document.getElementById('clearPreview').onclick = ()=>{
+    pendingFile = null; pendingType = null;
+    document.getElementById('previewArea').innerHTML = '';
+  };
+}
+
+async function publishPost(){
+  if(!currentUser || !currentProfile){ showToast('SIGN IN FIRST', true); return; }
+  if(!pendingFile){ showToast('CHOOSE A PHOTO OR VIDEO', true); return; }
+  const caption = document.getElementById('captionInput').value.trim();
+  const btn = document.getElementById('publishBtn');
+  btn.disabled = true; btn.textContent = 'PUBLISHING...';
+  try{
+    const ref = storage.ref().child(`social_posts/${currentUser.uid}/${Date.now()}_${pendingFile.name}`);
+    await ref.put(pendingFile);
+    const mediaURL = await ref.getDownloadURL();
+    await db.collection('social_posts').add({
+      authorUid: currentUser.uid,
+      authorName: currentProfile.displayName,
+      authorPhoto: currentProfile.photoURL,
+      mediaURL, mediaType: pendingType, caption,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      likes: [], reportCount: 0, reportedBy: []
+    });
+    pendingFile = null; pendingType = null;
+    document.getElementById('captionInput').value = '';
+    document.getElementById('previewArea').innerHTML = '';
+    showToast('POSTED');
+  }catch(e){
+    console.error(e);
+    showToast('PUBLISH FAILED: ' + e.message, true);
+  }
+  btn.disabled = false; btn.textContent = 'PUBLISH';
+}
+
+/* ---------- FEED ---------- */
+function startFeed(interactive){
+  if(feedUnsub) feedUnsub();
+  const feedDiv = document.getElementById('feed');
+  feedUnsub = db.collection('social_posts').orderBy('createdAt','desc').onSnapshot(snap=>{
+    if(snap.empty){
+      feedDiv.innerHTML = `<div class="empty-note">NO POSTS YET — BE THE FIRST</div>`;
+      return;
+    }
+    feedDiv.innerHTML = '';
+    snap.forEach(doc=> feedDiv.appendChild(renderPostCard(doc.id, doc.data(), interactive)));
+    flashLive();
+  }, err=>{
+    console.error(err);
+    feedDiv.innerHTML = `<div class="empty-note">COULD NOT LOAD FEED (${err.code||'error'})</div>`;
+  });
+}
+
+function requireAuth(){
+  if(!currentUser || !currentProfile){ showToast('SIGN IN FIRST', true); return false; }
+  return true;
+}
+
+function renderPostCard(postId, post, interactive){
+  const wrap = document.createElement('div');
+  wrap.className = 'device';
+  const uid = currentUser ? currentUser.uid : null;
+  const liked = uid && post.likes && post.likes.includes(uid);
+  const isOwner = uid && uid === post.authorUid;
+  const alreadyReported = uid && post.reportedBy && post.reportedBy.includes(uid);
+
+  wrap.innerHTML = `
+    <div class="screen">
+      <div class="screen-top">
+        <span class="screen-label" style="display:flex;align-items:center;gap:8px;">
+          <img class="avatar" src="${post.authorPhoto||''}">${escapeHtml(post.authorName||'User')}
+        </span>
+        <span class="screen-bpm">${timeAgo(post.createdAt)}</span>
+      </div>
+      ${post.caption ? `<div class="screen-row"><span class="screen-info on">${escapeHtml(post.caption)}</span></div>` : ''}
+    </div>
+    <div class="post-media">
+      ${post.mediaType==='video'
+        ? `<video src="${post.mediaURL}" controls playsinline></video>`
+        : `<img src="${post.mediaURL}">`}
+    </div>
+    <div class="pads-grid">
+      <div class="pad like-pad ${liked?'active':''}"><span class="pad-note">${(post.likes||[]).length}</span><span class="pad-sub">♥ like</span></div>
+      <div class="pad comment-toggle"><span class="pad-note">▾</span><span class="pad-sub">comments</span></div>
+      ${isOwner
+        ? `<div class="pad danger delete-post"><span class="pad-note">✕</span><span class="pad-sub">delete</span></div>`
+        : `<div class="pad danger report-post" ${alreadyReported?'data-disabled="1"':''}><span class="pad-note">${alreadyReported?'✓':'⚑'}</span><span class="pad-sub">${alreadyReported?'reported':'report'}</span></div>`}
+    </div>
+    <div class="songs-list comment-list" id="comments-${postId}" style="display:none;"></div>
+    ${interactive ? `
+    <div class="songs-row comment-input-row" style="display:none;margin-top:.6rem;">
+      <input class="song-name-input" placeholder="Write a comment..." maxlength="300">
+      <button class="btn primary send-comment">SEND</button>
+    </div>` : ''}
+  `;
+
+  // like
+  wrap.querySelector('.like-pad').onclick = async ()=>{
+    if(!interactive || !requireAuth()) return;
+    const ref = db.collection('social_posts').doc(postId);
+    await ref.update({ likes: liked
+      ? firebase.firestore.FieldValue.arrayRemove(uid)
+      : firebase.firestore.FieldValue.arrayUnion(uid) });
+  };
+
+  // toggle comments
+  const commentList = wrap.querySelector('.comment-list');
+  const inputRow = wrap.querySelector('.comment-input-row');
+  let loaded = false;
+  wrap.querySelector('.comment-toggle').onclick = ()=>{
+    const opening = commentList.style.display === 'none';
+    commentList.style.display = opening ? '' : 'none';
+    if(inputRow) inputRow.style.display = opening ? 'flex' : 'none';
+    if(opening && !loaded){ loaded = true; loadComments(postId, post, commentList, interactive); }
+  };
+
+  // send comment
+  if(interactive){
+    const input = wrap.querySelector('.comment-input-row input');
+    const sendBtn = wrap.querySelector('.send-comment');
+    const submit = async ()=>{
+      if(!requireAuth()) return;
+      const text = input.value.trim();
+      if(!text) return;
+      sendBtn.disabled = true;
+      try{
+        await db.collection('social_posts').doc(postId).collection('comments').add({
+          authorUid: currentUser.uid,
+          authorName: currentProfile.displayName,
+          authorPhoto: currentProfile.photoURL,
+          text,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          reportCount: 0, reportedBy: []
+        });
+        input.value = '';
+      }catch(e){ showToast('COMMENT FAILED', true); }
+      sendBtn.disabled = false;
+    };
+    sendBtn.onclick = submit;
+    input.addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); });
+  }
+
+  // delete / report post
+  if(isOwner){
+    wrap.querySelector('.delete-post').onclick = async ()=>{
+      if(confirm('Delete this post permanently?')) await db.collection('social_posts').doc(postId).delete();
+    };
+  } else if(interactive){
+    wrap.querySelector('.report-post').onclick = async ()=>{
+      if(!requireAuth() || alreadyReported) return;
+      const ref = db.collection('social_posts').doc(postId);
+      const newCount = (post.reportCount||0) + 1;
+      await ref.update({
+        reportCount: firebase.firestore.FieldValue.increment(1),
+        reportedBy: firebase.firestore.FieldValue.arrayUnion(uid)
+      });
+      if(newCount >= REPORT_LIMIT_POST) await ref.delete();
+      showToast('REPORTED');
+    };
+  }
+
+  return wrap;
+}
+
+function loadComments(postId, post, listEl, interactive){
+  db.collection('social_posts').doc(postId).collection('comments').orderBy('createdAt','asc')
+    .onSnapshot(snap=>{
+      const items = [];
+      snap.forEach(d=> items.push({ id:d.id, ...d.data() }));
+      items.sort((a,b)=> (a.reportCount>0?1:0) - (b.reportCount>0?1:0));
+      listEl.innerHTML = '';
+      if(items.length===0){
+        listEl.innerHTML = `<div class="empty-note" style="padding:.6rem 0;">NO COMMENTS YET</div>`;
+        return;
+      }
+      const uid = currentUser ? currentUser.uid : null;
+      const isPostOwner = uid && uid === post.authorUid;
+      items.forEach(c=>{
+        const alreadyReported = uid && c.reportedBy && c.reportedBy.includes(uid);
+        const isCommentOwner = uid && uid === c.authorUid;
+        const row = document.createElement('div');
+        row.className = 'song-item' + ((c.reportCount||0) > 0 ? ' flagged' : '');
+        row.innerHTML = `
+          <img class="avatar" style="width:24px;height:24px;" src="${c.authorPhoto||''}">
+          <span class="song-item-name">${escapeHtml(c.authorName||'User')}</span>
+          <span class="song-item-meta">${timeAgo(c.createdAt)}</span>
+          ${interactive ? (
+            isCommentOwner
+            ? `<button class="btn-sm danger" data-act="delete">DELETE</button>`
+            : `<button class="btn-sm danger" data-act="report" ${alreadyReported?'disabled':''}>${alreadyReported?'REPORTED':'REPORT'}</button>`
+          ) : ''}
+          <div class="song-item-text">${escapeHtml(c.text)}</div>
+        `;
+        if(interactive){
+          const actBtn = row.querySelector('[data-act]');
+          if(actBtn) actBtn.onclick = async ()=>{
+            const cRef = db.collection('social_posts').doc(postId).collection('comments').doc(c.id);
+            if(actBtn.dataset.act === 'delete'){
+              if(confirm('Delete this comment?')) await cRef.delete();
+              return;
+            }
+            if(!requireAuth() || alreadyReported) return;
+            if(isPostOwner){
+              // reported by the post's own creator -> removed immediately
+              await cRef.delete();
+              return;
+            }
+            const newCount = (c.reportCount||0) + 1;
+            await cRef.update({
+              reportCount: firebase.firestore.FieldValue.increment(1),
+              reportedBy: firebase.firestore.FieldValue.arrayUnion(uid)
+            });
+            if(newCount >= REPORT_LIMIT_COMMENT) await cRef.delete();
+            showToast('REPORTED');
+          };
+        }
+        listEl.appendChild(row);
+      });
+    }, err=>{
+      console.error(err);
+      listEl.innerHTML = `<div class="empty-note">COULD NOT LOAD COMMENTS</div>`;
+    });
+}
+
+// initial state before auth resolves: show the feed read-only so the page is never blank
+renderGate();
+startFeed(false);
+</script>
+</body>
+</html>
