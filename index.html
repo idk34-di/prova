@@ -123,11 +123,9 @@
     <div id="previewArea"></div>
     <div class="songs-row">
       <button class="btn" id="pickPhoto">PHOTO</button>
-      <button class="btn" id="pickVideo">VIDEO</button>
       <button class="btn primary" id="publishBtn" style="margin-left:auto;">PUBLISH</button>
     </div>
     <input type="file" id="photoInput" accept="image/*" style="display:none;">
-    <input type="file" id="videoInput" accept="video/*" style="display:none;">
   </div>
   <div id="feed"></div>
 </main>
@@ -180,26 +178,54 @@ function timeAgo(ts){
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyA0-O7pTF_M_DmJ2mkvlGqkJuoD5Lc_WjE",
   authDomain: "workspace-5e87a.firebaseapp.com",
-  projectId: "workspace-5e87a",
-  storageBucket: "workspace-5e87a.appspot.com"
+  projectId: "workspace-5e87a"
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-const storage = firebase.storage();
 
 const REPORT_LIMIT_COMMENT = 10;
 const REPORT_LIMIT_POST = 20;
-const MAX_MEDIA_MB = 50;
+
+// ---- Client-side image compression (no external service, no account needed) ----
+// Resizes to maxDim on the longest side and lowers JPEG quality until the
+// resulting data URL comfortably fits inside a single Firestore document (1MB limit).
+function compressImage(file, maxDim, targetBytes){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onerror = ()=> reject(new Error('Could not read file'));
+    reader.onload = (e)=>{
+      const img = new Image();
+      img.onerror = ()=> reject(new Error('Could not read image'));
+      img.onload = ()=>{
+        let w = img.width, h = img.height;
+        if(w > maxDim || h > maxDim){
+          if(w > h){ h = Math.round(h * maxDim / w); w = maxDim; }
+          else { w = Math.round(w * maxDim / h); h = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        let quality = 0.85;
+        let dataUrl = canvas.toDataURL('image/jpeg', quality);
+        while(dataUrl.length > targetBytes * 1.37 && quality > 0.3){
+          quality -= 0.1;
+          dataUrl = canvas.toDataURL('image/jpeg', quality);
+        }
+        resolve(dataUrl);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 let currentUser = null;
 let currentProfile = null;
-let pendingFile = null, pendingType = null;
 let feedUnsub = null;
 
 // ---- Monthly-resetting visit counter (same pattern as the other sites) ----
@@ -315,9 +341,7 @@ function renderProfileSetup(){
     try{
       let photoURL = `https://api.dicebear.com/7.x/identicon/svg?seed=${currentUser.uid}`;
       if(avatarFile){
-        const ref = storage.ref().child(`profile_pictures/${currentUser.uid}/${Date.now()}_${avatarFile.name}`);
-        await ref.put(avatarFile);
-        photoURL = await ref.getDownloadURL();
+        photoURL = await compressImage(avatarFile, 300, 80000);
       }
       await db.collection('utenti').doc(currentUser.uid).set({
         displayName: name,
@@ -338,49 +362,51 @@ function renderProfileSetup(){
 
 /* ---------- COMPOSER ---------- */
 document.getElementById('pickPhoto').onclick = ()=> document.getElementById('photoInput').click();
-document.getElementById('pickVideo').onclick = ()=> document.getElementById('videoInput').click();
-document.getElementById('photoInput').onchange = (e)=> handleMediaPick(e.target.files[0], 'image');
-document.getElementById('videoInput').onchange = (e)=> handleMediaPick(e.target.files[0], 'video');
+document.getElementById('photoInput').onchange = (e)=> handleMediaPick(e.target.files[0]);
 document.getElementById('publishBtn').onclick = publishPost;
 
-function handleMediaPick(file, type){
+let pendingMedia = null;
+
+async function handleMediaPick(file){
   if(!file) return;
-  if(file.size / (1024*1024) > MAX_MEDIA_MB){
-    showToast(`FILE OVER ${MAX_MEDIA_MB}MB`, true);
-    return;
+  const previewArea = document.getElementById('previewArea');
+  previewArea.innerHTML = `<div class="empty-note">COMPRESSING PHOTO...</div>`;
+  try{
+    pendingMedia = await compressImage(file, 1280, 500000);
+    previewArea.innerHTML = `
+      <div class="post-media" style="position:relative;">
+        <button class="btn-sm danger" id="clearPreview" style="position:absolute;top:6px;right:6px;z-index:2;background:var(--surface);">✕</button>
+        <img src="${pendingMedia}">
+      </div>`;
+    document.getElementById('clearPreview').onclick = ()=>{
+      pendingMedia = null;
+      previewArea.innerHTML = '';
+    };
+  }catch(e){
+    pendingMedia = null;
+    previewArea.innerHTML = '';
+    showToast('COULD NOT READ PHOTO', true);
   }
-  pendingFile = file; pendingType = type;
-  const url = URL.createObjectURL(file);
-  document.getElementById('previewArea').innerHTML = `
-    <div class="post-media" style="position:relative;">
-      <button class="btn-sm danger" id="clearPreview" style="position:absolute;top:6px;right:6px;z-index:2;background:var(--surface);">✕</button>
-      ${type==='image' ? `<img src="${url}">` : `<video src="${url}" controls></video>`}
-    </div>`;
-  document.getElementById('clearPreview').onclick = ()=>{
-    pendingFile = null; pendingType = null;
-    document.getElementById('previewArea').innerHTML = '';
-  };
 }
 
 async function publishPost(){
   if(!currentUser || !currentProfile){ showToast('SIGN IN FIRST', true); return; }
-  if(!pendingFile){ showToast('CHOOSE A PHOTO OR VIDEO', true); return; }
   const caption = document.getElementById('captionInput').value.trim();
+  if(!pendingMedia && !caption){ showToast('WRITE SOMETHING OR ADD A PHOTO', true); return; }
   const btn = document.getElementById('publishBtn');
   btn.disabled = true; btn.textContent = 'PUBLISHING...';
   try{
-    const ref = storage.ref().child(`social_posts/${currentUser.uid}/${Date.now()}_${pendingFile.name}`);
-    await ref.put(pendingFile);
-    const mediaURL = await ref.getDownloadURL();
     await db.collection('social_posts').add({
       authorUid: currentUser.uid,
       authorName: currentProfile.displayName,
       authorPhoto: currentProfile.photoURL,
-      mediaURL, mediaType: pendingType, caption,
+      mediaURL: pendingMedia || null,
+      mediaType: pendingMedia ? 'image' : null,
+      caption,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       likes: [], reportCount: 0, reportedBy: []
     });
-    pendingFile = null; pendingType = null;
+    pendingMedia = null;
     document.getElementById('captionInput').value = '';
     document.getElementById('previewArea').innerHTML = '';
     showToast('POSTED');
@@ -432,11 +458,10 @@ function renderPostCard(postId, post, interactive){
       </div>
       ${post.caption ? `<div class="screen-row"><span class="screen-info on">${escapeHtml(post.caption)}</span></div>` : ''}
     </div>
+    ${post.mediaURL ? `
     <div class="post-media">
-      ${post.mediaType==='video'
-        ? `<video src="${post.mediaURL}" controls playsinline></video>`
-        : `<img src="${post.mediaURL}">`}
-    </div>
+      <img src="${post.mediaURL}">
+    </div>` : ''}
     <div class="pads-grid">
       <div class="pad like-pad ${liked?'active':''}"><span class="pad-note">${(post.likes||[]).length}</span><span class="pad-sub">♥ like</span></div>
       <div class="pad comment-toggle"><span class="pad-note">▾</span><span class="pad-sub">comments</span></div>
