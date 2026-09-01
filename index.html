@@ -32,6 +32,11 @@
   .theme-dot.active { border-color: var(--text); transform: scale(1.2); }
   .theme-label { font-family: var(--font-mono); font-size: 9px; color: var(--text2); letter-spacing: 1px; margin-right: 4px; white-space: nowrap; }
 
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: .25rem; }
+  .tab { padding: 5px 14px; border-radius: 2px; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 11px; letter-spacing: 2px; cursor: pointer; background: transparent; color: var(--text2); transition: all .15s; }
+  .tab:hover { border-color: var(--accent); color: var(--accent); }
+  .tab.active { background: var(--accent); color: var(--pad-text); border-color: var(--accent); }
+
   main { max-width: 620px; margin: 0 auto; padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 1rem; }
 
   .device { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1.25rem; }
@@ -77,10 +82,15 @@
   .btn:hover { border-color: var(--accent); color: var(--accent); }
   .btn.primary { border-color: var(--accent); color: var(--accent); }
   .btn.primary:hover { background: var(--accent); color: var(--pad-text); }
+  .btn.danger { border-color: var(--accent3); color: var(--accent3); }
+  .btn.danger:hover { background: var(--accent3); color: #fff; }
   .btn:disabled { opacity: .4; cursor: not-allowed; }
   .btn-sm { padding: 4px 10px; border-radius: 2px; border: 1px solid var(--border); background: transparent; color: var(--text2); font-family: var(--font-mono); font-size: 10px; cursor: pointer; transition: all .1s; white-space: nowrap; }
   .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
   .btn-sm.danger:hover { border-color: var(--accent3); color: var(--accent3); }
+  .btn-sm.active { border-color: var(--accent2); color: var(--accent2); }
+  .author-link { cursor: pointer; }
+  .author-link:hover { color: var(--accent); }
 
   .empty-note { font-family: var(--font-mono); font-size: 11px; color: var(--text2); text-align: center; padding: 1.5rem 0; letter-spacing: 1px; }
 
@@ -108,13 +118,19 @@
   <div class="header-right">
     <span id="contatore" style="font-family:var(--font-mono);font-size:11px;color:var(--text2);margin-right:6px;">👁 …</span>
     <button id="login-btn" class="btn" onclick="accedi()" style="margin-right:6px;">ACCEDI</button>
-    <span id="user-info" style="display:none;color:var(--accent2);cursor:pointer;font-family:var(--font-mono);font-size:11px;margin-right:6px;" onclick="esci()"></span>
+    <img id="userAvatarChip" class="avatar" style="width:24px;height:24px;display:none;cursor:pointer;" onclick="headerAvatarClick()">
+    <span id="user-info" style="display:none;color:var(--accent2);cursor:pointer;font-family:var(--font-mono);font-size:11px;margin:0 6px;" onclick="headerAvatarClick()"></span>
     <div class="live-indicator" id="live-dot" title="Live data"></div>
   </div>
 </header>
 
 <main>
   <div id="gate"></div>
+  <div class="tabs" id="tabsBar" style="display:none">
+    <button class="tab active" data-view="feed" onclick="switchTab('feed')">FEED</button>
+    <button class="tab" data-view="following" onclick="switchTab('following')">FOLLOWING</button>
+    <button class="tab" data-view="profile" onclick="switchTab('profile')">MY PROFILE</button>
+  </div>
   <div class="songs-section" id="composerSection" style="display:none">
     <div class="songs-title">✎ NEW POST</div>
     <div class="songs-row">
@@ -128,6 +144,9 @@
     <input type="file" id="photoInput" accept="image/*" style="display:none;">
   </div>
   <div id="feed"></div>
+  <div id="followingView" style="display:none"></div>
+  <div id="editProfileView" style="display:none"></div>
+  <div id="personView" style="display:none"></div>
 </main>
 
 <script>
@@ -227,6 +246,8 @@ function compressImage(file, maxDim, targetBytes){
 let currentUser = null;
 let currentProfile = null;
 let feedUnsub = null;
+let personFeedUnsub = null;
+let currentView = 'feed';
 
 // ---- Monthly-resetting visit counter (same pattern as the other sites) ----
 function monthKey(){
@@ -254,17 +275,26 @@ function accedi() {
   });
 }
 function esci() { auth.signOut(); }
+function headerAvatarClick(){
+  if(currentProfile){ switchTab('profile'); }
+}
 
 auth.onAuthStateChanged(async (user) => {
   document.getElementById("login-btn").style.display = user ? "none" : "";
   document.getElementById("user-info").style.display = user ? "" : "none";
+  document.getElementById("userAvatarChip").style.display = "none";
   currentUser = user;
   if (user) {
     document.getElementById("user-info").textContent = user.displayName || user.email;
     await caricaProfilo(user.uid);
   } else {
     currentProfile = null;
+    document.getElementById('tabsBar').style.display = 'none';
     document.getElementById('composerSection').style.display = 'none';
+    document.getElementById('followingView').style.display = 'none';
+    document.getElementById('editProfileView').style.display = 'none';
+    document.getElementById('personView').style.display = 'none';
+    document.getElementById('feed').style.display = '';
     renderGate();
     startFeed(false);
   }
@@ -278,12 +308,15 @@ async function caricaProfilo(uid) {
     const doc = await db.collection("utenti").doc(uid).get();
     const dati = doc.exists ? doc.data() : {};
     if (dati.displayName && dati.photoURL) {
-      currentProfile = { displayName: dati.displayName, photoURL: dati.photoURL };
+      currentProfile = { displayName: dati.displayName, photoURL: dati.photoURL, following: dati.following || [] };
       document.getElementById('gate').innerHTML = '';
-      document.getElementById('composerSection').style.display = '';
-      startFeed(true);
+      document.getElementById('userAvatarChip').src = dati.photoURL;
+      document.getElementById('userAvatarChip').style.display = '';
+      document.getElementById('tabsBar').style.display = 'flex';
+      switchTab('feed');
       showToast('WELCOME BACK, ' + dati.displayName.toUpperCase());
     } else {
+      document.getElementById('tabsBar').style.display = 'none';
       document.getElementById('composerSection').style.display = 'none';
       renderProfileSetup();
       startFeed(false);
@@ -321,6 +354,7 @@ function renderProfileSetup(){
         <input class="song-name-input" id="nameInput" placeholder="Display name" maxlength="30">
       </div>
       <button class="btn primary" id="saveProfileBtn" style="width:100%;padding:10px;">SAVE &amp; CONTINUE</button>
+      <button class="btn" style="width:100%;padding:8px;margin-top:.5rem;" onclick="esci()">SIGN OUT</button>
     </div>
   `;
   let avatarFile = null;
@@ -358,6 +392,185 @@ function renderProfileSetup(){
       btn.disabled = false; btn.textContent = 'SAVE & CONTINUE';
     }
   };
+}
+
+/* ---------- TAB NAVIGATION ---------- */
+function switchTab(view){
+  if(!currentProfile) return;
+  currentView = view;
+  document.querySelectorAll('#tabsBar .tab').forEach(t=> t.classList.toggle('active', t.dataset.view===view));
+  document.getElementById('composerSection').style.display = view==='feed' ? '' : 'none';
+  document.getElementById('feed').style.display = view==='feed' ? '' : 'none';
+  document.getElementById('followingView').style.display = view==='following' ? '' : 'none';
+  document.getElementById('editProfileView').style.display = view==='profile' ? '' : 'none';
+  document.getElementById('personView').style.display = 'none';
+  if(view==='feed') startFeed(true);
+  if(view==='following') renderFollowingView();
+  if(view==='profile') renderEditProfileView();
+}
+
+function goToProfile(uid){
+  if(currentUser && uid === currentUser.uid){ switchTab('profile'); }
+  else { openPersonProfile(uid); }
+}
+
+function openPersonProfile(uid){
+  document.querySelectorAll('#tabsBar .tab').forEach(t=> t.classList.remove('active'));
+  document.getElementById('composerSection').style.display = 'none';
+  document.getElementById('feed').style.display = 'none';
+  document.getElementById('followingView').style.display = 'none';
+  document.getElementById('editProfileView').style.display = 'none';
+  document.getElementById('personView').style.display = '';
+  renderPersonView(uid);
+}
+
+/* ---------- FOLLOW / UNFOLLOW ---------- */
+async function toggleFollow(targetUid, btnEl){
+  if(!requireAuth()) return;
+  if(targetUid === currentUser.uid) return;
+  const ref = db.collection('utenti').doc(currentUser.uid);
+  const isFollowing = currentProfile.following.includes(targetUid);
+  try{
+    if(isFollowing){
+      await ref.update({ following: firebase.firestore.FieldValue.arrayRemove(targetUid) });
+      currentProfile.following = currentProfile.following.filter(u=>u!==targetUid);
+    } else {
+      await ref.update({ following: firebase.firestore.FieldValue.arrayUnion(targetUid) });
+      currentProfile.following.push(targetUid);
+    }
+    const nowFollowing = currentProfile.following.includes(targetUid);
+    document.querySelectorAll(`[data-follow-uid="${targetUid}"]`).forEach(b=>{
+      b.textContent = nowFollowing ? 'FOLLOWING' : 'FOLLOW';
+      b.classList.toggle('active', nowFollowing);
+    });
+    if(currentView==='following') renderFollowingView();
+  }catch(e){
+    console.error(e);
+    showToast('COULD NOT UPDATE FOLLOW', true);
+  }
+}
+
+/* ---------- FOLLOWING LIST ---------- */
+async function renderFollowingView(){
+  const el = document.getElementById('followingView');
+  const following = currentProfile.following || [];
+  if(following.length===0){
+    el.innerHTML = `<div class="songs-section"><div class="songs-title">☆ FOLLOWING</div><div class="empty-note">NOT FOLLOWING ANYONE YET — TAP A NAME ON A POST TO FOLLOW</div></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="songs-section"><div class="songs-title">☆ FOLLOWING</div><div class="empty-note">LOADING...</div></div>`;
+  try{
+    const docs = await Promise.all(following.map(uid=> db.collection('utenti').doc(uid).get()));
+    const rows = docs.map((doc,i)=>{
+      const uid = following[i];
+      const d = doc.exists ? doc.data() : {};
+      return `
+        <div class="song-item">
+          <img class="avatar" src="${d.photoURL||''}">
+          <span class="song-item-name author-link" onclick="openPersonProfile('${uid}')">${escapeHtml(d.displayName||'User')}</span>
+          <button class="btn-sm active" data-follow-uid="${uid}" onclick="toggleFollow('${uid}', this)">FOLLOWING</button>
+        </div>`;
+    }).join('');
+    el.innerHTML = `<div class="songs-section"><div class="songs-title">☆ FOLLOWING</div><div class="songs-list">${rows}</div></div>`;
+  }catch(e){
+    console.error(e);
+    el.innerHTML = `<div class="empty-note">COULD NOT LOAD FOLLOWING LIST</div>`;
+  }
+}
+
+/* ---------- EDIT MY PROFILE ---------- */
+function renderEditProfileView(){
+  const el = document.getElementById('editProfileView');
+  el.innerHTML = `
+    <div class="device">
+      <div class="screen"><div class="screen-top"><span class="screen-label">MY PROFILE</span></div></div>
+      <div class="avatar-picker" id="editAvatarPicker"><img class="avatar-lg" src="${currentProfile.photoURL}"></div>
+      <input type="file" id="editAvatarInput" accept="image/*" style="display:none;">
+      <div class="songs-row">
+        <input class="song-name-input" id="editNameInput" value="${escapeHtml(currentProfile.displayName)}" maxlength="30">
+      </div>
+      <div class="songs-row">
+        <button class="btn primary" id="editSaveBtn" style="flex:1;">SAVE CHANGES</button>
+        <button class="btn danger" onclick="esci()">SIGN OUT</button>
+      </div>
+    </div>
+  `;
+  let newAvatarFile = null;
+  const picker = document.getElementById('editAvatarPicker');
+  const input = document.getElementById('editAvatarInput');
+  picker.onclick = ()=> input.click();
+  input.onchange = ()=>{
+    const f = input.files[0];
+    if(!f) return;
+    newAvatarFile = f;
+    picker.innerHTML = `<img class="avatar-lg" src="${URL.createObjectURL(f)}">`;
+  };
+  document.getElementById('editSaveBtn').onclick = async ()=>{
+    const name = document.getElementById('editNameInput').value.trim();
+    if(!name){ showToast('ENTER A NAME', true); return; }
+    const btn = document.getElementById('editSaveBtn');
+    btn.disabled = true; btn.textContent = 'SAVING...';
+    try{
+      let photoURL = currentProfile.photoURL;
+      if(newAvatarFile) photoURL = await compressImage(newAvatarFile, 300, 80000);
+      await db.collection('utenti').doc(currentUser.uid).set({ displayName: name, photoURL }, { merge:true });
+      currentProfile.displayName = name;
+      currentProfile.photoURL = photoURL;
+      document.getElementById('user-info').textContent = name;
+      document.getElementById('userAvatarChip').src = photoURL;
+      showToast('PROFILE UPDATED');
+    }catch(e){
+      console.error(e);
+      showToast('SAVE FAILED: ' + e.message, true);
+    }
+    btn.disabled = false; btn.textContent = 'SAVE CHANGES';
+  };
+}
+
+/* ---------- VIEW ANOTHER PERSON'S POSTS ---------- */
+async function renderPersonView(uid){
+  const el = document.getElementById('personView');
+  el.innerHTML = `<div class="empty-note">LOADING...</div>`;
+  if(personFeedUnsub){ personFeedUnsub(); personFeedUnsub = null; }
+  try{
+    const doc = await db.collection('utenti').doc(uid).get();
+    const d = doc.exists ? doc.data() : {};
+    const isSelf = currentUser && uid === currentUser.uid;
+    const isFollowing = currentProfile && currentProfile.following.includes(uid);
+    el.innerHTML = `
+      <button class="btn-sm" style="margin-bottom:.75rem;" onclick="switchTab('feed')">← BACK TO FEED</button>
+      <div class="device" style="margin-bottom:1rem;">
+        <div class="screen">
+          <div class="screen-top">
+            <span class="screen-label" style="display:flex;align-items:center;gap:8px;">
+              <img class="avatar" src="${d.photoURL||''}">${escapeHtml(d.displayName||'User')}
+            </span>
+            ${(!isSelf && currentUser) ? `<button class="btn-sm ${isFollowing?'active':''}" data-follow-uid="${uid}" onclick="toggleFollow('${uid}', this)">${isFollowing?'FOLLOWING':'FOLLOW'}</button>` : ''}
+          </div>
+        </div>
+      </div>
+      <div id="personPosts"></div>
+    `;
+    const postsEl = document.getElementById('personPosts');
+    personFeedUnsub = db.collection('social_posts').where('authorUid','==',uid).onSnapshot(snap=>{
+      if(snap.empty){ postsEl.innerHTML = `<div class="empty-note">NO POSTS YET</div>`; return; }
+      const items = [];
+      snap.forEach(docSnap=> items.push({ id:docSnap.id, ...docSnap.data() }));
+      items.sort((a,b)=>{
+        const ta = a.createdAt ? a.createdAt.toMillis() : 0;
+        const tb = b.createdAt ? b.createdAt.toMillis() : 0;
+        return tb - ta;
+      });
+      postsEl.innerHTML = '';
+      items.forEach(p=> postsEl.appendChild(renderPostCard(p.id, p, !!currentUser && !!currentProfile)));
+    }, err=>{
+      console.error(err);
+      postsEl.innerHTML = `<div class="empty-note">COULD NOT LOAD POSTS</div>`;
+    });
+  }catch(e){
+    console.error(e);
+    el.innerHTML = `<div class="empty-note">COULD NOT LOAD PROFILE</div>`;
+  }
 }
 
 /* ---------- COMPOSER ---------- */
@@ -451,10 +664,13 @@ function renderPostCard(postId, post, interactive){
   wrap.innerHTML = `
     <div class="screen">
       <div class="screen-top">
-        <span class="screen-label" style="display:flex;align-items:center;gap:8px;">
+        <span class="screen-label author-link" style="display:flex;align-items:center;gap:8px;" onclick="goToProfile('${post.authorUid}')">
           <img class="avatar" src="${post.authorPhoto||''}">${escapeHtml(post.authorName||'User')}
         </span>
-        <span class="screen-bpm">${timeAgo(post.createdAt)}</span>
+        <span style="display:flex;align-items:center;gap:8px;">
+          ${(interactive && !isOwner) ? `<button class="btn-sm ${uid && currentProfile && currentProfile.following.includes(post.authorUid)?'active':''}" data-follow-uid="${post.authorUid}" onclick="toggleFollow('${post.authorUid}', this)">${uid && currentProfile && currentProfile.following.includes(post.authorUid)?'FOLLOWING':'FOLLOW'}</button>` : ''}
+          <span class="screen-bpm">${timeAgo(post.createdAt)}</span>
+        </span>
       </div>
       ${post.caption ? `<div class="screen-row"><span class="screen-info on">${escapeHtml(post.caption)}</span></div>` : ''}
     </div>
