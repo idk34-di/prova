@@ -1,485 +1,687 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Assistente</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#0a0e12; --panel:#12181f; --panel2:#0e1319; --text:#d9e7ee; --text-dim:#7c8a94;
-    --border:rgba(255,255,255,.08); --accent:#00e5ff; --accent-dim:rgba(0,229,255,.15);
-  }
-  html[data-theme="verde"]{ --accent:#39ff14; --accent-dim:rgba(57,255,20,.15); }
-  html[data-theme="ambra"]{ --accent:#ffb000; --accent-dim:rgba(255,176,0,.15); }
-  html[data-theme="magenta"]{ --accent:#ff2fd6; --accent-dim:rgba(255,47,214,.15); }
-  html[data-theme="viola"]{ --accent:#9d4dff; --accent-dim:rgba(157,77,255,.15); }
-  html[data-theme="rosso"]{ --accent:#ff3b3b; --accent-dim:rgba(255,59,59,.15); }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Assistente</title>
 
-  *{box-sizing:border-box;}
-  body{margin:0;background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;}
-  .mono{font-family:'Share Tech Mono',monospace;}
+  <style>
+    :root {
+      --black: #000;
+      --blue: #1683ff;
+      --white: #fff;
+      --gray: #aaa;
+    }
 
-  #app{display:flex;flex-direction:column;height:100vh;}
-  header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--panel);gap:10px;}
-  header h1{font-size:16px;letter-spacing:1px;margin:0;}
-  .header-right{display:flex;align-items:center;gap:12px;}
-  .clock{font-size:13px;color:var(--accent);white-space:nowrap;}
-  .theme-dots{display:flex;gap:6px;}
-  .dot{width:16px;height:16px;border-radius:50%;border:1px solid var(--border);cursor:pointer;flex-shrink:0;}
-  .dot[data-t="cyan"]{background:#00e5ff;} .dot[data-t="verde"]{background:#39ff14;}
-  .dot[data-t="ambra"]{background:#ffb000;} .dot[data-t="magenta"]{background:#ff2fd6;}
-  .dot[data-t="viola"]{background:#9d4dff;} .dot[data-t="rosso"]{background:#ff3b3b;}
+    * {
+      box-sizing: border-box;
+    }
 
-  nav{display:flex;border-bottom:1px solid var(--border);background:var(--panel2);}
-  nav button{flex:1;padding:10px;background:none;border:none;color:var(--text-dim);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:14px;cursor:pointer;border-bottom:2px solid transparent;}
-  nav button.active{color:var(--accent);border-bottom-color:var(--accent);}
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--white);
+      background: var(--black);
+      font-family: Arial, sans-serif;
+    }
 
-  main{flex:1;overflow:hidden;display:flex;flex-direction:column;}
-  section{display:none;flex:1;flex-direction:column;overflow:hidden;}
-  section.active{display:flex;}
+    header {
+      padding: 24px 20px;
+      text-align: center;
+      border-bottom: 1px solid var(--blue);
+    }
 
-  #chat-log{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;}
-  .bubble{max-width:80%;padding:10px 14px;border-radius:14px;font-size:14.5px;line-height:1.4;white-space:pre-wrap;}
-  .bubble.user{align-self:flex-end;background:var(--accent-dim);border:1px solid var(--accent);color:var(--text);border-bottom-right-radius:4px;}
-  .bubble.assistant{align-self:flex-start;background:var(--panel);border:1px solid var(--border);border-bottom-left-radius:4px;}
+    header h1 {
+      margin: 0;
+      font-size: 26px;
+      color: var(--white);
+    }
 
-  #chips{display:flex;gap:8px;padding:8px 16px;overflow-x:auto;}
-  .chip{white-space:nowrap;padding:7px 12px;border-radius:20px;border:1px solid var(--border);background:var(--panel);color:var(--text-dim);font-size:12.5px;cursor:pointer;font-family:'Rajdhani',sans-serif;}
-  .chip:hover{border-color:var(--accent);color:var(--accent);}
+    main {
+      width: min(1000px, 100%);
+      margin: 30px auto;
+      padding: 0 20px;
+    }
 
-  #input-bar{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border);background:var(--panel);}
-  #text-input{flex:1;padding:11px 14px;background:var(--panel2);border:1px solid var(--border);border-radius:20px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:15px;}
-  #text-input:focus{outline:none;border-color:var(--accent);}
-  .icon-btn{width:42px;height:42px;border-radius:50%;border:1px solid var(--border);background:var(--panel2);color:var(--text);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-  .icon-btn:hover{border-color:var(--accent);color:var(--accent);}
-  .icon-btn.recording{border-color:#ff3b3b;color:#ff3b3b;background:rgba(255,59,59,.12);}
-  #send-btn{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+    .box {
+      margin-bottom: 24px;
+      padding: 22px;
+      border: 1px solid var(--blue);
+      border-radius: 12px;
+      background: var(--black);
+    }
 
-  #agenda-view{padding:16px;overflow-y:auto;gap:10px;}
-  .day-col{border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:10px;background:var(--panel);}
-  .day-col h3{margin:0 0 8px;font-size:13px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;}
-  .ev-item{font-size:13.5px;padding:6px 8px;border-radius:6px;background:var(--panel2);margin-bottom:6px;display:flex;justify-content:space-between;gap:8px;}
-  .ev-time{color:var(--accent);font-family:'Share Tech Mono',monospace;font-size:12.5px;}
-  .empty-day{color:var(--text-dim);font-size:12.5px;}
+    .assistant {
+      text-align: center;
+    }
 
-  #toast-container{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:6px;z-index:99;}
-  .toast{background:var(--panel);border:1px solid var(--accent);color:var(--text);padding:8px 16px;border-radius:20px;font-size:13px;opacity:0;animation:toastIn .3s forwards, toastOut .3s forwards 2.7s;}
-  @keyframes toastIn{to{opacity:1;}} @keyframes toastOut{to{opacity:0;}}
-</style>
+    #voiceButton {
+      width: 90px;
+      height: 90px;
+      border: 2px solid var(--blue);
+      border-radius: 50%;
+      color: var(--white);
+      background: var(--black);
+      font-size: 38px;
+      cursor: pointer;
+    }
+
+    #voiceButton:hover,
+    #voiceButton.listening {
+      color: var(--blue);
+      box-shadow: 0 0 20px var(--blue);
+    }
+
+    #status {
+      margin-top: 18px;
+      color: var(--gray);
+    }
+
+    #transcript {
+      min-height: 22px;
+      margin-top: 8px;
+      color: var(--blue);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    input,
+    textarea,
+    button {
+      font: inherit;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      color: var(--white);
+      background: var(--black);
+      border: 1px solid var(--blue);
+      border-radius: 7px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    button[type="submit"] {
+      padding: 11px;
+      color: var(--white);
+      background: var(--black);
+      border: 1px solid var(--blue);
+      border-radius: 7px;
+      cursor: pointer;
+    }
+
+    button[type="submit"]:hover {
+      color: var(--black);
+      background: var(--blue);
+    }
+
+    ul {
+      padding: 0;
+      margin: 18px 0 0;
+      list-style: none;
+    }
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--blue);
+    }
+
+    .item-content {
+      flex: 1;
+      word-break: break-word;
+    }
+
+    .item-date {
+      display: block;
+      margin-top: 5px;
+      color: var(--gray);
+      font-size: 12px;
+    }
+
+    .delete-button {
+      height: fit-content;
+      padding: 6px 9px;
+      color: var(--white);
+      background: var(--black);
+      border: 1px solid var(--blue);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .delete-button:hover {
+      color: var(--black);
+      background: var(--blue);
+    }
+
+    .search-result {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--blue);
+    }
+
+    .search-result a {
+      color: var(--blue);
+    }
+
+    .empty {
+      color: var(--gray);
+    }
+  </style>
 </head>
-<body>
 
-<div id="app">
+<body>
   <header>
-    <h1 class="mono">ASSISTENTE</h1>
-    <div class="header-right">
-      <div class="clock mono" id="clock">--:--</div>
-      <div class="theme-dots">
-        <div class="dot" data-t="cyan"></div><div class="dot" data-t="verde"></div>
-        <div class="dot" data-t="ambra"></div><div class="dot" data-t="magenta"></div>
-        <div class="dot" data-t="viola"></div><div class="dot" data-t="rosso"></div>
-      </div>
-    </div>
+    <h1>Assistente vocale</h1>
   </header>
-  <nav>
-    <button class="tab-btn active" data-tab="chat-view">Chat</button>
-    <button class="tab-btn" data-tab="agenda-view">Agenda settimanale</button>
-  </nav>
+
   <main>
-    <section id="chat-view" class="active">
-      <div id="chat-log"></div>
-      <div id="chips">
-        <div class="chip" data-msg="che tempo fa oggi">☁️ Che tempo fa oggi</div>
-        <div class="chip" data-msg="cosa ho oggi">📅 Cosa ho oggi</div>
-        <div class="chip" data-focus="1">📝 Nuovo appunto</div>
+    <section class="box assistant">
+      <button id="voiceButton" aria-label="Avvia assistente vocale">
+        🎙️
+      </button>
+
+      <div id="status">Premi il microfono</div>
+      <div id="transcript"></div>
+    </section>
+
+    <section class="grid">
+      <div class="box">
+        <h2>Nota</h2>
+
+        <form id="noteForm">
+          <textarea
+            id="noteInput"
+            placeholder="Scrivi una nota"
+            required
+          ></textarea>
+
+          <button type="submit">Salva</button>
+        </form>
+
+        <ul id="notesList"></ul>
       </div>
-      <div id="input-bar">
-        <button class="icon-btn" id="mic-btn">🎤</button>
-        <input type="text" id="text-input" placeholder="Scrivi o parla...">
-        <button class="icon-btn" id="send-btn">➤</button>
+
+      <div class="box">
+        <h2>Promemoria</h2>
+
+        <form id="reminderForm">
+          <input
+            id="reminderInput"
+            type="text"
+            placeholder="Testo"
+            required
+          />
+
+          <input
+            id="reminderDate"
+            type="datetime-local"
+            required
+          />
+
+          <button type="submit">Salva</button>
+        </form>
+
+        <ul id="remindersList"></ul>
       </div>
     </section>
-    <section id="agenda-view">
-      <div id="agenda-grid"></div>
+
+    <section class="box">
+      <h2>Ricerca</h2>
+      <div id="searchResults">
+        <p class="empty">Nessuna ricerca</p>
+      </div>
     </section>
   </main>
-</div>
 
-<div id="toast-container"></div>
+  <script>
+    const voiceButton = document.getElementById("voiceButton");
+    const statusElement = document.getElementById("status");
+    const transcriptElement = document.getElementById("transcript");
 
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-<script>
-// TODO Ismaele: incolla qui la tua config reale (stessa degli altri siti)
-const firebaseConfig = {
-  apiKey: "INCOLLA_QUI",
-  authDomain: "workspace-5e87a.firebaseapp.com",
-  projectId: "workspace-5e87a"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+    const noteForm = document.getElementById("noteForm");
+    const noteInput = document.getElementById("noteInput");
+    const notesList = document.getElementById("notesList");
 
-let uid = null;
-let events = [];   // {id, titolo, data:Date, ricorrenza:{giorno}|null}
-let notified = new Set();
+    const reminderForm = document.getElementById("reminderForm");
+    const reminderInput = document.getElementById("reminderInput");
+    const reminderDate = document.getElementById("reminderDate");
+    const remindersList = document.getElementById("remindersList");
 
-/* ---------- ACCESSO AUTOMATICO (anonimo, invisibile) ---------- */
-auth.onAuthStateChanged(async user=>{
-  if(user){
-    uid = user.uid;
-    await loadEvents();
-    renderAgenda();
-    await maybeMorningSummary();
-    setupNotifications();
-  } else {
-    auth.signInAnonymously().catch(()=> showToast('Errore di connessione, riprova'));
-  }
-});
+    const searchResults = document.getElementById("searchResults");
 
-/* ---------- THEME ---------- */
-const savedTheme = localStorage.getItem('theme') || 'cyan';
-document.documentElement.setAttribute('data-theme', savedTheme);
-document.querySelectorAll('.dot').forEach(d=>{
-  d.addEventListener('click', ()=>{
-    document.documentElement.setAttribute('data-theme', d.dataset.t);
-    localStorage.setItem('theme', d.dataset.t);
-  });
-});
-
-/* ---------- CLOCK ---------- */
-function tickClock(){
-  const n = new Date();
-  document.getElementById('clock').textContent =
-    n.toLocaleDateString('it-IT',{weekday:'short',day:'2-digit',month:'2-digit'})+' '+
-    n.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
-}
-tickClock(); setInterval(tickClock, 30000);
-
-/* ---------- TOAST ---------- */
-function showToast(msg){
-  const t = document.createElement('div');
-  t.className = 'toast'; t.textContent = msg;
-  document.getElementById('toast-container').appendChild(t);
-  setTimeout(()=>t.remove(), 3000);
-}
-
-/* ---------- TABS ---------- */
-document.querySelectorAll('.tab-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('main section').forEach(s=>s.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById(btn.dataset.tab).classList.add('active');
-    if(btn.dataset.tab==='agenda-view') renderAgenda();
-  });
-});
-
-/* ---------- CHAT UI ---------- */
-function addBubble(role, text){
-  const log = document.getElementById('chat-log');
-  const b = document.createElement('div');
-  b.className = 'bubble '+role;
-  b.textContent = text;
-  log.appendChild(b);
-  log.scrollTop = log.scrollHeight;
-}
-
-document.getElementById('send-btn').addEventListener('click', sendFromInput);
-document.getElementById('text-input').addEventListener('keydown', e=>{
-  if(e.key==='Enter') sendFromInput();
-});
-function sendFromInput(){
-  const input = document.getElementById('text-input');
-  const text = input.value.trim();
-  if(!text) return;
-  input.value = '';
-  handleMessage(text);
-}
-document.querySelectorAll('.chip').forEach(chip=>{
-  chip.addEventListener('click', ()=>{
-    if(chip.dataset.msg) handleMessage(chip.dataset.msg);
-    else if(chip.dataset.focus){
-      document.getElementById('text-input').focus();
-      showToast('Scrivi il tuo appunto e invia');
-    }
-  });
-});
-
-/* ---------- MIC (Web Speech API) ---------- */
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognizer = null;
-if(SpeechRecognition){
-  recognizer = new SpeechRecognition();
-  recognizer.lang = 'it-IT';
-  recognizer.interimResults = false;
-  recognizer.onresult = e=>{
-    const text = e.results[0][0].transcript;
-    handleMessage(text);
-  };
-  recognizer.onerror = ()=>{
-    showToast('Non ho sentito bene, riprova');
-    document.getElementById('mic-btn').classList.remove('recording');
-  };
-  recognizer.onend = ()=> document.getElementById('mic-btn').classList.remove('recording');
-} else {
-  document.getElementById('mic-btn').style.display = 'none';
-}
-document.getElementById('mic-btn').addEventListener('click', ()=>{
-  if(!recognizer) return;
-  document.getElementById('mic-btn').classList.add('recording');
-  recognizer.start();
-});
-
-/* ---------- PARSING DATA/ORA ---------- */
-const DAYS_IT = ['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
-
-function parseDateTime(rawText, now){
-  const text = rawText.toLowerCase();
-  let target = new Date(now);
-  let matched = false;
-  let recurrence = null;
-
-  const rel = text.match(/tra\s+(\d+|un|una)\s*(minut[oi]|or[ae])/);
-  if(rel){
-    const n = (rel[1]==='un'||rel[1]==='una') ? 1 : parseInt(rel[1]);
-    if(rel[2].startsWith('minut')) target.setMinutes(target.getMinutes()+n);
-    else target.setHours(target.getHours()+n);
-    matched = true;
-  }
-
-  if(text.includes('dopodomani')){ target.setDate(now.getDate()+2); matched=true; }
-  else if(text.includes('domani')){ target.setDate(now.getDate()+1); matched=true; }
-  else if(text.includes('oggi')){ matched=true; }
-
-  for(let i=0;i<DAYS_IT.length;i++){
-    if(text.includes(DAYS_IT[i])){
-      let diff = (i - now.getDay() + 7) % 7;
-      if(diff===0) diff = 7;
-      target.setDate(now.getDate()+diff);
-      matched = true;
-      if(text.includes('ogni '+DAYS_IT[i])) recurrence = { giorno: DAYS_IT[i] };
-    }
-  }
-
-  const tm = text.match(/alle\s+(\d{1,2})[:.]?(\d{2})?/);
-  if(tm){
-    target.setHours(parseInt(tm[1]), tm[2]?parseInt(tm[2]):0, 0, 0);
-    matched = true;
-  }
-
-  const dm = text.match(/(\d{1,2})\/(\d{1,2})(\/(\d{2,4}))?/);
-  if(dm){
-    const d = parseInt(dm[1]), mo = parseInt(dm[2])-1;
-    const y = dm[4] ? (dm[4].length===2 ? 2000+parseInt(dm[4]) : parseInt(dm[4])) : now.getFullYear();
-    target.setFullYear(y, mo, d);
-    matched = true;
-  }
-
-  return matched ? { date: target, recurrence } : null;
-}
-
-function isWeatherQuery(t){ return /meteo|che tempo|temperatura|piove|pioggia|previsioni|grad[oi]|nuvol|sole/.test(t.toLowerCase()); }
-function isAgendaQuery(t){ return /cosa ho|impegni|programma|agenda|cosa devo fare/.test(t.toLowerCase()); }
-
-function summarize(text){
-  let s = text.split(/[.!?]/)[0].trim();
-  const words = s.split(/\s+/);
-  if(words.length>20) s = words.slice(0,20).join(' ')+'…';
-  return s || text.slice(0,80);
-}
-
-function describeWhen(target, now){
-  const diffMin = (target-now)/60000;
-  if(Math.abs(diffMin) < 20) return 'Adesso';
-  if(diffMin>0 && diffMin<=90) return "Tra un'ora circa";
-  const sameDay = target.toDateString()===now.toDateString();
-  const time = target.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
-  if(sameDay) return `Oggi alle ${time}`;
-  return `Il ${target.toLocaleDateString('it-IT')} alle ${time}`;
-}
-
-/* ---------- METEO (Open-Meteo, stessa fonte di weather.html) ---------- */
-function pad(n){ return String(n).padStart(2,'0'); }
-function localHourStr(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:00`; }
-
-const WEATHER_DESC = {0:'sereno',1:'prevalentemente sereno',2:'parzialmente nuvoloso',3:'nuvoloso',
-  45:'nebbia',48:'nebbia',51:'pioggerella',53:'pioggerella',55:'pioggerella',56:'pioggerella gelata',57:'pioggerella gelata',
-  61:'pioggia leggera',63:'pioggia',65:'pioggia forte',66:'pioggia gelata',67:'pioggia gelata',
-  71:'neve leggera',73:'neve',75:'neve forte',77:'granelli di neve',80:'rovesci leggeri',81:'rovesci',82:'rovesci forti',
-  85:'rovesci di neve',86:'rovesci di neve forti',95:'temporale',96:'temporale con grandine',99:'temporale con grandine'};
-
-function getCoords(){
-  return new Promise(resolve=>{
-    const cached = localStorage.getItem('coords');
-    if(cached) return resolve(JSON.parse(cached));
-    if(!navigator.geolocation) return resolve({lat:41.9028, lon:12.4964});
-    navigator.geolocation.getCurrentPosition(
-      pos=>{ const c={lat:pos.coords.latitude, lon:pos.coords.longitude}; localStorage.setItem('coords', JSON.stringify(c)); resolve(c); },
-      ()=> resolve({lat:41.9028, lon:12.4964}),
-      {timeout:5000}
+    let notes = JSON.parse(localStorage.getItem("notes") || "[]");
+    let reminders = JSON.parse(
+      localStorage.getItem("reminders") || "[]"
     );
-  });
-}
 
-async function getWeatherReply(date){
-  const {lat, lon} = await getCoords();
-  const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,weathercode&timezone=auto`);
-  const data = await res.json();
-  const target = new Date(date); target.setMinutes(0,0,0);
-  const targetStr = localHourStr(target);
-  let idx = data.hourly.time.indexOf(targetStr);
-  if(idx===-1){ idx = data.hourly.time.findIndex(t=>t>=targetStr); if(idx===-1) idx = data.hourly.time.length-1; }
-  const temp = Math.round(data.hourly.temperature_2m[idx]);
-  const desc = WEATHER_DESC[data.hourly.weathercode[idx]] || 'variabile';
-  return `${describeWhen(target, new Date())} ci saranno ${temp}°C, cielo ${desc}.`;
-}
+    const SpeechRecognition =
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition;
 
-/* ---------- FIRESTORE: EVENTI / NOTE ---------- */
-async function loadEvents(){
-  events = [];
-  const snap = await db.collection('utenti').doc(uid).collection('eventi').get();
-  snap.forEach(d=>{
-    const v = d.data();
-    events.push({ id:d.id, titolo:v.titolo, data:new Date(v.data), ricorrenza:v.ricorrenza||null });
-  });
-}
-async function saveEvent(text, dt){
-  const payload = { titolo:text, data:dt.date.toISOString(), ricorrenza:dt.recurrence };
-  const ref = await db.collection('utenti').doc(uid).collection('eventi').add(payload);
-  events.push({ id:ref.id, titolo:text, data:dt.date, ricorrenza:dt.recurrence });
-}
-async function saveNote(text, riassunto){
-  await db.collection('utenti').doc(uid).collection('note').add({ testo:text, riassunto, creato: new Date().toISOString() });
-}
-async function getLastNotePreview(){
-  const snap = await db.collection('utenti').doc(uid).collection('note').get();
-  let last = null;
-  snap.forEach(d=>{ const v=d.data(); if(!last || v.creato>last.creato) last=v; });
-  return last ? last.riassunto : null;
-}
+    let recognition = null;
 
-function eventsForDay(dateRef){
-  const dayIdx = dateRef.getDay();
-  const dayName = DAYS_IT[dayIdx];
-  return events.filter(ev=>{
-    if(ev.ricorrenza) return ev.ricorrenza.giorno === dayName;
-    return ev.data.toDateString() === dateRef.toDateString();
-  }).sort((a,b)=> a.ricorrenza? 0 : a.data-b.data);
-}
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = "it-IT";
+      recognition.continuous = false;
+      recognition.interimResults = false;
 
-/* ---------- GESTIONE MESSAGGI ---------- */
-async function handleMessage(rawText){
-  addBubble('user', rawText);
-  const now = new Date();
+      recognition.onstart = () => {
+        voiceButton.classList.add("listening");
+        statusElement.textContent = "Ascolto...";
+        transcriptElement.textContent = "";
+      };
 
-  if(isAgendaQuery(rawText)){
-    const dt = parseDateTime(rawText, now) || { date: now };
-    const list = eventsForDay(dt.date);
-    if(list.length===0){
-      addBubble('assistant', `Non hai nulla in programma per ${dt.date.toLocaleDateString('it-IT')}.`);
+      recognition.onresult = (event) => {
+        const text = event.results[0][0].transcript;
+
+        transcriptElement.textContent = text;
+        processVoiceCommand(text);
+      };
+
+      recognition.onerror = () => {
+        statusElement.textContent = "Errore microfono";
+      };
+
+      recognition.onend = () => {
+        voiceButton.classList.remove("listening");
+
+        if (statusElement.textContent === "Ascolto...") {
+          statusElement.textContent = "Premi il microfono";
+        }
+      };
     } else {
-      const righe = list.map(e=> (e.ricorrenza? e.titolo : `${e.data.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})} — ${e.titolo}`));
-      addBubble('assistant', `Per ${dt.date.toLocaleDateString('it-IT')} hai:\n`+righe.join('\n'));
+      voiceButton.disabled = true;
+      statusElement.textContent = "Browser non compatibile";
     }
-    return;
-  }
 
-  if(isWeatherQuery(rawText)){
-    const dt = parseDateTime(rawText, now) || { date: now };
-    try{
-      const reply = await getWeatherReply(dt.date);
-      addBubble('assistant', reply);
-    }catch(e){ addBubble('assistant', 'Non riesco a recuperare il meteo in questo momento.'); }
-    return;
-  }
+    voiceButton.addEventListener("click", () => {
+      if (!recognition) return;
 
-  const dt = parseDateTime(rawText, now);
-  if(dt){
-    await saveEvent(rawText, dt);
-    const quando = dt.recurrence ? `ogni ${dt.recurrence.giorno}` : dt.date.toLocaleString('it-IT',{weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-    addBubble('assistant', `Segnato in calendario: "${rawText}" — ${quando}.`);
-    renderAgenda();
-    return;
-  }
-
-  const riassunto = summarize(rawText);
-  await saveNote(rawText, riassunto);
-  addBubble('assistant', `Appunto salvato su Workspace. Riassunto: ${riassunto}`);
-}
-
-/* ---------- AGENDA SETTIMANALE ---------- */
-function renderAgenda(){
-  const grid = document.getElementById('agenda-grid');
-  grid.innerHTML = '';
-  const now = new Date();
-  const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - now.getDay() + 1); // lunedì
-  for(let i=0;i<7;i++){
-    const day = new Date(startOfWeek);
-    day.setDate(startOfWeek.getDate()+i);
-    const col = document.createElement('div');
-    col.className = 'day-col';
-    const list = eventsForDay(day);
-    col.innerHTML = `<h3>${day.toLocaleDateString('it-IT',{weekday:'long',day:'2-digit',month:'2-digit'})}</h3>`;
-    if(list.length===0){
-      col.innerHTML += `<div class="empty-day">Nessun evento</div>`;
-    } else {
-      list.forEach(ev=>{
-        const time = ev.ricorrenza ? '' : ev.data.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
-        col.innerHTML += `<div class="ev-item"><span>${ev.titolo}</span><span class="ev-time mono">${time}</span></div>`;
-      });
-    }
-    grid.appendChild(col);
-  }
-}
-
-/* ---------- RIEPILOGO MATTUTINO ---------- */
-async function maybeMorningSummary(){
-  const today = new Date().toDateString();
-  if(localStorage.getItem('lastSummary') === today) return;
-  localStorage.setItem('lastSummary', today);
-  const list = eventsForDay(new Date());
-  let msg = list.length
-    ? `Buongiorno! Oggi hai: ${list.map(e=>e.titolo).join(', ')}.`
-    : 'Buongiorno! Oggi non hai eventi in programma.';
-  try{
-    const meteo = await getWeatherReply(new Date());
-    msg += ' ' + meteo;
-  }catch(e){}
-  const lastNote = await getLastNotePreview();
-  if(lastNote) msg += ` Ultimo appunto: ${lastNote}`;
-  addBubble('assistant', msg);
-}
-
-/* ---------- NOTIFICHE (solo a sito aperto/PWA) ---------- */
-function setupNotifications(){
-  if('Notification' in window && Notification.permission==='default'){
-    Notification.requestPermission();
-  }
-  setInterval(()=>{
-    if(Notification.permission!=='granted') return;
-    const now = new Date();
-    events.forEach(ev=>{
-      let occ = ev.data;
-      if(ev.ricorrenza){
-        occ = new Date(now);
-        occ.setHours(ev.data.getHours(), ev.data.getMinutes(), 0, 0);
-        const dayIdx = DAYS_IT.indexOf(ev.ricorrenza.giorno);
-        if(now.getDay()!==dayIdx) return;
-      }
-      const diffMin = (occ-now)/60000;
-      const key = ev.id + '_' + occ.toDateString();
-      if(diffMin>0 && diffMin<=10 && !notified.has(key)){
-        notified.add(key);
-        new Notification('Promemoria', { body: ev.titolo });
+      try {
+        recognition.start();
+      } catch {
+        // Il microfono è già attivo.
       }
     });
-  }, 60000);
-}
-</script>
+
+    function speak(message) {
+      if (!("speechSynthesis" in window)) return;
+
+      const speech = new SpeechSynthesisUtterance(message);
+      speech.lang = "it-IT";
+
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(speech);
+    }
+
+    function saveNotes() {
+      localStorage.setItem("notes", JSON.stringify(notes));
+    }
+
+    function saveReminders() {
+      localStorage.setItem(
+        "reminders",
+        JSON.stringify(reminders)
+      );
+    }
+
+    function renderNotes() {
+      notesList.innerHTML = "";
+
+      if (!notes.length) {
+        notesList.innerHTML =
+          '<li class="empty">Nessuna nota</li>';
+        return;
+      }
+
+      notes.forEach((note) => {
+        const li = document.createElement("li");
+
+        li.innerHTML = `
+          <div class="item-content">
+            ${escapeHtml(note.text)}
+            <span class="item-date">
+              ${new Date(note.createdAt).toLocaleString("it-IT")}
+            </span>
+          </div>
+
+          <button class="delete-button">
+            Elimina
+          </button>
+        `;
+
+        li.querySelector(".delete-button").onclick = () => {
+          notes = notes.filter((item) => item.id !== note.id);
+          saveNotes();
+          renderNotes();
+        };
+
+        notesList.appendChild(li);
+      });
+    }
+
+    function renderReminders() {
+      remindersList.innerHTML = "";
+
+      if (!reminders.length) {
+        remindersList.innerHTML =
+          '<li class="empty">Nessun promemoria</li>';
+        return;
+      }
+
+      reminders
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .forEach((reminder) => {
+          const li = document.createElement("li");
+
+          li.innerHTML = `
+            <div class="item-content">
+              ${escapeHtml(reminder.text)}
+              <span class="item-date">
+                ${new Date(reminder.date).toLocaleString("it-IT")}
+              </span>
+            </div>
+
+            <button class="delete-button">
+              Elimina
+            </button>
+          `;
+
+          li.querySelector(".delete-button").onclick = () => {
+            reminders = reminders.filter(
+              (item) => item.id !== reminder.id
+            );
+
+            saveReminders();
+            renderReminders();
+          };
+
+          remindersList.appendChild(li);
+        });
+    }
+
+    noteForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const text = noteInput.value.trim();
+      if (!text) return;
+
+      notes.push({
+        id: crypto.randomUUID(),
+        text,
+        createdAt: new Date().toISOString()
+      });
+
+      saveNotes();
+      renderNotes();
+
+      noteInput.value = "";
+      speak("Nota salvata");
+    });
+
+    reminderForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const text = reminderInput.value.trim();
+      const date = reminderDate.value;
+
+      if (!text || !date) return;
+
+      reminders.push({
+        id: crypto.randomUUID(),
+        text,
+        date,
+        notified: false
+      });
+
+      saveReminders();
+      renderReminders();
+
+      reminderInput.value = "";
+      reminderDate.value = "";
+
+      speak("Promemoria salvato");
+    });
+
+    function processVoiceCommand(command) {
+      const text = command.toLowerCase().trim();
+
+      if (
+        text.startsWith("crea una nota") ||
+        text.startsWith("crea nota") ||
+        text.startsWith("annota")
+      ) {
+        const note = text
+          .replace(/^crea una nota\s*:?\s*/i, "")
+          .replace(/^crea nota\s*:?\s*/i, "")
+          .replace(/^annota\s*:?\s*/i, "")
+          .trim();
+
+        if (note) {
+          notes.push({
+            id: crypto.randomUUID(),
+            text: note,
+            createdAt: new Date().toISOString()
+          });
+
+          saveNotes();
+          renderNotes();
+          speak("Nota salvata");
+        }
+
+        return;
+      }
+
+      if (
+        text.startsWith("ricordami") ||
+        text.startsWith("crea un promemoria") ||
+        text.startsWith("crea promemoria")
+      ) {
+        const reminderText = text
+          .replace(/^ricordami\s*/i, "")
+          .replace(/^crea un promemoria\s*/i, "")
+          .replace(/^crea promemoria\s*/i, "")
+          .replace(/^di\s*/i, "")
+          .trim();
+
+        if (reminderText) {
+          reminders.push({
+            id: crypto.randomUUID(),
+            text: reminderText,
+            date: parseItalianDate(text),
+            notified: false
+          });
+
+          saveReminders();
+          renderReminders();
+          speak("Promemoria salvato");
+        }
+
+        return;
+      }
+
+      if (
+        text.includes("leggi le note") ||
+        text.includes("leggi le mie note")
+      ) {
+        if (!notes.length) {
+          speak("Nessuna nota");
+        } else {
+          speak(
+            notes
+              .map((note) => note.text)
+              .join(". ")
+          );
+        }
+
+        return;
+      }
+
+      if (
+        text.startsWith("cerca") ||
+        text.startsWith("ricerca")
+      ) {
+        const query = text
+          .replace(/^cerca su internet\s*/i, "")
+          .replace(/^cerca\s*/i, "")
+          .replace(/^ricerca\s*/i, "")
+          .trim();
+
+        if (query) {
+          searchWeb(query);
+        }
+
+        return;
+      }
+
+      if (text.includes("apri youtube")) {
+        window.open("https://www.youtube.com", "_blank");
+        return;
+      }
+
+      if (text.includes("apri google")) {
+        window.open("https://www.google.com", "_blank");
+      }
+    }
+
+    function searchWeb(query) {
+      const url =
+        "https://www.google.com/search?q=" +
+        encodeURIComponent(query);
+
+      const empty = searchResults.querySelector(".empty");
+
+      if (empty) {
+        empty.remove();
+      }
+
+      const result = document.createElement("div");
+      result.className = "search-result";
+
+      result.innerHTML = `
+        ${escapeHtml(query)}
+        <br />
+        <a
+          href="${url}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Apri
+        </a>
+      `;
+
+      searchResults.prepend(result);
+      window.open(url, "_blank");
+      speak("Ricerca avviata");
+    }
+
+    function parseItalianDate(command) {
+      const date = new Date();
+
+      if (command.includes("domani")) {
+        date.setDate(date.getDate() + 1);
+      }
+
+      const match = command.match(
+        /alle\s+(\d{1,2})(?:[:.](\d{2}))?/
+      );
+
+      if (match) {
+        date.setHours(
+          Number(match[1]),
+          Number(match[2] || 0),
+          0,
+          0
+        );
+      } else {
+        date.setHours(date.getHours() + 1, 0, 0, 0);
+      }
+
+      return toLocalDateTime(date);
+    }
+
+    function toLocalDateTime(date) {
+      const offset = date.getTimezoneOffset();
+      const local = new Date(
+        date.getTime() - offset * 60000
+      );
+
+      return local.toISOString().slice(0, 16);
+    }
+
+    function checkReminders() {
+      const now = new Date();
+      let changed = false;
+
+      reminders.forEach((reminder) => {
+        if (
+          !reminder.notified &&
+          new Date(reminder.date) <= now
+        ) {
+          reminder.notified = true;
+          changed = true;
+
+          const message =
+            "Promemoria: " + reminder.text;
+
+          if (
+            "Notification" in window &&
+            Notification.permission === "granted"
+          ) {
+            new Notification("Promemoria", {
+              body: reminder.text
+            });
+          }
+
+          speak(message);
+          alert(message);
+        }
+      });
+
+      if (changed) {
+        saveReminders();
+        renderReminders();
+      }
+    }
+
+    function escapeHtml(value) {
+      return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    renderNotes();
+    renderReminders();
+
+    setInterval(checkReminders, 10000);
+    checkReminders();
+  </script>
 </body>
 </html>
