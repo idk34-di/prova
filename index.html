@@ -22,27 +22,25 @@
   .mono{font-family:'Share Tech Mono',monospace;}
 
   #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;}
-  .login-box{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:32px;width:min(360px,90vw);}
+  .login-box{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:32px;width:min(340px,90vw);text-align:center;}
   .login-box h1{margin:0 0 4px;font-size:22px;letter-spacing:1px;}
-  .login-box p{color:var(--text-dim);font-size:13px;margin:0 0 20px;}
-  .field{margin-bottom:14px;}
-  .field label{display:block;font-size:12px;color:var(--text-dim);margin-bottom:4px;}
-  .field input{width:100%;padding:10px 12px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:15px;}
-  .field input:focus{outline:none;border-color:var(--accent);}
-  .btn{width:100%;padding:11px;border-radius:8px;border:1px solid var(--accent);background:var(--accent-dim);color:var(--accent);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:15px;cursor:pointer;letter-spacing:.5px;}
-  .btn:hover{background:var(--accent);color:#04161a;}
-  .link-btn{background:none;border:none;color:var(--text-dim);font-size:12px;cursor:pointer;margin-top:10px;text-decoration:underline;}
-  .login-error{color:#ff6b6b;font-size:12px;margin-top:8px;min-height:16px;}
+  .login-box p{color:var(--text-dim);font-size:13px;margin:0 0 22px;}
+  .google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--panel2);color:var(--text);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:15px;cursor:pointer;}
+  .google-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .google-btn svg{width:18px;height:18px;flex-shrink:0;}
+  .login-error{color:#ff6b6b;font-size:12px;margin-top:12px;min-height:16px;}
 
   #app{display:none;flex-direction:column;height:100vh;}
-  header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--panel);}
+  header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--panel);gap:10px;}
   header h1{font-size:16px;letter-spacing:1px;margin:0;}
-  .clock{font-size:13px;color:var(--accent);}
+  .header-right{display:flex;align-items:center;gap:12px;}
+  .clock{font-size:13px;color:var(--accent);white-space:nowrap;}
   .theme-dots{display:flex;gap:6px;}
-  .dot{width:16px;height:16px;border-radius:50%;border:1px solid var(--border);cursor:pointer;}
+  .dot{width:16px;height:16px;border-radius:50%;border:1px solid var(--border);cursor:pointer;flex-shrink:0;}
   .dot[data-t="cyan"]{background:#00e5ff;} .dot[data-t="verde"]{background:#39ff14;}
   .dot[data-t="ambra"]{background:#ffb000;} .dot[data-t="magenta"]{background:#ff2fd6;}
   .dot[data-t="viola"]{background:#9d4dff;} .dot[data-t="rosso"]{background:#ff3b3b;}
+  #user-info{color:var(--accent);cursor:pointer;font-size:12.5px;white-space:nowrap;max-width:110px;overflow:hidden;text-overflow:ellipsis;}
 
   nav{display:flex;border-bottom:1px solid var(--border);background:var(--panel2);}
   nav button{flex:1;padding:10px;background:none;border:none;color:var(--text-dim);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:14px;cursor:pointer;border-bottom:2px solid transparent;}
@@ -53,7 +51,7 @@
   section.active{display:flex;}
 
   #chat-log{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;}
-  .bubble{max-width:80%;padding:10px 14px;border-radius:14px;font-size:14.5px;line-height:1.4;}
+  .bubble{max-width:80%;padding:10px 14px;border-radius:14px;font-size:14.5px;line-height:1.4;white-space:pre-wrap;}
   .bubble.user{align-self:flex-end;background:var(--accent-dim);border:1px solid var(--accent);color:var(--text);border-bottom-right-radius:4px;}
   .bubble.assistant{align-self:flex-start;background:var(--panel);border:1px solid var(--border);border-bottom-left-radius:4px;}
 
@@ -64,7 +62,7 @@
   #input-bar{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border);background:var(--panel);}
   #text-input{flex:1;padding:11px 14px;background:var(--panel2);border:1px solid var(--border);border-radius:20px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:15px;}
   #text-input:focus{outline:none;border-color:var(--accent);}
-  .icon-btn{width:42px;height:42px;border-radius:50%;border:1px solid var(--border);background:var(--panel2);color:var(--text);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .icon-btn{width:42px;height:42px;border-radius:50%;border:1px solid var(--border);background:var(--panel2);color:var(--text);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .icon-btn:hover{border-color:var(--accent);color:var(--accent);}
   .icon-btn.recording{border-color:#ff3b3b;color:#ff3b3b;background:rgba(255,59,59,.12);}
   #send-btn{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
@@ -86,11 +84,11 @@
 <div id="login-screen">
   <div class="login-box">
     <h1 class="mono">ASSISTENTE</h1>
-    <p id="login-sub">Accedi per continuare</p>
-    <div class="field"><label>Email</label><input type="email" id="login-email"></div>
-    <div class="field"><label>Password</label><input type="password" id="login-pass"></div>
-    <button class="btn" id="login-btn">Accedi</button>
-    <button class="link-btn" id="toggle-mode">Non hai un account? Registrati</button>
+    <p>Accedi per continuare</p>
+    <button class="google-btn" id="google-login-btn">
+      <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.9-2.26 5.36-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59A14.5 14.5 0 0 1 9.5 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.94 23.94 0 0 0 0 24c0 3.86.92 7.51 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Accedi con Google
+    </button>
     <div class="login-error" id="login-error"></div>
   </div>
 </div>
@@ -98,11 +96,14 @@
 <div id="app">
   <header>
     <h1 class="mono">ASSISTENTE</h1>
-    <div class="clock mono" id="clock">--:--</div>
-    <div class="theme-dots">
-      <div class="dot" data-t="cyan"></div><div class="dot" data-t="verde"></div>
-      <div class="dot" data-t="ambra"></div><div class="dot" data-t="magenta"></div>
-      <div class="dot" data-t="viola"></div><div class="dot" data-t="rosso"></div>
+    <div class="header-right">
+      <div class="clock mono" id="clock">--:--</div>
+      <div class="theme-dots">
+        <div class="dot" data-t="cyan"></div><div class="dot" data-t="verde"></div>
+        <div class="dot" data-t="ambra"></div><div class="dot" data-t="magenta"></div>
+        <div class="dot" data-t="viola"></div><div class="dot" data-t="rosso"></div>
+      </div>
+      <span id="user-info" title="Esci"></span>
     </div>
   </header>
   <nav>
@@ -131,32 +132,48 @@
 
 <div id="toast-container"></div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {
-  getFirestore, collection, addDoc, getDocs, query, doc, updateDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script>
 // TODO Ismaele: incolla qui la tua config reale (stessa degli altri siti)
 const firebaseConfig = {
   apiKey: "INCOLLA_QUI",
   authDomain: "workspace-5e87a.firebaseapp.com",
-  projectId: "workspace-5e87a",
-  storageBucket: "workspace-5e87a.appspot.com",
-  messagingSenderId: "INCOLLA_QUI",
-  appId: "INCOLLA_QUI"
+  projectId: "workspace-5e87a"
 };
-const fbApp = initializeApp(firebaseConfig);
-const auth = getAuth(fbApp);
-const db = getFirestore(fbApp);
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
 let uid = null;
-let isRegisterMode = false;
 let events = [];   // {id, titolo, data:Date, ricorrenza:{giorno}|null}
 let notified = new Set();
+
+/* ---------- LOGIN ---------- */
+document.getElementById('google-login-btn').addEventListener('click', ()=>{
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>{
+    document.getElementById('login-error').textContent = 'Accesso non riuscito, riprova.';
+  });
+});
+document.getElementById('user-info').addEventListener('click', ()=> auth.signOut());
+
+auth.onAuthStateChanged(async user=>{
+  if(user){
+    uid = user.uid;
+    document.getElementById('user-info').textContent = user.displayName || user.email;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    await loadEvents();
+    renderAgenda();
+    await maybeMorningSummary();
+    setupNotifications();
+  } else {
+    uid = null;
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  }
+});
 
 /* ---------- THEME ---------- */
 const savedTheme = localStorage.getItem('theme') || 'cyan';
@@ -194,40 +211,6 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     document.getElementById(btn.dataset.tab).classList.add('active');
     if(btn.dataset.tab==='agenda-view') renderAgenda();
   });
-});
-
-/* ---------- LOGIN ---------- */
-document.getElementById('toggle-mode').addEventListener('click', ()=>{
-  isRegisterMode = !isRegisterMode;
-  document.getElementById('login-btn').textContent = isRegisterMode ? 'Registrati' : 'Accedi';
-  document.getElementById('toggle-mode').textContent = isRegisterMode
-    ? 'Hai già un account? Accedi' : 'Non hai un account? Registrati';
-});
-document.getElementById('login-btn').addEventListener('click', async ()=>{
-  const email = document.getElementById('login-email').value.trim();
-  const pass = document.getElementById('login-pass').value;
-  const errEl = document.getElementById('login-error');
-  errEl.textContent = '';
-  try{
-    if(isRegisterMode) await createUserWithEmailAndPassword(auth, email, pass);
-    else await signInWithEmailAndPassword(auth, email, pass);
-  }catch(e){ errEl.textContent = 'Errore: controlla email e password.'; }
-});
-
-onAuthStateChanged(auth, async user=>{
-  if(user){
-    uid = user.uid;
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'flex';
-    await loadEvents();
-    renderAgenda();
-    await maybeMorningSummary();
-    setupNotifications();
-  } else {
-    uid = null;
-    document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('app').style.display = 'none';
-  }
 });
 
 /* ---------- CHAT UI ---------- */
@@ -393,7 +376,7 @@ async function getWeatherReply(date){
 /* ---------- FIRESTORE: EVENTI / NOTE ---------- */
 async function loadEvents(){
   events = [];
-  const snap = await getDocs(query(collection(db,'utenti',uid,'eventi')));
+  const snap = await db.collection('utenti').doc(uid).collection('eventi').get();
   snap.forEach(d=>{
     const v = d.data();
     events.push({ id:d.id, titolo:v.titolo, data:new Date(v.data), ricorrenza:v.ricorrenza||null });
@@ -401,14 +384,14 @@ async function loadEvents(){
 }
 async function saveEvent(text, dt){
   const payload = { titolo:text, data:dt.date.toISOString(), ricorrenza:dt.recurrence };
-  const ref = await addDoc(collection(db,'utenti',uid,'eventi'), payload);
+  const ref = await db.collection('utenti').doc(uid).collection('eventi').add(payload);
   events.push({ id:ref.id, titolo:text, data:dt.date, ricorrenza:dt.recurrence });
 }
 async function saveNote(text, riassunto){
-  await addDoc(collection(db,'utenti',uid,'note'), { testo:text, riassunto, creato: new Date().toISOString() });
+  await db.collection('utenti').doc(uid).collection('note').add({ testo:text, riassunto, creato: new Date().toISOString() });
 }
 async function getLastNotePreview(){
-  const snap = await getDocs(query(collection(db,'utenti',uid,'note')));
+  const snap = await db.collection('utenti').doc(uid).collection('note').get();
   let last = null;
   snap.forEach(d=>{ const v=d.data(); if(!last || v.creato>last.creato) last=v; });
   return last ? last.riassunto : null;
