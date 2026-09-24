@@ -1,1 +1,617 @@
-hello :)
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assistente</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: white;
+      background: black;
+      font-family: Arial, sans-serif;
+    }
+
+    header {
+      padding: 24px;
+      text-align: center;
+      border-bottom: 1px solid #1683ff;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 25px;
+    }
+
+    main {
+      width: min(900px, 100%);
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .box {
+      margin-bottom: 24px;
+      padding: 22px;
+      border: 1px solid #1683ff;
+      border-radius: 10px;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    form {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    input,
+    textarea,
+    button {
+      font: inherit;
+    }
+
+    input,
+    textarea {
+      flex: 1;
+      min-width: 180px;
+      padding: 12px;
+      color: white;
+      background: black;
+      border: 1px solid #1683ff;
+      border-radius: 6px;
+      outline: none;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    button {
+      padding: 11px 18px;
+      color: white;
+      background: black;
+      border: 1px solid #1683ff;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      color: black;
+      background: #1683ff;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    #response {
+      min-height: 24px;
+      margin-top: 16px;
+      color: #1683ff;
+      white-space: pre-wrap;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    ul {
+      padding: 0;
+      margin: 18px 0 0;
+      list-style: none;
+    }
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #1683ff;
+    }
+
+    .content {
+      flex: 1;
+      word-break: break-word;
+    }
+
+    .date {
+      display: block;
+      margin-top: 5px;
+      color: #999;
+      font-size: 12px;
+    }
+
+    .delete {
+      height: fit-content;
+      padding: 6px 9px;
+    }
+
+    .empty {
+      color: #999;
+    }
+
+    a {
+      color: #1683ff;
+    }
+
+    .hint {
+      margin: 10px 0 0;
+      color: #777;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Assistente</h1>
+  </header>
+
+  <main>
+    <section class="box">
+      <h2>Comando</h2>
+
+      <form id="commandForm">
+        <input
+          id="commandInput"
+          type="text"
+          placeholder="Scrivi qualsiasi cosa, in modo naturale"
+          autocomplete="off"
+          required
+        >
+
+        <button type="submit" id="commandBtn">Invia</button>
+      </form>
+
+      <div id="response"></div>
+      <p class="hint">Es: "segnati di comprare il pane", "ricordami tra un'ora di chiamare Marco", "cerca il prezzo di un ESP32", oppure fai una domanda qualsiasi.</p>
+    </section>
+
+    <section class="grid">
+      <div class="box">
+        <h2>Nota</h2>
+
+        <form id="noteForm">
+          <textarea
+            id="noteInput"
+            placeholder="Scrivi una nota"
+            required
+          ></textarea>
+
+          <button type="submit">Salva</button>
+        </form>
+
+        <ul id="notesList"></ul>
+      </div>
+
+      <div class="box">
+        <h2>Promemoria</h2>
+
+        <form id="reminderForm">
+          <input
+            id="reminderInput"
+            type="text"
+            placeholder="Testo"
+            required
+          >
+
+          <input
+            id="reminderDate"
+            type="datetime-local"
+            required
+          >
+
+          <button type="submit">Salva</button>
+        </form>
+
+        <ul id="remindersList"></ul>
+      </div>
+    </section>
+
+    <section class="box">
+      <h2>Ricerche</h2>
+      <div id="searchResults">
+        <p class="empty">Nessuna ricerca</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const commandForm = document.getElementById("commandForm");
+    const commandInput = document.getElementById("commandInput");
+    const commandBtn = document.getElementById("commandBtn");
+    const response = document.getElementById("response");
+
+    const noteForm = document.getElementById("noteForm");
+    const noteInput = document.getElementById("noteInput");
+    const notesList = document.getElementById("notesList");
+
+    const reminderForm = document.getElementById("reminderForm");
+    const reminderInput = document.getElementById("reminderInput");
+    const reminderDate = document.getElementById("reminderDate");
+    const remindersList = document.getElementById("remindersList");
+
+    const searchResults = document.getElementById("searchResults");
+
+    let notes = JSON.parse(localStorage.getItem("notes") || "[]");
+    let reminders = JSON.parse(localStorage.getItem("reminders") || "[]");
+
+    function showResponse(message) {
+      response.textContent = message;
+    }
+
+    function saveNotes() {
+      localStorage.setItem("notes", JSON.stringify(notes));
+    }
+
+    function saveReminders() {
+      localStorage.setItem("reminders", JSON.stringify(reminders));
+    }
+
+    function renderNotes() {
+      notesList.innerHTML = "";
+
+      if (notes.length === 0) {
+        notesList.innerHTML = '<li class="empty">Nessuna nota</li>';
+        return;
+      }
+
+      notes
+        .slice()
+        .reverse()
+        .forEach((note) => {
+          const li = document.createElement("li");
+
+          li.innerHTML = `
+            <div class="content">
+              ${escapeHtml(note.text)}
+              <span class="date">
+                ${new Date(note.createdAt).toLocaleString("it-IT")}
+              </span>
+            </div>
+
+            <button class="delete">Elimina</button>
+          `;
+
+          li.querySelector(".delete").onclick = () => {
+            notes = notes.filter((item) => item.id !== note.id);
+            saveNotes();
+            renderNotes();
+            showResponse("Nota eliminata");
+          };
+
+          notesList.appendChild(li);
+        });
+    }
+
+    function renderReminders() {
+      remindersList.innerHTML = "";
+
+      if (reminders.length === 0) {
+        remindersList.innerHTML = '<li class="empty">Nessun promemoria</li>';
+        return;
+      }
+
+      reminders
+        .slice()
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .forEach((reminder) => {
+          const li = document.createElement("li");
+
+          li.innerHTML = `
+            <div class="content">
+              ${escapeHtml(reminder.text)}
+              <span class="date">
+                ${new Date(reminder.date).toLocaleString("it-IT")}
+              </span>
+            </div>
+
+            <button class="delete">Elimina</button>
+          `;
+
+          li.querySelector(".delete").onclick = () => {
+            reminders = reminders.filter((item) => item.id !== reminder.id);
+            saveReminders();
+            renderReminders();
+            showResponse("Promemoria eliminato");
+          };
+
+          remindersList.appendChild(li);
+        });
+    }
+
+    noteForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const text = noteInput.value.trim();
+      if (!text) return;
+
+      notes.push({
+        id: crypto.randomUUID(),
+        text,
+        createdAt: new Date().toISOString()
+      });
+
+      saveNotes();
+      renderNotes();
+
+      noteInput.value = "";
+      showResponse("Nota salvata");
+    });
+
+    reminderForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const text = reminderInput.value.trim();
+      const date = reminderDate.value;
+      if (!text || !date) return;
+
+      reminders.push({
+        id: crypto.randomUUID(),
+        text,
+        date,
+        notified: false
+      });
+
+      saveReminders();
+      renderReminders();
+
+      reminderInput.value = "";
+      reminderDate.value = "";
+
+      showResponse("Promemoria salvato");
+    });
+
+    commandForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const command = commandInput.value.trim();
+      if (!command) return;
+
+      commandInput.value = "";
+      commandBtn.disabled = true;
+      showResponse("Un attimo...");
+
+      try {
+        await processCommand(command);
+      } catch (err) {
+        console.error(err);
+        showResponse("C'è stato un problema, riprova.");
+      } finally {
+        commandBtn.disabled = false;
+      }
+    });
+
+    // Interpreta il comando in linguaggio naturale tramite l'API,
+    // restituendo un'azione strutturata da eseguire.
+    async function interpretCommand(command) {
+      const now = new Date();
+
+      const systemPrompt = `Sei il motore di interpretazione comandi di un assistente personale.
+Data e ora attuali: ${now.toLocaleString("it-IT")} (ISO: ${now.toISOString()}).
+Rispondi SOLO con un oggetto JSON valido, senza backtick, senza markdown, senza testo prima o dopo.
+
+Formato:
+{
+  "azione": "nota" | "promemoria" | "cerca" | "apri_sito" | "lista_note" | "lista_promemoria" | "rispondi",
+  "testo": string,
+  "data_iso": string,
+  "sito": string,
+  "risposta": string
+}
+
+Regole:
+- "nota": l'utente vuole salvare/annotare qualcosa da ricordare in forma scritta (non un evento con orario). Metti il contenuto in "testo".
+- "promemoria": l'utente vuole essere avvisato in un momento preciso o relativo (es. "tra un'ora", "domani alle 9", "venerdì sera"). Calcola "data_iso" in formato locale "YYYY-MM-DDTHH:mm" basandoti sulla data/ora attuali sopra. Metti il testo del promemoria in "testo".
+- "cerca": l'utente vuole cercare qualcosa sul web. Metti la query pulita in "testo".
+- "apri_sito": l'utente vuole aprire un sito noto (es. google, youtube, github). Metti l'URL completo in "sito".
+- "lista_note": l'utente vuole vedere le note salvate.
+- "lista_promemoria": l'utente vuole vedere i promemoria salvati.
+- "rispondi": in ogni altro caso, incluse domande generiche, richieste di spiegazioni, conversazione. Scrivi una risposta utile, concisa e in italiano nel campo "risposta".
+
+Includi solo i campi rilevanti per l'azione scelta, gli altri puoi ometterli o lasciarli vuoti.`;
+
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-6",
+          max_tokens: 1000,
+          system: systemPrompt,
+          messages: [{ role: "user", content: command }]
+        })
+      });
+
+      const data = await res.json();
+      const raw = (data.content || [])
+        .map((block) => block.text || "")
+        .join("")
+        .trim();
+
+      const clean = raw.replace(/^```json\s*|^```\s*|```$/g, "").trim();
+      return JSON.parse(clean);
+    }
+
+    async function processCommand(command) {
+      let result;
+
+      try {
+        result = await interpretCommand(command);
+      } catch (err) {
+        console.error("Errore interpretazione:", err);
+        showResponse("Non sono riuscito a capire, riprova con parole diverse.");
+        return;
+      }
+
+      switch (result.azione) {
+        case "nota": {
+          const text = (result.testo || "").trim();
+          if (!text) {
+            showResponse("Cosa devo annotare?");
+            return;
+          }
+
+          notes.push({
+            id: crypto.randomUUID(),
+            text,
+            createdAt: new Date().toISOString()
+          });
+
+          saveNotes();
+          renderNotes();
+          showResponse("Nota salvata: " + text);
+          return;
+        }
+
+        case "promemoria": {
+          const text = (result.testo || "").trim();
+          const date = (result.data_iso || "").trim();
+
+          if (!text || !date) {
+            showResponse("Non ho capito cosa e quando ricordarti.");
+            return;
+          }
+
+          reminders.push({
+            id: crypto.randomUUID(),
+            text,
+            date,
+            notified: false
+          });
+
+          saveReminders();
+          renderReminders();
+          showResponse(
+            "Promemoria salvato per " +
+              new Date(date).toLocaleString("it-IT")
+          );
+          return;
+        }
+
+        case "cerca": {
+          const query = (result.testo || "").trim();
+          if (!query) {
+            showResponse("Cosa devo cercare?");
+            return;
+          }
+
+          searchWeb(query);
+          return;
+        }
+
+        case "apri_sito": {
+          const url = (result.sito || "").trim();
+          if (!url) {
+            showResponse("Non ho capito quale sito aprire.");
+            return;
+          }
+
+          window.open(url, "_blank");
+          showResponse("Ho aperto " + url);
+          return;
+        }
+
+        case "lista_note": {
+          if (notes.length === 0) {
+            showResponse("Non ci sono note salvate.");
+          } else {
+            showResponse(notes.map((note) => note.text).join(" | "));
+          }
+          return;
+        }
+
+        case "lista_promemoria": {
+          if (reminders.length === 0) {
+            showResponse("Non ci sono promemoria salvati.");
+          } else {
+            showResponse(
+              reminders
+                .map(
+                  (r) =>
+                    r.text +
+                    " (" +
+                    new Date(r.date).toLocaleString("it-IT") +
+                    ")"
+                )
+                .join(" | ")
+            );
+          }
+          return;
+        }
+
+        case "rispondi":
+        default: {
+          showResponse(result.risposta || "Non ho una risposta per questo.");
+          return;
+        }
+      }
+    }
+
+    function searchWeb(query) {
+      const url = "https://www.google.com/search?q=" + encodeURIComponent(query);
+
+      const empty = searchResults.querySelector(".empty");
+      if (empty) empty.remove();
+
+      const result = document.createElement("div");
+      result.innerHTML = `
+        <p>${escapeHtml(query)}</p>
+        <a href="${url}" target="_blank">Apri ricerca</a>
+      `;
+
+      searchResults.prepend(result);
+      window.open(url, "_blank");
+      showResponse("Ricerca avviata: " + query);
+    }
+
+    function checkReminders() {
+      const now = new Date();
+      let changed = false;
+
+      reminders.forEach((reminder) => {
+        if (!reminder.notified && new Date(reminder.date) <= now) {
+          reminder.notified = true;
+          changed = true;
+
+          alert("Promemoria: " + reminder.text);
+          showResponse("Promemoria: " + reminder.text);
+        }
+      });
+
+      if (changed) {
+        saveReminders();
+        renderReminders();
+      }
+    }
+
+    function escapeHtml(value) {
+      return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    renderNotes();
+    renderReminders();
+
+    setInterval(checkReminders, 10000);
+    checkReminders();
+  </script>
+</body>
+</html>
