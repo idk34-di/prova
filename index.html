@@ -1,18 +1,11 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Assistente</title>
 
   <style>
-    :root {
-      --black: #000;
-      --blue: #1683ff;
-      --white: #fff;
-      --gray: #aaa;
-    }
-
     * {
       box-sizing: border-box;
     }
@@ -20,25 +13,24 @@
     body {
       margin: 0;
       min-height: 100vh;
-      color: var(--white);
-      background: var(--black);
+      color: white;
+      background: black;
       font-family: Arial, sans-serif;
     }
 
     header {
-      padding: 24px 20px;
+      padding: 24px;
       text-align: center;
-      border-bottom: 1px solid var(--blue);
+      border-bottom: 1px solid #1683ff;
     }
 
-    header h1 {
+    h1 {
       margin: 0;
-      font-size: 26px;
-      color: var(--white);
+      font-size: 25px;
     }
 
     main {
-      width: min(1000px, 100%);
+      width: min(900px, 100%);
       margin: 30px auto;
       padding: 0 20px;
     }
@@ -46,47 +38,8 @@
     .box {
       margin-bottom: 24px;
       padding: 22px;
-      border: 1px solid var(--blue);
-      border-radius: 12px;
-      background: var(--black);
-    }
-
-    .assistant {
-      text-align: center;
-    }
-
-    #voiceButton {
-      width: 90px;
-      height: 90px;
-      border: 2px solid var(--blue);
-      border-radius: 50%;
-      color: var(--white);
-      background: var(--black);
-      font-size: 38px;
-      cursor: pointer;
-    }
-
-    #voiceButton:hover,
-    #voiceButton.listening {
-      color: var(--blue);
-      box-shadow: 0 0 20px var(--blue);
-    }
-
-    #status {
-      margin-top: 18px;
-      color: var(--gray);
-    }
-
-    #transcript {
-      min-height: 22px;
-      margin-top: 8px;
-      color: var(--blue);
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 24px;
+      border: 1px solid #1683ff;
+      border-radius: 10px;
     }
 
     h2 {
@@ -96,8 +49,8 @@
 
     form {
       display: flex;
-      flex-direction: column;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
     input,
@@ -108,32 +61,46 @@
 
     input,
     textarea {
-      width: 100%;
+      flex: 1;
+      min-width: 180px;
       padding: 12px;
-      color: var(--white);
-      background: var(--black);
-      border: 1px solid var(--blue);
-      border-radius: 7px;
+      color: white;
+      background: black;
+      border: 1px solid #1683ff;
+      border-radius: 6px;
       outline: none;
     }
 
     textarea {
-      min-height: 90px;
+      width: 100%;
+      min-height: 80px;
       resize: vertical;
     }
 
-    button[type="submit"] {
-      padding: 11px;
-      color: var(--white);
-      background: var(--black);
-      border: 1px solid var(--blue);
-      border-radius: 7px;
+    button {
+      padding: 11px 18px;
+      color: white;
+      background: black;
+      border: 1px solid #1683ff;
+      border-radius: 6px;
       cursor: pointer;
     }
 
-    button[type="submit"]:hover {
-      color: var(--black);
-      background: var(--blue);
+    button:hover {
+      color: black;
+      background: #1683ff;
+    }
+
+    #response {
+      min-height: 24px;
+      margin-top: 16px;
+      color: #1683ff;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
     }
 
     ul {
@@ -147,64 +114,58 @@
       justify-content: space-between;
       gap: 12px;
       padding: 12px 0;
-      border-bottom: 1px solid var(--blue);
+      border-bottom: 1px solid #1683ff;
     }
 
-    .item-content {
+    .content {
       flex: 1;
       word-break: break-word;
     }
 
-    .item-date {
+    .date {
       display: block;
       margin-top: 5px;
-      color: var(--gray);
+      color: #999;
       font-size: 12px;
     }
 
-    .delete-button {
+    .delete {
       height: fit-content;
       padding: 6px 9px;
-      color: var(--white);
-      background: var(--black);
-      border: 1px solid var(--blue);
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .delete-button:hover {
-      color: var(--black);
-      background: var(--blue);
-    }
-
-    .search-result {
-      padding: 12px 0;
-      border-bottom: 1px solid var(--blue);
-    }
-
-    .search-result a {
-      color: var(--blue);
     }
 
     .empty {
-      color: var(--gray);
+      color: #999;
+    }
+
+    a {
+      color: #1683ff;
     }
   </style>
 </head>
 
 <body>
   <header>
-    <h1>Assistente vocale</h1>
+    <h1>Assistente</h1>
   </header>
 
   <main>
-    <section class="box assistant">
-      <button id="voiceButton" aria-label="Avvia assistente vocale">
-        🎙️
-      </button>
+    <section class="box">
+      <h2>Comando</h2>
 
-      <div id="status">Premi il microfono</div>
-      <div id="transcript"></div>
+      <form id="commandForm">
+        <input
+          id="commandInput"
+          type="text"
+          placeholder="Scrivi una richiesta"
+          autocomplete="off"
+          required
+        >
+
+        <button type="submit">Invia</button>
+      </form>
+
+      <div id="response"></div>
     </section>
 
     <section class="grid">
@@ -233,13 +194,13 @@
             type="text"
             placeholder="Testo"
             required
-          />
+          >
 
           <input
             id="reminderDate"
             type="datetime-local"
             required
-          />
+          >
 
           <button type="submit">Salva</button>
         </form>
@@ -249,7 +210,7 @@
     </section>
 
     <section class="box">
-      <h2>Ricerca</h2>
+      <h2>Ricerche</h2>
       <div id="searchResults">
         <p class="empty">Nessuna ricerca</p>
       </div>
@@ -257,9 +218,9 @@
   </main>
 
   <script>
-    const voiceButton = document.getElementById("voiceButton");
-    const statusElement = document.getElementById("status");
-    const transcriptElement = document.getElementById("transcript");
+    const commandForm = document.getElementById("commandForm");
+    const commandInput = document.getElementById("commandInput");
+    const response = document.getElementById("response");
 
     const noteForm = document.getElementById("noteForm");
     const noteInput = document.getElementById("noteInput");
@@ -273,69 +234,13 @@
     const searchResults = document.getElementById("searchResults");
 
     let notes = JSON.parse(localStorage.getItem("notes") || "[]");
+
     let reminders = JSON.parse(
       localStorage.getItem("reminders") || "[]"
     );
 
-    const SpeechRecognition =
-      window.SpeechRecognition ||
-      window.webkitSpeechRecognition;
-
-    let recognition = null;
-
-    if (SpeechRecognition) {
-      recognition = new SpeechRecognition();
-      recognition.lang = "it-IT";
-      recognition.continuous = false;
-      recognition.interimResults = false;
-
-      recognition.onstart = () => {
-        voiceButton.classList.add("listening");
-        statusElement.textContent = "Ascolto...";
-        transcriptElement.textContent = "";
-      };
-
-      recognition.onresult = (event) => {
-        const text = event.results[0][0].transcript;
-
-        transcriptElement.textContent = text;
-        processVoiceCommand(text);
-      };
-
-      recognition.onerror = () => {
-        statusElement.textContent = "Errore microfono";
-      };
-
-      recognition.onend = () => {
-        voiceButton.classList.remove("listening");
-
-        if (statusElement.textContent === "Ascolto...") {
-          statusElement.textContent = "Premi il microfono";
-        }
-      };
-    } else {
-      voiceButton.disabled = true;
-      statusElement.textContent = "Browser non compatibile";
-    }
-
-    voiceButton.addEventListener("click", () => {
-      if (!recognition) return;
-
-      try {
-        recognition.start();
-      } catch {
-        // Il microfono è già attivo.
-      }
-    });
-
-    function speak(message) {
-      if (!("speechSynthesis" in window)) return;
-
-      const speech = new SpeechSynthesisUtterance(message);
-      speech.lang = "it-IT";
-
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(speech);
+    function showResponse(message) {
+      response.textContent = message;
     }
 
     function saveNotes() {
@@ -352,7 +257,7 @@
     function renderNotes() {
       notesList.innerHTML = "";
 
-      if (!notes.length) {
+      if (notes.length === 0) {
         notesList.innerHTML =
           '<li class="empty">Nessuna nota</li>';
         return;
@@ -362,22 +267,21 @@
         const li = document.createElement("li");
 
         li.innerHTML = `
-          <div class="item-content">
+          <div class="content">
             ${escapeHtml(note.text)}
-            <span class="item-date">
+            <span class="date">
               ${new Date(note.createdAt).toLocaleString("it-IT")}
             </span>
           </div>
 
-          <button class="delete-button">
-            Elimina
-          </button>
+          <button class="delete">Elimina</button>
         `;
 
-        li.querySelector(".delete-button").onclick = () => {
+        li.querySelector(".delete").onclick = () => {
           notes = notes.filter((item) => item.id !== note.id);
           saveNotes();
           renderNotes();
+          showResponse("Nota eliminata");
         };
 
         notesList.appendChild(li);
@@ -387,7 +291,7 @@
     function renderReminders() {
       remindersList.innerHTML = "";
 
-      if (!reminders.length) {
+      if (reminders.length === 0) {
         remindersList.innerHTML =
           '<li class="empty">Nessun promemoria</li>';
         return;
@@ -399,35 +303,46 @@
           const li = document.createElement("li");
 
           li.innerHTML = `
-            <div class="item-content">
+            <div class="content">
               ${escapeHtml(reminder.text)}
-              <span class="item-date">
+              <span class="date">
                 ${new Date(reminder.date).toLocaleString("it-IT")}
               </span>
             </div>
 
-            <button class="delete-button">
-              Elimina
-            </button>
+            <button class="delete">Elimina</button>
           `;
 
-          li.querySelector(".delete-button").onclick = () => {
+          li.querySelector(".delete").onclick = () => {
             reminders = reminders.filter(
               (item) => item.id !== reminder.id
             );
 
             saveReminders();
             renderReminders();
+            showResponse("Promemoria eliminato");
           };
 
           remindersList.appendChild(li);
         });
     }
 
+    commandForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const command = commandInput.value.trim();
+
+      if (!command) return;
+
+      processCommand(command);
+      commandInput.value = "";
+    });
+
     noteForm.addEventListener("submit", (event) => {
       event.preventDefault();
 
       const text = noteInput.value.trim();
+
       if (!text) return;
 
       notes.push({
@@ -440,7 +355,7 @@
       renderNotes();
 
       noteInput.value = "";
-      speak("Nota salvata");
+      showResponse("Nota salvata");
     });
 
     reminderForm.addEventListener("submit", (event) => {
@@ -464,10 +379,10 @@
       reminderInput.value = "";
       reminderDate.value = "";
 
-      speak("Promemoria salvato");
+      showResponse("Promemoria salvato");
     });
 
-    function processVoiceCommand(command) {
+    function processCommand(command) {
       const text = command.toLowerCase().trim();
 
       if (
@@ -481,60 +396,62 @@
           .replace(/^annota\s*:?\s*/i, "")
           .trim();
 
-        if (note) {
-          notes.push({
-            id: crypto.randomUUID(),
-            text: note,
-            createdAt: new Date().toISOString()
-          });
-
-          saveNotes();
-          renderNotes();
-          speak("Nota salvata");
+        if (!note) {
+          showResponse("Scrivi il testo della nota");
+          return;
         }
 
+        notes.push({
+          id: crypto.randomUUID(),
+          text: note,
+          createdAt: new Date().toISOString()
+        });
+
+        saveNotes();
+        renderNotes();
+        showResponse("Nota salvata");
         return;
       }
 
       if (
         text.startsWith("ricordami") ||
-        text.startsWith("crea un promemoria") ||
-        text.startsWith("crea promemoria")
+        text.startsWith("crea promemoria") ||
+        text.startsWith("crea un promemoria")
       ) {
         const reminderText = text
           .replace(/^ricordami\s*/i, "")
-          .replace(/^crea un promemoria\s*/i, "")
           .replace(/^crea promemoria\s*/i, "")
+          .replace(/^crea un promemoria\s*/i, "")
           .replace(/^di\s*/i, "")
           .trim();
 
-        if (reminderText) {
-          reminders.push({
-            id: crypto.randomUUID(),
-            text: reminderText,
-            date: parseItalianDate(text),
-            notified: false
-          });
-
-          saveReminders();
-          renderReminders();
-          speak("Promemoria salvato");
+        if (!reminderText) {
+          showResponse("Scrivi il testo del promemoria");
+          return;
         }
 
+        reminders.push({
+          id: crypto.randomUUID(),
+          text: reminderText,
+          date: parseDate(text),
+          notified: false
+        });
+
+        saveReminders();
+        renderReminders();
+        showResponse("Promemoria salvato");
         return;
       }
 
       if (
         text.includes("leggi le note") ||
-        text.includes("leggi le mie note")
+        text.includes("mostra le note")
       ) {
-        if (!notes.length) {
-          speak("Nessuna nota");
+        if (notes.length === 0) {
+          showResponse("Non ci sono note");
         } else {
-          speak(
-            notes
-              .map((note) => note.text)
-              .join(". ")
+          showResponse(
+            notes.map((note) => note.text).join(" | ")
           );
         }
 
@@ -551,21 +468,30 @@
           .replace(/^ricerca\s*/i, "")
           .trim();
 
-        if (query) {
-          searchWeb(query);
+        if (!query) {
+          showResponse("Scrivi cosa vuoi cercare");
+          return;
         }
 
-        return;
-      }
-
-      if (text.includes("apri youtube")) {
-        window.open("https://www.youtube.com", "_blank");
+        searchWeb(query);
         return;
       }
 
       if (text.includes("apri google")) {
         window.open("https://www.google.com", "_blank");
+        showResponse("Google aperto");
+        return;
       }
+
+      if (text.includes("apri youtube")) {
+        window.open("https://www.youtube.com", "_blank");
+        showResponse("YouTube aperto");
+        return;
+      }
+
+      showResponse(
+        "Comando non riconosciuto"
+      );
     }
 
     function searchWeb(query) {
@@ -580,26 +506,20 @@
       }
 
       const result = document.createElement("div");
-      result.className = "search-result";
 
       result.innerHTML = `
-        ${escapeHtml(query)}
-        <br />
-        <a
-          href="${url}"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Apri
+        <p>${escapeHtml(query)}</p>
+        <a href="${url}" target="_blank">
+          Apri ricerca
         </a>
       `;
 
       searchResults.prepend(result);
       window.open(url, "_blank");
-      speak("Ricerca avviata");
+      showResponse("Ricerca avviata");
     }
 
-    function parseItalianDate(command) {
+    function parseDate(command) {
       const date = new Date();
 
       if (command.includes("domani")) {
@@ -621,16 +541,12 @@
         date.setHours(date.getHours() + 1, 0, 0, 0);
       }
 
-      return toLocalDateTime(date);
-    }
-
-    function toLocalDateTime(date) {
       const offset = date.getTimezoneOffset();
-      const local = new Date(
+      const localDate = new Date(
         date.getTime() - offset * 60000
       );
 
-      return local.toISOString().slice(0, 16);
+      return localDate.toISOString().slice(0, 16);
     }
 
     function checkReminders() {
@@ -645,20 +561,8 @@
           reminder.notified = true;
           changed = true;
 
-          const message =
-            "Promemoria: " + reminder.text;
-
-          if (
-            "Notification" in window &&
-            Notification.permission === "granted"
-          ) {
-            new Notification("Promemoria", {
-              body: reminder.text
-            });
-          }
-
-          speak(message);
-          alert(message);
+          alert("Promemoria: " + reminder.text);
+          showResponse("Promemoria: " + reminder.text);
         }
       });
 
