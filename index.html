@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Grana</title>
+<title>prova</title>
 <style>
 *{box-sizing:border-box;margin:0}
 body{font-family:system-ui,sans-serif;background:#fff;color:#111;line-height:1.5}
@@ -18,6 +18,7 @@ header h1{font-size:20px;font-weight:600;letter-spacing:.5px}
 #overlay.open{display:block}
 main{max-width:1100px;margin:0 auto;padding:24px 16px}
 h2{font-weight:600;margin-bottom:18px}
+.vuoto{color:#777}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
 .grid img{width:100%;aspect-ratio:1;object-fit:cover;cursor:pointer;display:block;background:#f2f2f2}
 .luoghi{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
@@ -25,9 +26,8 @@ h2{font-weight:600;margin-bottom:18px}
 .luoghi button.on{background:#111;color:#fff;border-color:#111}
 .card{border:1px solid #eee;padding:16px;margin-bottom:12px;border-radius:8px}
 .card b{display:block}
-form{display:flex;flex-direction:column;gap:10px;max-width:360px}
-input,button.btn{padding:12px;font-size:16px;border:1px solid #ccc;border-radius:6px}
-button.btn{background:#111;color:#fff;border-color:#111;cursor:pointer}
+.btn{padding:12px 18px;font-size:16px;border:1px solid #111;border-radius:6px;background:#111;color:#fff;cursor:pointer}
+.btn.chiaro{background:#fff;color:#111}
 #lightbox{display:none;position:fixed;inset:0;background:#fff;z-index:40;overflow:auto;padding:16px}
 #lightbox.open{display:block}
 #lightbox img{max-width:100%;max-height:75vh;display:block;margin:0 auto}
@@ -39,7 +39,7 @@ button.btn{background:#111;color:#fff;border-color:#111;cursor:pointer}
 
 <header>
   <button id="burger" aria-label="Menu">☰</button>
-  <h1>Grana</h1>
+  <h1>prova</h1>
 </header>
 
 <nav id="menu">
@@ -60,33 +60,49 @@ button.btn{background:#111;color:#fff;border-color:#111;cursor:pointer}
   <div class="info" id="lbInfo"></div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
-/* ====== I TUOI DATI: modifica qui ====== */
+/* ====== I TUOI DATI: modifica solo qui ====== */
+
+/* Una riga per ogni foto. Il file va nella cartella foto/ */
 const FOTO = [
-  {src:"foto/roma1.jpg", titolo:"Fori Imperiali", luogo:"Roma", data:"2026-05-12",
-   camera:"Nome fotocamera", obiettivo:"50mm f/1.8", focale:"50mm", apertura:"f/8", tempo:"1/250", iso:"100"},
-  {src:"foto/roma2.jpg", titolo:"Tramonto sul Tevere", luogo:"Roma", data:"2026-05-13",
-   camera:"Nome fotocamera", obiettivo:"50mm f/1.8", focale:"50mm", apertura:"f/4", tempo:"1/125", iso:"200"},
-  {src:"foto/milano1.jpg", titolo:"Duomo", luogo:"Milano", data:"2026-06-02",
-   camera:"Nome fotocamera", obiettivo:"28mm f/2.8", focale:"28mm", apertura:"f/5.6", tempo:"1/200", iso:"100"}
+  // {src:"foto/esempio.jpg", titolo:"Titolo", luogo:"Roma", data:"2026-05-12",
+  //  camera:"La tua fotocamera", obiettivo:"50mm f/1.8", focale:"50mm", apertura:"f/8", tempo:"1/250", iso:"100"},
 ];
 
 const ATTREZZATURA = {
-  fotocamere: [{nome:"La tua fotocamera", note:"Descrizione, anno, pellicola/digitale…"}],
-  obiettivi:  [{nome:"Obiettivo 1", note:"es. 50mm f/1.8"},
-               {nome:"Obiettivo 2", note:"es. 28mm f/2.8"}]
+  fotocamere: [
+    // {nome:"La tua fotocamera", note:"Descrizione"},
+  ],
+  obiettivi: [
+    // {nome:"Obiettivo", note:"Descrizione"},
+  ]
 };
 
-const CONTATTI_EMAIL = "tua@email.it";
-const CHI_SONO = "Qui scrivi tu la tua descrizione.";
-/* Iscrizione: crea un account gratuito su buttondown.com e sostituisci TUOUSERNAME */
-const NEWSLETTER_URL = "https://buttondown.com/api/emails/embed-subscribe/TUOUSERNAME";
-/* ======================================= */
+const CONTATTI_EMAIL = "";
+const CHI_SONO = "";
+
+/* Copia apiKey e appId dalla config Firebase che usi già negli altri siti */
+const firebaseConfig = {
+  apiKey: "INCOLLA_QUI",
+  authDomain: "workspace-5e87a.firebaseapp.com",
+  projectId: "workspace-5e87a",
+  appId: "INCOLLA_QUI"
+};
+/* ============================================ */
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+let utente = null;
 
 const app = document.getElementById("app");
 const menu = document.getElementById("menu");
 const overlay = document.getElementById("overlay");
 let luogoSel = null;
+let vistaCorrente = "foto";
 
 function toggleMenu(open){
   menu.classList.toggle("open", open);
@@ -97,8 +113,9 @@ overlay.onclick = () => toggleMenu(false);
 menu.querySelectorAll("a").forEach(a => a.onclick = () => { vai(a.dataset.v); toggleMenu(false); });
 
 function griglia(lista){
+  if(!lista.length) return '<p class="vuoto">Nessuna foto ancora.</p>';
   return '<div class="grid">' + lista.map(f =>
-    `<img loading="lazy" src="${f.src}" alt="${f.titolo}" data-src="${f.src}">`).join("") + '</div>';
+    `<img loading="lazy" src="${f.src}" alt="${f.titolo||""}" data-src="${f.src}">`).join("") + '</div>';
 }
 function attivaClick(lista){
   app.querySelectorAll(".grid img").forEach(img => {
@@ -107,46 +124,82 @@ function attivaClick(lista){
 }
 function apriFoto(f){
   document.getElementById("lbImg").src = f.src;
-  document.getElementById("lbInfo").innerHTML =
-    `<h3>${f.titolo}</h3><p>📍 ${f.luogo} · ${f.data}</p>
-     <p>📷 ${f.camera} · ${f.obiettivo}<br>
-     Focale ${f.focale} · ${f.apertura} · ${f.tempo} · ISO ${f.iso}</p>`;
+  const righe = [];
+  if(f.titolo) righe.push(`<h3>${f.titolo}</h3>`);
+  if(f.luogo || f.data) righe.push(`<p>📍 ${f.luogo||""}${f.luogo&&f.data?" · ":""}${f.data||""}</p>`);
+  const tech = [f.camera, f.obiettivo].filter(Boolean).join(" · ");
+  const exp = [f.focale, f.apertura, f.tempo, f.iso ? "ISO "+f.iso : ""].filter(Boolean).join(" · ");
+  if(tech || exp) righe.push(`<p>📷 ${tech}${tech&&exp?"<br>":""}${exp}</p>`);
+  document.getElementById("lbInfo").innerHTML = righe.join("");
   document.getElementById("lightbox").classList.add("open");
 }
 document.getElementById("chiudi").onclick = () =>
   document.getElementById("lightbox").classList.remove("open");
 
+function accedi(){
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => alert("Accesso non riuscito: " + e.message));
+}
+function esci(){ auth.signOut(); }
+
+async function iscriviti(){
+  try{
+    await db.collection("iscritti_prova").doc(utente.uid).set({
+      email: utente.email,
+      nome: utente.displayName || "",
+      data: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    alert("Iscrizione completata");
+  }catch(e){ alert("Errore: " + e.message); }
+}
+
+auth.onAuthStateChanged(u => {
+  utente = u;
+  if(vistaCorrente === "accedi") vai("accedi");
+});
+
 function vai(v){
+  vistaCorrente = v;
   if(v==="foto"){
     app.innerHTML = "<h2>Foto</h2>" + griglia(FOTO);
     attivaClick(FOTO);
   }
   else if(v==="attrezzatura"){
-    const blocco = (t, arr) => `<h3 style="margin:18px 0 10px">${t}</h3>` +
-      arr.map(x => `<div class="card"><b>${x.nome}</b>${x.note}</div>`).join("");
-    app.innerHTML = "<h2>Attrezzatura</h2>" +
-      blocco("Fotocamere", ATTREZZATURA.fotocamere) + blocco("Obiettivi", ATTREZZATURA.obiettivi);
+    const blocco = (t, arr) => arr.length
+      ? `<h3 style="margin:18px 0 10px">${t}</h3>` + arr.map(x => `<div class="card"><b>${x.nome}</b>${x.note||""}</div>`).join("")
+      : "";
+    const html = blocco("Fotocamere", ATTREZZATURA.fotocamere) + blocco("Obiettivi", ATTREZZATURA.obiettivi);
+    app.innerHTML = "<h2>Attrezzatura</h2>" + (html || '<p class="vuoto">Nulla ancora.</p>');
   }
   else if(v==="luoghi"){
-    const luoghi = [...new Set(FOTO.map(f => f.luogo))].sort();
-    if(!luogoSel) luogoSel = luoghi[0];
-    const lista = FOTO.filter(f => f.luogo === luogoSel);
-    app.innerHTML = "<h2>Luoghi</h2><div class='luoghi'>" +
-      luoghi.map(l => `<button class="${l===luogoSel?'on':''}" data-l="${l}">${l}</button>`).join("") +
-      "</div>" + griglia(lista);
-    app.querySelectorAll(".luoghi button").forEach(b => b.onclick = () => { luogoSel = b.dataset.l; vai("luoghi"); });
-    attivaClick(lista);
+    const luoghi = [...new Set(FOTO.map(f => f.luogo).filter(Boolean))].sort();
+    if(!luoghi.length){ app.innerHTML = '<h2>Luoghi</h2><p class="vuoto">Nessun luogo ancora.</p>'; }
+    else{
+      if(!luogoSel || !luoghi.includes(luogoSel)) luogoSel = luoghi[0];
+      const lista = FOTO.filter(f => f.luogo === luogoSel);
+      app.innerHTML = "<h2>Luoghi</h2><div class='luoghi'>" +
+        luoghi.map(l => `<button class="${l===luogoSel?'on':''}" data-l="${l}">${l}</button>`).join("") +
+        "</div>" + griglia(lista);
+      app.querySelectorAll(".luoghi button").forEach(b => b.onclick = () => { luogoSel = b.dataset.l; vai("luoghi"); });
+      attivaClick(lista);
+    }
   }
   else if(v==="accedi"){
-    app.innerHTML = `<h2>Accedi o registrati</h2>
-      <p style="margin-bottom:16px">Inserisci la tua e-mail: ti avviserò ogni volta che carico nuove foto.</p>
-      <form action="${NEWSLETTER_URL}" method="post" target="_blank">
-        <input type="email" name="email" placeholder="La tua e-mail" required>
-        <button class="btn" type="submit">Iscriviti</button>
-      </form>`;
+    if(!utente){
+      app.innerHTML = `<h2>Accedi o registrati</h2>
+        <p style="margin-bottom:16px">Accedi con Google per ricevere un avviso quando carico nuove foto.</p>
+        <button class="btn" id="bAccedi">Accedi con Google</button>`;
+      document.getElementById("bAccedi").onclick = accedi;
+    }else{
+      app.innerHTML = `<h2>Ciao ${utente.displayName||""}</h2>
+        <p style="margin-bottom:16px">${utente.email}</p>
+        <button class="btn" id="bIscr">Ricevi avvisi per nuove foto</button>
+        <button class="btn chiaro" id="bEsci">Esci</button>`;
+      document.getElementById("bIscr").onclick = iscriviti;
+      document.getElementById("bEsci").onclick = esci;
+    }
   }
   else if(v==="contatti"){
-    app.innerHTML = `<h2>Contatti</h2><p><a href="mailto:${CONTATTI_EMAIL}">${CONTATTI_EMAIL}</a></p>`;
+    app.innerHTML = `<h2>Contatti</h2>` + (CONTATTI_EMAIL ? `<p><a href="mailto:${CONTATTI_EMAIL}">${CONTATTI_EMAIL}</a></p>` : "");
   }
   else if(v==="chisono"){
     app.innerHTML = `<h2>Chi sono</h2><p>${CHI_SONO}</p>`;
